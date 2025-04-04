@@ -1,0 +1,179 @@
+.event
+{
+
+}
+
+.event-top-line
+{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-line
+{
+    display: flex;
+    gap: 10px;
+}
+
+.event-top-line h1
+{
+    margin: 0;
+    font-size: 3rem;
+}
+
+.top-line h2
+{
+    font-size: 3rem;
+}
+
+.section
+{
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 50px;
+}
+
+.panels {
+    width: 100%;
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    grid-template-rows: auto; 
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.panels .event-panel {
+    position: relative;
+    width: 100%; 
+    padding-top: 100%;
+    height: 0; 
+    max-width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+}
+
+.panels .event-panel > * {
+    position: absolute; /* Make sure the content inside is positioned correctly */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the content */
+}
+
+.panels .event-panel .event-panel-button
+{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    outline: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.event-panel-button img, .section-icon
+{
+    width: 60px;
+    height: auto;
+}
+
+.event-panel-button p
+{
+    font-size: clamp(0.7rem, 1.7vw, 1.5rem);
+    font-weight: bold;
+}
+
+.logout-button
+{
+    position: relative;
+    font-weight: bold;
+    box-shadow: none;
+    padding: 0;
+}
+
+.logout-button img
+{
+    height: 40px;
+    width: 40px;
+}
+
+.back-button
+{
+    box-shadow: none;
+    width: 30px;
+    padding: 0;
+}
+
+.back-button img
+{
+    width: 100%;
+}
+
+.notifcation-circle
+{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgb(226, 113, 113);
+    position: absolute;
+    top: 9;
+    right: 9;
+    color: var(--background-colour);
+    font-size: 0rem;
+}
+
+.notifcation-circle-comment
+{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgb(226, 113, 113);
+    position: absolute;
+    top: -3;
+    right: -3;
+    color: var(--background-colour);
+    font-size: 0rem;
+    transition: all 0.3s ease;
+}
+
+
+.bottom-line
+{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+}
+
+
+.comment-button
+{
+    position: relative;
+    width: 70px;
+    height: 70px;
+    outline: none;
+    padding: 10;
+    box-shadow: none;
+}
+
+.comment-button .notifcation-circle
+{
+    top: 5;
+    right: 5;
+}
+
+
+.comment-button img
+{
+    width: 100%;
+}
+
+@media (max-width: 868px) {
+    .panels {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns */
+        grid-template-rows: repeat(4, 1fr); /* 4 rows */
+    }
+}

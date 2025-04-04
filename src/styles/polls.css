@@ -1,0 +1,14 @@
+
+.create-poll
+{
+    display: flex;
+    flex-direction: column;
+}
+
+.create-poll div
+{
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

@@ -1,0 +1,102 @@
+
+:root
+{
+    --accent-colour: #f9f9f9;
+    --background-colour: #ffffff;
+    --primary-colour: #000000;
+}
+
+.page-content
+{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    padding: 20px 50px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.page-container
+{
+    padding-bottom: 5px;
+    width: 100%;
+}
+
+
+body
+{
+    font-family: "main";
+    color: var(--primary-colour);
+    background-color: var(--background-colour);
+    overflow-y: scroll; /* Show scrollbar only when necessary */
+    scrollbar-gutter: stable; /* Prevents layout shift */
+}
+
+textarea, input
+{
+    font-family: "main";
+    padding: 9px 15px;
+    border-radius: 17px;
+    border: 1px solid rgba(0, 0, 0, 0.376);
+}
+
+button
+{
+    cursor: pointer;
+    padding: 13px 18px;
+    border-radius: 10px;
+    border: none;
+    background-color: transparent;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
+}
+
+.buttons
+{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.buttons button
+{
+    width: fit-content;
+    transition: transform 0.3s ease;
+}
+
+.buttons button:hover
+{
+    transform: scale(1.05);
+}
+
+.warning
+{
+    display: flex;
+    height: 30px;
+    align-items: center;
+    gap: 4px;
+}
+
+
+.warning img
+{
+    height: 100%;
+    width: auto;
+    padding: 5px;
+}
+
+.warning p
+{
+    margin: 0;
+}
+
+@font-face {
+    font-family: main;
+    src: url("/public/fonts/UnivaNova-Regular.ttf");
+}
+

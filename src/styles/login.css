@@ -1,0 +1,47 @@
+
+.login-form
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-form form
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-form form input
+{
+    height: 30px;
+    width: 300px;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.username-form form input
+{
+    height: 30px;
+    width: 300px;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.login-form form .login
+{
+    width: 50px;
+    padding: 0;
+    outline: none;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+.login-form form .login img
+{
+    width: 100%;
+    padding: 0;
+}

@@ -1,0 +1,86 @@
+/* CreateEvent.css */
+
+.create-event-container {
+
+}
+
+.create-event-container h1 {
+    font-size: 4rem;
+}
+
+.create-event-container form {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    max-width: 500px;
+}
+
+.create-event-container label {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.create-event-container input,
+.create-event-container textarea {
+    width: 100%;
+    margin-top: 10px;
+    padding: 9px 15px;
+    border-radius: 17px;
+    border: 1px solid rgba(0, 0, 0, 0.376);
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.create-event-container textarea {
+    resize: vertical;
+    height: 100px;
+}
+
+
+.create-event-container button:disabled
+{
+    opacity: 0.4;
+    cursor:auto;
+}
+
+
+.one-line-input
+{
+    display: flex;
+    gap: 20px;
+}
+
+.one-line-input div
+{
+    flex: 1;
+}
+
+.control-button
+{
+    width: 40px;
+    padding: 0;
+    box-shadow: none;
+}
+
+.control-button .fire
+{
+    width: 100%;
+}
+
+.control-button .next
+{
+    width: 100%;
+    transform: rotate(90deg);
+}
+
+.control-button .back
+{
+    width: 100%;
+    transform: rotate(-90deg);
+}
+
+.create-event-container .button-container
+{
+    margin-top: 0;
+    justify-content: space-between;
+}

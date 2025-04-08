@@ -5,10 +5,100 @@
     flex-direction: column;
 }
 
+.poll-container
+{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.poll
+{
+    position: relative;
+    margin-bottom: 0px !important;
+}
+
+.poll-form
+{
+    margin-top: 50px;
+}
+
 .create-poll div
 {
     margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.poll-options
+{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.poll-option
+{
+    width: 100%;
+    display: flex;
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 3px solid black;
+}
+
+.vote-count
+{
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.button-filler {
+    position: absolute;
+    height: 100%;
+    top: 0;
+    left: 0;
+    width: 0; 
+    transition: width 0.3s ease-in-out;
+    z-index: 1;
+}
+
+.button-filler.voted
+{
+    background-color: var(--accent-colour)
+}
+
+.poll-option button
+{
+    width: 100%;
+    box-shadow: none;
+    border-radius: 0;
+    text-align: start;
+    color: var(--primary-colour);
+    background: transparent;
+    position: relative;
+    height: 39px;
+}
+
+.poll-option button p
+{
+    z-index: 1;
+    position: absolute;
+    margin: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.priority-level
+{
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    color: red;
+    font-size: 2rem;
+    margin: 0;
 }

@@ -3,6 +3,7 @@ import { API_BASE_URL } from "../../components/App";
 import { useAuth } from "../../contexts/auth";
 import useFetchEventData from "../../hooks/useFetchEventData";
 import { SharedCalendar } from "../../components/Calender";
+import { useNavigate } from "react-router-dom";
 
 const AttendeeCalendar = () => {
     const { data: calenderData, error, loading, event_id, refetch, goEventPage } = useFetchEventData("calendar/fetch-calendar");
@@ -16,7 +17,7 @@ const AttendeeCalendar = () => {
     const [cancelReason, setCancelReason] = useState("");
     const [showCancelReasonInput, setShowCancelReasonInput] = useState(false);
 
-    console.log("render");
+    const navigate = useNavigate();
 
     // Fetch attendee availability
     const fetchAttendeeAvailability = async () => {
@@ -162,7 +163,12 @@ const AttendeeCalendar = () => {
                 </button>
                 <h2>Shared Calender</h2>
             </div>
-            <p>Selecting Dates? = {isSelectingDates ? "true" : "false"}</p>
+
+            <button onClick={() => {navigate(`/event/${event_id}/settings`)}}>Change Duration or Available Days</button>
+
+            {isSelectingDates && 
+                <p>Remaining = {calenderData.duration - (selectedDates?.length || 0)}</p>
+            }
             <SharedCalendar 
                 data={calenderData} 
                 selectChosenDays={selectChosenDays} 
@@ -174,20 +180,32 @@ const AttendeeCalendar = () => {
 
             {/* Confirm Event Button */}
             {role === "organiser" && calenderData?.status !== "confirmed" && (
-                <button onClick={() => {
-                    // Avoid resetting selectedDates immediately after confirmation
-                    if (!isSelectingDates) {
-                        setIsSelectingDates(true);
-                    } else if (selectedDates?.length === calenderData.duration) {
-                        confirmEvent();  // Only confirm, don't reset
-                    } else {
-                        setIsSelectingDates(false); 
-                        setSelectedDates(null);
-                    }
-                }}>
-                    {!isSelectingDates ? "Choose Dates" : selectedDates?.length === calenderData.duration ? "Confirm" : "Cancel"}
+            <>
+                {!isSelectingDates && (
+                <button onClick={() => setIsSelectingDates(true)}>
+                    Choose Dates
                 </button>
+                )}
+
+                {isSelectingDates && (
+                <button
+                    onClick={() => {
+                    setIsSelectingDates(false);
+                    setSelectedDates(null);
+                    }}
+                >
+                    Cancel
+                </button>
+                )}
+
+                {isSelectingDates && selectedDates?.length === calenderData.duration && (
+                <button onClick={confirmEvent}>
+                    Confirm
+                </button>
+                )}
+            </>
             )}
+
 
 
             {/* Cancel Event Button */}

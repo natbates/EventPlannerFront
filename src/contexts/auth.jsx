@@ -18,18 +18,7 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   // 🔹 Load user data from local storage
-  useEffect(() => {
-    // const storedUser = JSON.parse(localStorage.getItem("user"));
-    // console.log("event_id ", event_id);
-    // if (storedUser) {
-    //   console.log("local session auto sign in");
-    //   setUser_id(storedUser.user_id);
-    //   setEmail(storedUser.email);
-    //   setName(storedUser.name);
-    //   setRole(storedUser.role);
-    //   setAuthed(true);
-    // }
-    
+  useEffect(() => {    
     // Fetch fingerprint
     const fetchFingerprint = async () => {
       const print = await getFingerprint();
@@ -38,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     fetchFingerprint();
 
     setLoading(false);
-  }, []);  // Only run this once when the component mounts
+  }, [event_id]);  
 
   // 🔹 Save user data to local storage
   const saveUserToStorage = (user) => {

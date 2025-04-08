@@ -33,6 +33,7 @@
     padding: 30px;
     border-radius: 20px;
     margin-bottom: 50px;
+    background-color: var(--panel-colour);
 }
 
 .panels {
@@ -52,6 +53,7 @@
     max-width: 100%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 20px;
+    background-color: var(--panel-colour);
 }
 
 .panels .event-panel > * {
@@ -83,8 +85,9 @@
 
 .event-panel-button p
 {
-    font-size: clamp(0.7rem, 1.7vw, 1.5rem);
+    font-size: 0.9rem;
     font-weight: bold;
+    color: var(--primary-colour);
 }
 
 .logout-button
@@ -175,5 +178,10 @@
     .panels {
         grid-template-columns: repeat(2, 1fr); /* 2 columns */
         grid-template-rows: repeat(4, 1fr); /* 4 rows */
+    }
+
+    .event-panel-button p
+    {
+        font-size: 1.9rem;
     }
 }

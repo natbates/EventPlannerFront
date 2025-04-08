@@ -11,7 +11,7 @@
 .footer {
     text-align: start;
     font-size: 14px;
-    color: #333;
+    color: var(--primary-colour);
     display: flex;
     justify-content: space-between;
     width: 100%;

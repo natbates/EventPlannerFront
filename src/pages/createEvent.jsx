@@ -47,7 +47,11 @@ const CreateEvent = () => {
       earliest_date: earliestDate.toISOString().split("T")[0],
       latest_date: latestDate.toISOString().split("T")[0],
       duration: duration,
-      location: getRandomItem(["New York", "Los Angeles", "Chicago", "San Francisco", "Miami"]),
+      location: {
+        address: getRandomItem(["123 Main St", "456 Elm St", "789 Broadway"]),
+        city: getRandomItem(["New York", "Los Angeles", "Chicago"]),
+        postcode: getRandomItem(["10001", "90001", "60601"]),
+      },
       organiser_id: "",
     };
   });
@@ -137,34 +141,46 @@ const CreateEvent = () => {
     }
   
     if (step === 4) {
-      if (!formData.location.trim()) errors.location = "Location is required.";
+      if (!formData.location.address.trim()) errors.locationAddress = "Address is required.";
+      if (!formData.location.city.trim()) errors.locationCity = "City is required.";
+      if (!formData.location.postcode.trim()) errors.locationPostcode = "Postcode is required.";
     }
   
     setValidationErrors(errors);
     return Object.keys(errors).length === 0; // Returns true if no errors
   };
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-
+  
     const namePattern = /^[A-Za-z\s]*$/;
-
+  
     // Check for special characters in name fields
     if ((name === "firstName" || name === "lastName") && !namePattern.test(value)) {
       alert("Names can only contain letters and spaces.");
-      return; // Prevent updating the state
+      return;
     }
-
+  
+    // Handle nested location fields
+    if (name.startsWith("location.")) {
+      const field = name.split(".")[1];
+      setFormData((prev) => ({
+        ...prev,
+        location: {
+          ...prev.location,
+          [field]: value,
+        },
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
+  
     // Validate dates and duration
     const errors = validateDates(name, value, formData);
     setValidationErrors(errors);
-
-    // Update form data
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
   };
 
   const handleNextStep = () => {
@@ -202,6 +218,7 @@ const CreateEvent = () => {
         organiser_id,
         earliest_date: formatDate(formData.earliest_date),
         latest_date: formatDate(formData.latest_date),
+        location: JSON.stringify(formData.location),
       };
 
       const response = await fetch(`${API_BASE_URL}/events/create-event`, {
@@ -364,17 +381,36 @@ const CreateEvent = () => {
         {/* Step 4: Event Location */}
         {step === 4 && (
           <div>
-            <label>Location:</label>
+            <label>Address:</label>
             <input
               type="text"
-              name="location"
-              value={formData.location}
+              name="location.address"
+              value={formData.location.address}
               onChange={handleChange}
               required
             />
+
+            <label>City:</label>
+            <input
+              type="text"
+              name="location.city"
+              value={formData.location.city}
+              onChange={handleChange}
+              required
+            />
+
+            <label>Postcode:</label>
+            <input
+              type="text"
+              name="location.postcode"
+              value={formData.location.postcode}
+              onChange={handleChange}
+              required
+            />
+
             <div className="create-button-container">
               <button className="control-button" type="button" onClick={handlePrevStep}>
-                <img className = "back" alt = "next" src = "/svgs/go.svg"></img>
+                <img className="back" alt="back" src="/svgs/go.svg" />
               </button>
               <button type="submit">Create Event</button>
             </div>

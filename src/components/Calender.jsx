@@ -2,6 +2,7 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useState } from "react";
+import "../styles/calendar.css";
 
 const localizer = momentLocalizer(moment);
 
@@ -18,27 +19,48 @@ const SharedCalendarComponent = ({
   onSelectDate,
   userAvailability,
 }) => {
+
+  console.log("EARLIEST DATE ", earliestDate);
+
   // Function to grey out dates outside the range
   const dayPropGetter = (date) => {
-    const currentDate = new Date(date);
-    if (currentDate < earliestDate || currentDate > latestDate) {
-      return {
-        className: "grey-out", // Apply 'grey-out' class to out-of-range dates
-      };
+    const formattedDate = formatDateToYYYYMMDD(date);
+  
+    if (date < earliestDate || date > latestDate) {
+      return { className: "grey-out" };
     }
+  
+    const status = userAvailability?.[formattedDate];
+
+    console.log("STATUS ", status);
+  
+    if (status === "available") {
+      return { className: "available-date" };
+    }
+  
+    if (status === "not available") {
+      return { className: "not-available-date" };
+    }
+
+    if (status === "tentative") {
+      return { className: "tentative-date" };
+    }
+  
     return {};
   };
+  
+
 
   return (
     <>
       <Calendar
         localizer={localizer}
-        events={events}
         startAccessor="start"
         endAccessor="end"
         style={{ height: 500 }}
         views={{ month: true }} // Show only month view
         defaultView="month" // Default to month view
+        defaultDate={earliestDate}
         selectable
         min={earliestDate} // Restrict selection to earliestDate
         max={latestDate} // Restrict selection to latestDate
@@ -50,15 +72,6 @@ const SharedCalendarComponent = ({
         }}
         dayPropGetter={dayPropGetter} // Apply the dayPropGetter to apply styles to days
       />
-
-      <style>
-        {`
-          .grey-out {
-            background-color: #d3d3d3 !important; /* Grey background for out-of-range dates */
-            pointer-events: none; /* Disable click interaction */
-          }
-        `}
-      </style>
     </>
   );
 };
@@ -79,15 +92,35 @@ const MyCalendar = ({ data, processDate, userAvailability }) => {
   }));
 
   return (
-    <SharedCalendarComponent
+    <>
+  <p>{Object.keys(userAvailability).join(", ")}</p>
+  <SharedCalendarComponent
       events={events}
       earliestDate={earliestDate}
       latestDate={latestDate}
       onSelectDate={processDate} // Passing processDate function from parent to SharedCalendarComponent
       userAvailability={userAvailability}
     />
+    </>
   );
 };
+
+const buildAvailabilityMap = (rawAvailability) => {
+  const summary = {};
+
+  for (const [date, entries] of Object.entries(rawAvailability)) {
+    summary[date] = { available: 0, notAvailable: 0, tentative: 0 };
+
+    entries.forEach(({ status }) => {
+      if (status === "available") summary[date].available++;
+      else if (status === "not available") summary[date].notAvailable++;
+      else if (status === "tentative") summary[date].tentative++;
+    });
+  }
+
+  return summary;
+};
+
 
 export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelectingDates, selectedDates}) => {
   if (!data || !attendeeData) return <p>Loading calendar...</p>;
@@ -125,29 +158,57 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
     });
   });
 
-  const [selectedDate, setSelectedDate] = useState(null);
+  const newavailabilityMap = buildAvailabilityMap(availabilityMap);
+
+  console.log(newavailabilityMap);
 
   const dayPropGetter = (date) => {
     const formattedDate = formatDateToYYYYMMDD(date);
+  
     if (date < earliestDate || date > latestDate) {
       return { className: "grey-out" };
     }
-    if (selectedDates != null && selectedDates.includes(formattedDate)) {
-      return { className: "chosen-date" };
+  
+    const stats = newavailabilityMap?.[formattedDate];
+    if (!stats) return {};
+  
+    const score = (stats.available || 0) - (stats.notAvailable || 0);
+    const maxScore = stats.available + stats.notAvailable;
+
+    console.log("SCORE: ", score);
+  
+    const normalized = Math.max(0, Math.min(1, (score + maxScore) / (2 * maxScore)));
+  
+    const red = Math.round(255 * (1 - normalized));
+    const green = Math.round(255 * normalized);
+    const bgColor = `rgb(${red}, ${green}, 100)`;
+
+    if (maxScore != undefined)
+    {
+      console.log("DATE ", date, " STATS ", stats, " SCORE ", score, " MAX ", maxScore, " NORMALIZED ", normalized, " BG COLOR ", bgColor);
     }
-    return {};
+  
+    return {
+      style: {
+        backgroundColor: bgColor,
+        borderRadius: "50%",
+        color: "white"
+      }
+    };
   };
+
+  const [selectedDate, setSelectedDate] = useState(null);
 
   return (
     <>
       <Calendar
         localizer={localizer}
-        events={events}
         startAccessor="start"
         endAccessor="end"
         style={{ height: 500 }}
         views={{ month: true }}
         defaultView="month"
+        defaultDate={earliestDate}
         selectable
         min={earliestDate}
         max={latestDate}
@@ -178,19 +239,6 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
           </ul>
         )}
       </div>}
-
-      <style>
-        {`
-          .grey-out {
-            background-color: #d3d3d3 !important;
-            pointer-events: none;
-          }
-          .chosen-date {
-            border: 2px solid red !important;
-            border-radius: 5px;
-          }
-        `}
-      </style>
     </>
   );
 };

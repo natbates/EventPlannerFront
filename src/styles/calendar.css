@@ -1,0 +1,107 @@
+
+.rbc-calendar
+{
+    background-color: var(--accent-colour);
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.rbc-header
+{
+    border-bottom: none;
+    border: none !important;
+}
+
+.rbc-month-view
+{
+    border: none !important;
+}
+
+.rbc-month-header
+{
+    margin-bottom: 10px;
+}
+
+.rbc-month-row
+{
+    border-top: none !important;
+}
+
+.rbc-day-bg
+{
+    cursor: pointer;
+    border: none !important;
+    outline: 3px solid black;
+    border-radius: 50%;
+    outline-offset: -20px;
+}
+
+.grey-out
+{
+    cursor: auto;
+}
+
+.rbc-row-content
+{
+    height: 100%;
+    position: relative;
+}
+
+.rbc-row-content .rbc-row
+{
+    height: 100%;
+}
+
+.rbc-date-cell
+{
+    position: relative;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-right: 0;
+    pointer-events: none;
+}
+
+.rbc-day-bg.grey-out
+{
+    cursor: auto;
+    outline-color: grey !important;
+}
+
+.rbc-button-link
+{
+    box-shadow: none;
+    pointer-events: none;
+}
+
+.rbc-calendar
+{
+    width: 600px;
+}
+
+.rbc-toolbar
+{
+    display: block;
+}
+
+.rbc-off-range-bg
+{
+    background-color: transparent !important;
+    opacity: 0.5 !important;
+}
+
+.not-available-date
+{
+    outline-color: red !important;
+}
+
+.available-date
+{
+    outline-color: green !important;
+}
+
+.tentative-date
+{
+    outline-color: orange !important;
+}

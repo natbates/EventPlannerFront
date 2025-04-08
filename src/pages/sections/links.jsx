@@ -59,7 +59,16 @@ const Links = () =>
               </button>
               <h2>Links</h2>
             </div>
+
+            <div>
+              <h2>Invite Link</h2>
+              <p>event/{event_id}</p>
+              <p>QR Code:</p>
+              <p>Share Links</p>
+            </div>
+
             <form onSubmit={handleAddLink}>
+                <h2>Usefull Links</h2>
                 <div>
                     <label>
                     Link:

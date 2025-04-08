@@ -10,6 +10,8 @@ const Polls = () =>
     const { data: pollsData, error, loading, event_id, refetch, goEventPage } = useFetchEventData("polls/fetch-polls");
     const { user_id, name, role } = useAuth();
 
+    console.log("Polls data:", pollsData);  
+
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [priority, setPriority] = useState("level-1");
@@ -19,7 +21,9 @@ const Polls = () =>
 
     const {updateEventPage, updateLastOpened} = useHistory();
 
-    const addOption = () => {
+    const addOption = (e) => {
+      e.preventDefault();
+       alert("adding option");
         if (options.length < 5) {
           setOptions([...options, ""]);
         }
@@ -36,7 +40,8 @@ const Polls = () =>
         setOptions(newOptions);
     };
 
-    const submitPoll = async () => {
+    const submitPoll = async (e) => {
+        e.preventDefault();
         // Ensure title, description, and at least 2 options are provided
         if (!title || !description || options.length < 2 || options.some(opt => opt.trim() === "")) {
           setMessage("Please fill all fields and provide at least 2 options.");
@@ -135,36 +140,87 @@ const Polls = () =>
           </button>
           <h2>Polls</h2>
         </div>
-        <div className="section">
-          {pollsData != null && pollsData.polls && pollsData.polls.length > 0 ? 
-          // Sort polls by priority (level-3 > level-2 > level-1)
-          Object.keys(pollsData.polls)
-            .sort((a, b) => {
-              const priorityOrder = {
-                "level-3": 1,
-                "level-2": 2,
-                "level-1": 3
-              };
+        <div className="poll-container">
+          {pollsData != null && pollsData.polls ? (
+            // Sort polls by priority (level-3 > level-2 > level-1)
+            Object.keys(pollsData.polls)
+              .sort((a, b) => {
+                const priorityOrder = {
+                  "level-3": 1,
+                  "level-2": 2,
+                  "level-1": 3,
+                };
 
-              const priorityA = pollsData.polls[a].priority;
-              const priorityB = pollsData.polls[b].priority;
+                const priorityA = pollsData.polls[a].priority;
+                const priorityB = pollsData.polls[b].priority;
 
-              return priorityOrder[priorityA] - priorityOrder[priorityB];
-            })
-            .map((pollId) => (
-              <div key={pollId}>
-              <h3>{pollsData.polls[pollId].title}</h3>
-              {Object.keys(pollsData.polls[pollId].options).map((option) => (
-                <button key={option} onClick={() => castVote(pollId, option)}>
-                  {option} ({pollsData.polls[pollId].options[option].length} votes)
-                </button>
-              ))}
-              <p>Priority: {pollsData.polls[pollId].priority}</p>
-              <p>Made by {pollsData.polls[pollId].creator_name}</p>
-              {(pollsData.polls[pollId].created_by === user_id || role === "organiser")&& <button onClick={() => deletePoll(pollId)}>Delete Poll</button>}
-          </div>
-          )) : <p>No Polls</p>}
+                return priorityOrder[priorityA] - priorityOrder[priorityB];
+              })
+              .map((pollId) => {
+                // Define allOptions outside of the JSX
+                const allOptions = Object.keys(pollsData.polls[pollId].options).map((option) => ({
+                  option,
+                  votedUserIds: pollsData.polls[pollId].options[option],
+                }));
+
+                const allVotedUserIds = Object.keys(pollsData.polls[pollId].options).flatMap(option => (
+                  pollsData.polls[pollId].options[option]  // Flattening the list of user IDs
+                ));
+              
+
+                console.log("HEREEE ", allOptions);
+
+                return (
+                  <div key={pollId} className="poll section">
+                    <h2>{pollsData.polls[pollId].title}</h2>
+                    <h3>{pollsData.polls[pollId].description}</h3>
+                    <p className="priority-level">
+                      {pollsData.polls[pollId].priority === "level-1" ? "!" : 
+                      pollsData.polls[pollId].priority === "level-2" ? "!!" : 
+                      pollsData.polls[pollId].priority === "level-3" ? "!!!" : "No priority"}
+                    </p>
+
+                    <div className="poll-options">
+                      {Object.keys(pollsData.polls[pollId].options).map((option) => {
+                        // Find the option data in allOptions
+                        const optionData = allOptions.find((o) => o.option === option);
+                        const hasVoted = allVotedUserIds?.includes(user_id);
+
+                        return (
+                          <div className="poll-option" key={option}>
+                            <button onClick={() => castVote(pollId, option)}>
+                              <div
+                                className={`button-filler ${hasVoted ? "voted" : ""}`}  
+                                style={{
+                                  width: hasVoted ? `${(optionData.votedUserIds.length / allVotedUserIds.length) * 100}%` : "0%",
+                                  opacity: pollsData.polls[pollId].options[option].includes(user_id) ? 0.7 : 0.3,
+                                }}
+                                ></div>
+                              <p>{option}</p>
+                            </button>
+                            {hasVoted && (
+                              <span
+                                className={`vote-count`}
+                              >
+                                {optionData.votedUserIds.length} votes
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <p>Made by {pollsData.polls[pollId].creator_name}</p>
+                    {(pollsData.polls[pollId].created_by === user_id || role === "organiser") && (
+                      <button onClick={() => deletePoll(pollId)}>Delete Poll</button>
+                    )}
+                  </div>
+                );
+              })
+          ) : (
+            <p>No Polls</p>
+          )}
         </div>
+
 
         <div className="poll-form section">
           <h2>Create a Poll</h2>

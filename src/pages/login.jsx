@@ -22,6 +22,15 @@ const Login = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        if (storedUser && event_id) {
+          console.log("WOOOOOOOOOP auto signing in ", event_id);
+          console.log("trying local session auto sign in ", storedUser.email);
+          LogIn(storedUser.email, event_id);
+        }
+
+
         if (event_id === undefined || event_id === "undefined") {
             console.log("event_id is undefined. Redirecting to home.");
             navigate(`/`); // Redirect to home page
@@ -40,9 +49,7 @@ const Login = () => {
     }, [event_id, authed, navigate, userFingerprint]);
 
     const setAutoLogInEmail = () => {
-        console.log("auto log in");
-        console.log("finger print ", userFingerprint);
-        console.log("event id ", event_id);
+
         if (userFingerprint && event_id) {
             // Make API call to auto-sign-in endpoint using fetch
             fetch(`${API_BASE_URL}/users/auto-sign-in`, {

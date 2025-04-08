@@ -3,6 +3,7 @@ import "../styles/navbar.css";
 import { useAuth } from "../contexts/auth";
 import { useEffect, useState } from "react";
 import { useHistory } from "../contexts/history";
+import { useTheme } from "../contexts/theme";
 
 const NavBar = () => {
     const { signOut, user_id, authed} = useAuth();
@@ -10,6 +11,7 @@ const NavBar = () => {
     const [event_id, setEvent_id] = useState();
     const navigate = useNavigate();
     const location = useLocation();
+    const { toggleTheme, theme } = useTheme();
 
     const [lastOpened, setLastOpened] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
@@ -72,7 +74,7 @@ const NavBar = () => {
     }, [event_id, location.pathname]);
 
     const handleNavigation = (path) => {
-        if (!event_id) {
+        if (event_id === null || event_id === undefined) {
             console.log("No event_id found, redirecting to /find-event");
             navigate("/find-event");
         } else {
@@ -133,7 +135,13 @@ const NavBar = () => {
                 >
                     <img src="/svgs/comments.svg" alt="comments" className="nav-icon" />
                     {showCommentNotification && <div className="notifcation-circle-comment"></div>}
-                </button>   
+                </button>
+                <button
+                    className= "nav-item"
+                    onClick={() => toggleTheme()}
+                >
+                    <img src="/svgs/theme.svg" alt="comments" className="nav-icon" />
+                </button>      
             </div>         
             )}
 

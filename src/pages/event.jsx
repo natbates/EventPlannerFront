@@ -99,7 +99,6 @@ const EventPage = () => {
         }
     
         const availabilityData = await response.json();
-        console.log("User availability data:", availabilityData);
     
         // Check if availability is empty
         if (!availabilityData || Object.keys(availabilityData).length === 0) {
@@ -149,19 +148,6 @@ const EventPage = () => {
       </div>
     );
   }
-
-  const filteredLastOpened = lastOpened
-    ? lastOpened.filter((entry) => entry.path === "comments") // Or any path filter logic
-    : [];
-
-  const filteredLastUpdated = lastUpdated
-    ? lastUpdated.filter((entry) => entry.path === "comments") // Or any path filter logic
-    : [];
-
-  const showCommentNotification =
-    filteredLastOpened.length > 0 &&
-    filteredLastUpdated.length > 0 &&
-    new Date(filteredLastOpened[0].timestamp) < new Date(filteredLastUpdated[0].timestamp);
 
 
   return (

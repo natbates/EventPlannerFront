@@ -6,12 +6,12 @@ import { useNavigate } from "react-router-dom";
 
 const formatDate = (dateString) => {
     if (!dateString) return "";
-    return new Date(dateString).toISOString().split("T")[0]; // Extracts YYYY-MM-DD
+    return new Date(dateString).toISOString().split("T")[0];
 };
 
 const Settings = () => {
     const { data: eventData, error, loading, event_id, refetch, goEventPage } = useFetchEventData("settings/fetch-settings");
-    const { user_id, name, role } = useAuth();
+    const { user_id, email, name, role, LogIn} = useAuth();
     const navigate = useNavigate();
 
     const [isEditing, setIsEditing] = useState({
@@ -30,7 +30,12 @@ const Settings = () => {
         duration: 0,
     });
 
-    // 🟢 Ensure `editedEvent` is updated when `eventData` changes
+    const [userEditing, setUserEditing] = useState(false);
+    const [editedUser, setEditedUser] = useState({
+        name: name || "",
+        email: email || "",
+    });
+
     useEffect(() => {
         if (eventData && eventData.event) {
             setEditedEvent({
@@ -41,7 +46,7 @@ const Settings = () => {
                 duration: eventData.event.duration || 0,
             });
         }
-    }, [eventData]); // Runs only when `eventData` changes
+    }, [eventData]);
 
     const handleEditClick = (field) => {
         setIsEditing((prev) => ({
@@ -54,25 +59,65 @@ const Settings = () => {
         }
     };
 
-    const migrateEvent = async () => {
+    const handleUserEditClick = async () => {
+        if (userEditing) {
+            await handleUserSubmit();
+        }
+        setUserEditing(!userEditing);
+    };
 
+    const handleUserInputChange = (e, field) => {
+        setEditedUser({
+            ...editedUser,
+            [field]: e.target.value,
+        });
+    };
+
+    const handleUserSubmit = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/update-user`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id,
+                    name: editedUser.name,
+                    email: editedUser.email,
+                    event_id,
+                }),
+            });
+    
+            const data = await response.json(); // ← Try to read the message even on error
+    
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to update user info");
+            }
+    
+            alert("User information updated!");
+            LogIn(editedUser.email, event_id);
+        } catch (error) {
+            console.error("Error updating user:", error);
+            alert("There was a problem updating your user information. " + error.message);
+            setEditedUser({
+                name: name || "",
+                email: email || "",
+            });
+        }
+    };
+    
+
+    const migrateEvent = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/events/migrate-event`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    event_id: event_id
-                }),
+                body: JSON.stringify({ event_id }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
                 alert("Event successfully migrated to a new event ID.");
-                
-                // Navigate to the new event page using the new event_id
-                const newEventId = data.new_event_id; // The new event_id returned from the backend
-                navigate(`/event/${newEventId}`); // Navigate to the new event page
+                navigate(`/event/${data.new_event_id}`);
             } else {
                 alert(data.message || "Failed to migrate the event.");
             }
@@ -95,16 +140,16 @@ const Settings = () => {
             earliest_date: formatDate(editedEvent.earliest_date),
             latest_date: formatDate(editedEvent.latest_date),
         };
-    
+
         const response = await fetch(`${API_BASE_URL}/events/update-event`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                event_id: event_id,
-                ...formattedEvent, // Now dates are correctly formatted
+                event_id,
+                ...formattedEvent,
             }),
         });
-    
+
         if (response.ok) {
             setIsEditing({
                 title: false,
@@ -113,12 +158,11 @@ const Settings = () => {
                 latest_date: false,
                 duration: false,
             });
-            refetch(); // Refresh event data
+            refetch();
         } else {
             alert("Failed to update event details.");
         }
     };
-    
 
     return (
         <div className="settings">
@@ -128,6 +172,41 @@ const Settings = () => {
                 </button>
                 <h2>Settings</h2>
             </div>
+
+            {user_id && (
+                <div className="user-info">
+                    <p>User ID: {user_id}</p>
+                    <p>
+                        <strong>Name:</strong>{" "}
+                        {userEditing ? (
+                            <input
+                                type="text"
+                                value={editedUser.name}
+                                onChange={(e) => handleUserInputChange(e, "name")}
+                            />
+                        ) : (
+                            <span>{name}</span>
+                        )}
+                    </p>
+                    <p>
+                        <strong>Email:</strong>{" "}
+                        {userEditing ? (
+                            <input
+                                type="email"
+                                value={editedUser.email}
+                                onChange={(e) => handleUserInputChange(e, "email")}
+                            />
+                        ) : (
+                            <span>{email}</span>
+                        )}
+                    </p>
+                    <p>Role: {role}</p>
+                    <button onClick={handleUserEditClick}>
+                        {userEditing ? "Save Info" : "Edit Info"}
+                    </button>
+                </div>
+            )}
+
             {eventData && (
                 <div>
                     {/* Title */}
@@ -163,7 +242,7 @@ const Settings = () => {
                         </button>
                     </p>
 
-                    {/* Earliest Date */}
+                    {/* Dates */}
                     <p>
                         <strong>Earliest Date:</strong>{" "}
                         {isEditing.earliest_date ? (
@@ -180,7 +259,6 @@ const Settings = () => {
                         </button>
                     </p>
 
-                    {/* Latest Date */}
                     <p>
                         <strong>Latest Date:</strong>{" "}
                         {isEditing.latest_date ? (
@@ -215,11 +293,9 @@ const Settings = () => {
                         </button>
                     </p>
                 </div>
-                
             )}
-            <button onClick={migrateEvent}>
-                Migrate Event
-            </button>
+
+            <button onClick={migrateEvent}>Migrate Event</button>
         </div>
     );
 };

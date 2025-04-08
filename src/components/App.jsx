@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import NavBar from "./nav";
 import Home from "../pages/home";
@@ -26,6 +27,35 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 export { API_BASE_URL };
 
 const App = () => {
+
+    const [isBackendUp, setIsBackendUp] = useState(true);
+
+    useEffect(() => {
+      const checkBackend = async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/health`);
+          if (!res.ok) throw new Error();
+          setIsBackendUp(true);
+        } catch (err) {
+          setIsBackendUp(false);
+        }
+      };
+  
+      checkBackend();
+    }, []);
+  
+    if (!isBackendUp) {
+      return (
+        <div className="page-content">
+            <div className="page-container">
+                <h1>Sorry, our servers are currently unavailable.</h1>
+                <p>Please try again later.</p>
+            </div>
+            <Footer />
+        </div>
+      );
+    }
+
     return (
         <div className="page-content">
             <div className="page-container">

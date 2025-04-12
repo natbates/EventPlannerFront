@@ -5,11 +5,50 @@
     flex-direction: column;
 }
 
+.create-poll textarea
+{
+    width: 100%;
+    height: 50px;
+    margin-bottom: 0;
+}
+
+.priority-and-buttons
+{
+    flex-direction: row !important;
+    margin-top: 10px;
+}
+
+.priority-and-buttons div
+{
+    margin-bottom: 0 !important;
+    width: 100%;
+}
+
+.priority-and-buttons button
+{
+    font-size: 0.8rem;
+    margin-top: auto;
+    height: 50px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.polls
+{
+    width: 100%;
+}
+
+.poll.section h2
+{
+    margin: 0;
+}
+
 .poll-container
 {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    margin-bottom: 40px;
 }
 
 .poll
@@ -18,9 +57,48 @@
     margin-bottom: 0px !important;
 }
 
+.poll-delete-made-by
+{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.poll-delete-made-by p
+{
+    margin: 0;
+    line-height: 37px;
+}
+
 .poll-form
 {
-    margin-top: 50px;
+    
+}
+
+.pending-poll-chosen
+{
+    position: absolute;
+    height: 100%;
+    width: auto;
+    right: 0px;
+    padding: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    box-sizing: border-box;
+}
+
+.poll .button-container
+{
+    margin-top: 20px;
+    justify-content: flex-end;
+}
+
+.creator-info
+{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
 .create-poll div
@@ -43,7 +121,6 @@
     width: 100%;
     display: flex;
     position: relative;
-    border-radius: 20px;
     overflow: hidden;
     border: 3px solid black;
 }
@@ -84,6 +161,11 @@
     height: 39px;
 }
 
+.poll-option button:disabled
+{
+    opacity: 1 !important;
+}
+
 .poll-option button p
 {
     z-index: 1;
@@ -91,6 +173,31 @@
     margin: 0;
     top: 50%;
     transform: translateY(-50%);
+    font-size: 1rem;
+}
+
+.top-line-polls
+{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-line-polls span
+{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.top-line-polls span p
+{
+}
+
+.toggle-unanswered-polls
+{
+    width: 40px;
+    padding: 5px 5px;
 }
 
 .priority-level
@@ -98,7 +205,39 @@
     position: absolute;
     right: 20px;
     top: 20px;
-    color: red;
+    background-color: var(--accent-colour);
+    color: var(--background-colour);
     font-size: 2rem;
     margin: 0;
+    padding: 2px 3px;
+}
+
+.priority-level span
+{
+    height: 20px;
+}
+
+.priority-level span img
+{
+    width: 20px;
+    height: 20px;
+}
+
+.option-field
+{
+    margin-top: 10px;
+    margin-bottom: 5px !important;
+    flex-direction: row !important;
+}
+
+.option-field input
+{
+    width: 100%;
+}
+
+.option-field button
+{
+    height: 50px;
+    border: 3px solid var(--primary-colour);
+    background-color: transparent;
 }

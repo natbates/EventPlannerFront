@@ -1,9 +1,44 @@
+:root
+{
+    --available:  rgb(165, 220, 165);
+    --not-available: rgb(220, 133, 133);
+    --tentative: rgb(226, 202, 148);
+}
+
+.your-calendar, .shared-calender
+{
+    width: 100%;
+}
 
 .rbc-calendar
 {
-    background-color: var(--accent-colour);
-    border-radius: 15px;
+    background-color: var(--background-colour);
     padding: 10px;
+    width: 100%;
+    border: 3px solid var(--primary-colour);
+}
+
+.rbc-toolbar button
+{
+    background-color: var(--primary-colour);
+    color: var(--background-colour);
+    padding: 10px;
+    margin: 0 5px;
+    font-size: 1.2rem;
+    border-radius: 0;
+}
+
+.rbc-today
+{
+    background-color: transparent !important;
+    outline-color: var(--accent-colour) !important;;
+}
+
+.rbc-toolbar button:hover, .rbc-toolbar button:focus
+{
+    background-color: var(--primary-colour);
+    color: var(--background-colour);
+    transform: none;
 }
 
 .rbc-header
@@ -25,6 +60,15 @@
 .rbc-month-row
 {
     border-top: none !important;
+    flex: 0 0 !important;
+    min-height: 110px;
+    justify-content: center;
+}
+
+.rbc-toolbar .rbc-toolbar-label
+{
+    text-align: end;
+    padding-right: 20px;
 }
 
 .rbc-day-bg
@@ -32,8 +76,9 @@
     cursor: pointer;
     border: none !important;
     outline: 3px solid black;
-    border-radius: 50%;
-    outline-offset: -20px;
+    outline-offset: 0px;
+    margin: 20px;
+    background-clip: padding-box;
 }
 
 .grey-out
@@ -45,6 +90,7 @@
 {
     height: 100%;
     position: relative;
+    pointer-events: none;
 }
 
 .rbc-row-content .rbc-row
@@ -66,7 +112,7 @@
 .rbc-day-bg.grey-out
 {
     cursor: auto;
-    outline-color: grey !important;
+    outline-color: grey;
 }
 
 .rbc-button-link
@@ -75,33 +121,208 @@
     pointer-events: none;
 }
 
+.rbc-btn-group {
+    padding-left: 10px;
+}
+
 .rbc-calendar
 {
-    width: 600px;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .rbc-toolbar
 {
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    margin-top: 10px;
+}
+
+.cancel-reason input
+{
+    width: 100%;
+}
+
+.selected-date
+{
+    transition: all 0.1s ease-in-out;
+    outline-width: 6px;
+    outline-color: rgb(0, 0, 0) !important;
+    transform: inherit;
+    opacity: 1 !important;
+}
+
+.grey-background
+{
+    background-color: rgba(128, 128, 128, 0.455) !important;
+}
+
+
+
+@keyframes flash 
+{
+    0% {
+        outline-color: var(--primary-colour); 
+    }
+    50% { 
+        outline-color: rgba(255, 222, 139, 0);
+    }
+    100% { 
+        outline-color: var(--primary-colour);
+    }
+    
+}
+
+.cancel-reason .button-container
+{
+    margin-top: 20px !important;
 }
 
 .rbc-off-range-bg
 {
-    background-color: transparent !important;
-    opacity: 0.5 !important;
+    background-color: transparent;
+    opacity: 0.5;
 }
 
 .not-available-date
 {
-    outline-color: red !important;
+    background-color: var(--not-available) !important;
 }
 
 .available-date
 {
-    outline-color: green !important;
+    background-color: var(--available) !important;
 }
 
 .tentative-date
 {
-    outline-color: orange !important;
+    background-color: var(--tentative) !important;
+}
+
+.your-calender-bottom
+{
+    display: flex;
+    margin-top: 20px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.legend
+{
+    display: flex;
+    gap: 20px;
+}
+
+.legend-item
+{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.legend-color
+{
+    width: 25px;
+    height: 25px;
+    border: 3px solid var(--primary-colour);
+}
+
+.legend-item.available .legend-color
+{
+    background-color: var(--available) !important;
+}
+
+.legend-item.not-available .legend-color
+{
+    background-color:var(--not-available) !important;
+}
+
+.legend-item.tentative .legend-color
+{
+    background-color: var(--tentative) !important;
+}
+
+.selected-dates
+{
+    margin-top: 0px;
+    margin-bottom: 20PX !important;
+}
+
+.shared-calender .button-container
+{
+    justify-content: flex-end;
+    margin-top: 0;
+}
+
+.attendee-availability-list
+{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.attendee-availability-list-item .entry
+{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+    overflow: hidden;
+}
+
+.availability-group-container
+{
+    display: flex;
+    width: 100%;
+    gap: 20px;
+}
+
+.availability-group
+{
+    flex: 1;
+}
+
+.section.reminder {
+    display: flex;          
+    flex-wrap: wrap;         
+    gap: 16px;               
+}
+
+.section.reminder > * {
+    flex: 1 1 calc(33.333% - 16px); 
+    box-sizing: border-box;        
+}
+.section.reminder h3
+{
+    margin: 0;
+}
+
+.section.reminder .button-container
+{
+    align-items: flex-start;
+}
+
+.reminder .reminder-count
+{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.reminder .date-selection
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.your-calender-bottom .button-container
+{
+    margin-top: 0px !important;
+    justify-content: flex-end;
 }

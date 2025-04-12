@@ -1,0 +1,44 @@
+.contact h1 {
+    font-size: 4rem;
+    margin-bottom: 5px;
+}
+
+.contact {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding-top: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group input, textarea {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.contact-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    margin-left: auto;
+}
+
+.thank-you-message {
+    text-align: center;
+}

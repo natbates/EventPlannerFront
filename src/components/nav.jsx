@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/auth";
 import { useEffect, useState } from "react";
 import { useHistory } from "../contexts/history";
 import { useTheme } from "../contexts/theme";
+import { API_BASE_URL } from "./App";
 
 const NavBar = () => {
     const { signOut, user_id, authed} = useAuth();
@@ -20,18 +21,17 @@ const NavBar = () => {
     const [isOnEventHomePage, setIsOnEventHomePage] = useState(false);
     const [isOnLoginPage, setIsOnLoginPage] = useState(false);
 
-    const {fetchLastOpened, fetchLastUpdated} = useHistory();
+    const {fetchLastOpened, fetchLastUpdated, eventStatus, fetchEventStatus} = useHistory(); 
 
     useEffect(() =>
     {
-        console.log("X");
+        fetchEventStatus(event_id);
         const match = location.pathname.match(/\/event\/([^/]+)/);
         setEvent_id(match ? match[1] : undefined);
-    }, []);
+    }, [location.pathname]);
 
     const fetchCommentData = async () =>
     {
-        console.log("X");
         const last_updated = await fetchLastUpdated(event_id);
         setLastUpdated(last_updated);
         const last_opened = await fetchLastOpened(user_id);
@@ -42,12 +42,14 @@ const NavBar = () => {
         fetchCommentData();
     }, [event_id, user_id])
 
-
     const homeRoutes = [
         { path: "/create-event", label: "Create Event", img: "/svgs/create.svg" },
         { path: "/find-event", label: "Find Event", img: "/svgs/find.svg" },
-        { path: "/support", label: "Get Support", img: "/svgs/support.svg" },
     ];
+
+    const otherHomeRoutes = [
+        {path: "/support"}, {path: "/tos"}, {path: "/contact"}, {path: "/privacy-policy"}
+    ]
 
     const eventRoutes = [
         { path: "/attendees", label: "Attendees", img: "/svgs/attendees.svg" },
@@ -64,7 +66,7 @@ const NavBar = () => {
     useEffect(() => {
         // Logic to set states based on the current location and event_id
         const homeRoutesPaths = homeRoutes.map((route) => route.path);
-        setIsOnHomeRoutes(location.pathname === "/" || homeRoutesPaths.includes(location.pathname));
+        setIsOnHomeRoutes(location.pathname === "/" || homeRoutesPaths.includes(location.pathname) || otherHomeRoutes.some(route => location.pathname === route.path));
       
         const isOnEventHomePage = location.pathname.startsWith('/event/') && location.pathname.split('/').length === 3;
         setIsOnEventHomePage(isOnEventHomePage);
@@ -99,7 +101,6 @@ const NavBar = () => {
         filteredLastUpdated.length > 0 &&
         new Date(filteredLastOpened[0].timestamp) < new Date(filteredLastUpdated[0].timestamp);
 
-
     return (
         <nav className="nav-bar">
             <Link to="/">
@@ -109,29 +110,40 @@ const NavBar = () => {
             {/* Show home routes if on any home-related page */}
             {isOnHomeRoutes && (
                 <div className="nav-links home-links">
-                    {homeRoutes.map(({ path, label, img }) => (
+                    {homeRoutes.map(({ path, label, img }, index) => (
                         <button
                             key={path}
                             className={`nav-item ${location.pathname === path ? "active" : ""}`}
                             onClick={() => handleHomeNavigation(path)}
+                            style={{ animationDelay: `${index * 0.03}s` }}
+
                         >
                             <img src={img} alt={label} className="nav-icon" />
                         </button>
                     ))}
+                    <button
+                        className= "nav-item"
+                        onClick={() => toggleTheme()}
+                        style={{ animationDelay: `${4 * 0.03}s` }}
+                        >
+                        <img src="/svgs/theme.svg" alt="comments" className="nav-icon" />
+                    </button>    
                 </div>
             )}
 
-            {isOnEventHomePage && authed && (
+            {isOnEventHomePage && authed && eventStatus !== "confirmed" && eventStatus !== "canceled" && (
             <div className="nav-links">
                 <button
                     className= "nav-item"
                     onClick={() => signOut()}
+                    style={{ animationDelay: `${1 * 0.01}s` }}
                 >
                     <img src="/svgs/logout.svg" alt="sign out" className="nav-icon" />
                 </button>   
                 <button
                     className= "nav-item"
                     onClick={() => navigate("/event/" + event_id + "/comments")}
+                    style={{ animationDelay: `${2 * 0.01}s` }}
                 >
                     <img src="/svgs/comments.svg" alt="comments" className="nav-icon" />
                     {showCommentNotification && <div className="notifcation-circle-comment"></div>}
@@ -139,6 +151,7 @@ const NavBar = () => {
                 <button
                     className= "nav-item"
                     onClick={() => toggleTheme()}
+                    style={{ animationDelay: `${3 * 0.01}s` }}
                 >
                     <img src="/svgs/theme.svg" alt="comments" className="nav-icon" />
                 </button>      

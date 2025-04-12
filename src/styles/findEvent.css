@@ -3,11 +3,59 @@
 .find-event h1
 {
     font-size: 4rem;
+    margin-bottom: 30px;
 }
 
 
 .find-event input
 {
-    width: 50%;
-    min-width: 300px;
+    width: 100%;
+    text-align: start;
+}
+
+.find-event-input
+{
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.find-event-input div
+{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.find-event-input label
+{
+    font-weight: bold
+}
+
+.find-event-input button
+{
+    padding: 10px 20px;
+    font-size: 1rem;
+    height: 50px;
+    margin-top: auto;
+}
+
+.find-event
+{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: flex-start;
+}
+
+@media (max-width: 714px) {
+    .find-event-input
+    {
+        flex-direction: column;
+    }
+    .find-event h1
+    {
+        font-size: 3rem;
+    }
 }

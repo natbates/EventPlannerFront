@@ -7,6 +7,9 @@ import { useNotification } from "../contexts/notification";
 import { API_BASE_URL } from "../components/App";
 import "../styles/event.css";
 import { useHistory } from "../contexts/history";
+import { formatDate } from "../components/Calender";
+import moment from "moment";
+import { Profiles } from "../components/ProfileSelector";
 
 const EventPage = () => {
   const event_id = useParams().event_id;
@@ -16,11 +19,16 @@ const EventPage = () => {
   const [lastOpened, setLastOpened] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [availabilityEmpty, setAvailabilityEmpty] = useState(false);
-
+  const [countdown, setCountdown] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
   const navigate = useNavigate();
   const { notify } = useNotification();
-  const { signOut, role, authed, user_id} = useAuth();
-  const {fetchLastOpened, fetchLastUpdated} = useHistory();
+  const { signOut, role, authed, user_id, profile_pic} = useAuth();
+  const {fetchLastOpened, fetchLastUpdated, fetchEventStatus} = useHistory();
 
   const routes = [
     { path: "/attendees", label: "Attendees", img: "/svgs/attendees.svg"},
@@ -32,6 +40,34 @@ const EventPage = () => {
     { path: "/to-do", label: "To Do List", img: "/svgs/to-do.svg"},
     { path: "/settings", label: "Settings", img: "/svgs/settings.svg"},
   ];
+
+  useEffect(() => {
+    if (event && event.chosen_dates && event.chosen_dates.length > 0) {
+      // Sort the chosen dates and get the earliest date
+      const sortedChosenDates = event.chosen_dates.map(date => moment(date)).sort((a, b) => a - b);
+      const earliestChosenDate = sortedChosenDates[0];
+  
+      const interval = setInterval(() => {
+        const now = moment();
+        const duration = moment.duration(earliestChosenDate.diff(now));
+  
+        if (duration.asSeconds() <= 0) {
+          clearInterval(interval);
+          setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        } else {
+          setCountdown({
+            days: duration.days(),
+            hours: duration.hours(),
+            minutes: duration.minutes(),
+            seconds: duration.seconds()
+          });
+        }
+      }, 1000);
+  
+      return () => clearInterval(interval);
+    }
+  }, [event]);
+  
 
   const reopenEvent = async () => {
     try {
@@ -48,6 +84,7 @@ const EventPage = () => {
       }
 
       fetchEventData();
+      fetchEventStatus(event_id);
     } catch (err) {
       console.error("Error reopening event:", err);
     }
@@ -57,6 +94,7 @@ const EventPage = () => {
     
     setError(null);
     setLoading(true);
+    fetchEventStatus(event_id);
     try {
       const response = await fetch(`${API_BASE_URL}/events/fetch-event/${event_id}`, {
         method: "GET",
@@ -77,11 +115,39 @@ const EventPage = () => {
 
     } catch (err) {
       setError(err.message);
+      notify(err.message);
     } finally {
       setLoading(false);
     }
     
   };
+
+  const formatChosenDates = (chosenDatesInput) => {
+    // Ensure chosenDates is a string
+    let chosenDatesString = "";
+  
+    if (Array.isArray(chosenDatesInput)) {
+      // If it's an array, join it into a single string
+      chosenDatesString = chosenDatesInput.join(" ");
+    } else if (typeof chosenDatesInput === "string") {
+      chosenDatesString = chosenDatesInput;
+    } else {
+      return ''; // Return empty string if the input is not a valid type
+    }
+  
+    // Extract the dates in YYYY-MM-DD format from the string
+    const dateStrings = chosenDatesString.match(/\d{4}-\d{2}-\d{2}/g); // Extract dates (e.g., 2025-05-16)
+  
+    if (!dateStrings || dateStrings.length < 2) return ''; // Return empty if no valid date pairs
+  
+    // Get the earliest and latest dates
+    const earliestDate = moment.min(dateStrings.map(date => moment(date)));
+    const latestDate = moment.max(dateStrings.map(date => moment(date)));
+  
+    // Return the formatted date range
+    return `${formatDate(earliestDate)} to ${formatDate(latestDate)}`;
+  };
+  
 
   const fetchUserAvailability = async () => {
     if (user_id)
@@ -125,31 +191,55 @@ const EventPage = () => {
     navigate(`/event/${event_id}/login`);
   }
 
-  if (error) return <div><h1>{error}</h1><p>Are you sure thats the right event ID?</p></div>;
+  if (error) {
+    return (
+      <div className="page-not-found page">
+        <img className = "sad-cat" src="/svgs/sad-cat.svg" alt="Servers Down" />
+        <h1>{error}</h1>
+        <h3>Are you sure that's the right event ID?</h3>
+        <button className = "small-button" onClick={() => navigate("/find-event")}>Try Again</button>
+      </div>
+    );
+  }
+  
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div class="loader"><p>Fetching Event</p></div>;
 
   if (authed && event && event.status === "canceled") {
+    const profile = Profiles.find((profile) => profile.id === Number(profile_pic));
     return (
-      <div>
-        <p>Event is Cancelled</p>
-        <p>Reason: {event.cancellation_reason}</p>
-        {role === "organiser" && <button onClick={reopenEvent}>Reopen</button>}
+      <div className="page-not-found page event-cancelled pending-form">
+        <img className = "sad-cat" src={profile.path} alt="Confirmed" />
+        <h1>Oh No - {event.title} is Cancelled</h1>
+        <p>Cancelled Because: {event.cancellation_reason}</p>
+        {role === "organiser" && <button className = "small-button" onClick={reopenEvent}>Reopen</button>}
       </div>
     );
   }
 
   if (authed && event && event.status === "confirmed") {
+    const profile = Profiles.find((profile) => profile.id === Number(profile_pic));
+
+    let formattedChosenDates;
+    if (event.chosen_dates.length === 1) {
+      formattedChosenDates = moment(event.chosen_dates[0]).format('MMMM Do YYYY');
+    } else {
+      formattedChosenDates = formatChosenDates(event.chosen_dates);
+    }
+
+    const { address, city, postcode, country } = event?.location || {};
+
     return (
-      <div>
-        <p>Event is Confirmed!</p>
-        <p>{event.chosen_dates}</p>
-        {role === "organiser" && <button onClick={reopenEvent}>Reopen</button>}
+      <div className="page-not-found page event-confirmed">
+        <img className="sad-cat" src={profile.path} alt="Confirmed" />
+        <h1>{event.title} is Confirmed!</h1>
+        <p>{formattedChosenDates} at {address}, {city}, {postcode}, {country}</p>
+        <strong> {countdown.days} days {countdown.hours} hours {countdown.minutes} minutes {countdown.seconds} seconds</strong>
+        {role === "organiser" && <button className="small-button" onClick={reopenEvent}>Reopen</button>}
       </div>
     );
   }
-
-
+  
   return (
     <div className="event">
       <div className="event-top-line">
@@ -181,8 +271,15 @@ const EventPage = () => {
               return (
                 <div className = "event-panel" key={path}>
                   <button className = "event-panel-button" onClick={() => navigate(`${location.pathname}${path}`)}>
-                    <img src = {img} alt = {path}></img>
-                    <p>{label}</p>
+                    <span>
+                      <img src = {img} alt = {path}></img>
+                      <h2>{label}</h2>
+                    </span>
+                    {path === "/your-calendar" && availabilityEmpty && (
+                      <div className="warning">
+                        <img src = "/svgs/warning.svg"></img>
+                        <p>You have not entered your calender availability.</p>
+                    </div>)}
                     {showNotification && <div className="notifcation-circle">!</div>}
                   </button>
 
@@ -206,14 +303,14 @@ const EventPage = () => {
             })}
           </div>
          
-          <div className="bottom-line">
+          {/* <div className="bottom-line">
             {availabilityEmpty ? (
               <div className="warning">
                 <img src = "/svgs/warning.svg"></img>
                 <p>You have not entered your calender availability.</p>
               </div>
               ) : <div></div>}
-          </div>
+          </div> */}
         </>
       )}
     </div>

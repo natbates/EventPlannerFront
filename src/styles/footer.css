@@ -10,15 +10,41 @@
 
 .footer {
     text-align: start;
+    gap: 15px;
     font-size: 14px;
     color: var(--primary-colour);
     display: flex;
     justify-content: space-between;
     width: 100%;
+    font-weight: bold;
+    animation: fly-up 0.5s ease-in-out forwards;
+}
+
+.footer-links a
+{
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--primary-colour);
+    text-wrap: nowrap;
+}
+
+.social-icon
+{
+    width: 23px;
+    cursor: pointer;
 }
 
 .footer div
 {
     display: flex;
     gap: 20px;
+}
+
+@media (max-width: 714px) {
+    .footer {
+        align-items: start;
+        text-align: start;
+        justify-content: center;
+        flex-direction: column;
+    }
 }

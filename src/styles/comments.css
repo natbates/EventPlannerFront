@@ -1,0 +1,73 @@
+.comments
+{
+    width: 100%;
+}
+
+.comments .section
+{
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin-top: 40px;
+}
+
+.replies
+{
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+}
+
+.profile-pic
+{
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+
+.comment-form textarea
+{
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.comment-form .button-container
+{
+    margin-top: 15px;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.comment-info-delete
+{
+    display: flex;
+    justify-content: space-between;
+}
+
+.comment-info-delete span
+{
+    font-size: 1rem;
+    align-items: center;
+    display: flex;
+    gap: 10px;
+}
+
+.reply-button-container
+{
+    display: flex;
+    gap: 10px;
+}
+
+.reply-form
+{
+    display: flex;
+    flex-direction: column;
+}
+
+.reply-form .button-container
+{
+    justify-content: flex-end;
+    margin-top: 10px;
+}

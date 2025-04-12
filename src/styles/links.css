@@ -1,0 +1,105 @@
+.add-link-form
+{
+
+}
+
+.links
+{
+    width: 100%;
+}
+
+.add-link-form .add-link
+{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.add-link div
+{
+    flex: 1;
+}
+
+.add-link button
+{
+    height: 50px;
+}
+
+.add-link-form input
+{
+    width: 100%;
+    display: block;
+}
+
+.invite-link-qr-code
+{
+    display: flex;
+    justify-content: space-between;
+}
+
+.invite-link-qr-code a
+{
+    height: fit-content;
+    color: var(--accent-colour);
+}
+
+.invite-link-qr-code div
+{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.invite-link-qr-code button
+{
+    width: fit-content;
+}
+
+.invite-link-qr-code .qr
+{
+    position: absolute;
+    right: 30;
+    top: 50%;
+    transform: translateY(-50%); 
+    outline: 3px solid var(--primary-colour);
+    outline-offset: 6px;
+}
+
+.links .section h2
+{
+    margin-top: 0;
+}
+
+.link-item
+{
+    display: flex;
+    justify-content: space-between;
+}
+
+.link-item div
+{
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+}
+
+.link-item div a
+{
+    margin: 0;
+    color: var(--accent-colour);
+}
+
+.link-list ul
+{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+}
+
+.link-list h3
+{
+    margin-top: 0;
+}

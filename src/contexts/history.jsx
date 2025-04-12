@@ -10,8 +10,24 @@ export const HistoryProvider = ({ children }) => {
   const [history, setHistory] = useState({ previous: null, current: null });
   const location = useLocation();
   const { user_id, authed } = useAuth();
+  const [eventStatus, setEventStatus] = useState("pending");
 
   const acceptedPaths = ["location", "to-do", "settings", "polls", "calendar", "links", "comments"]; 
+
+
+  const fetchEventStatus = async (event_id) => {
+    if (!event_id) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/events/fetch-event-status?event_id=${event_id}`);
+      const data = await res.json();
+      console.log("Event status data:", data.status);
+      setEventStatus(data.status); // e.g., "active", "confirmed", "cancelled"
+    } catch (error) {
+      console.error("Failed to fetch event status", error);
+      setEventStatus("pending");
+    }
+  };
 
   const fetchLastOpened = async (user_id) => {
 
@@ -109,6 +125,7 @@ export const HistoryProvider = ({ children }) => {
   };
 
   useEffect(() => {
+
     // If not logged in, we do not need to proceed with the path check
     if (!authed) return;
   
@@ -125,9 +142,7 @@ export const HistoryProvider = ({ children }) => {
   
     if (pathParts.length > 3 && acceptedPaths.includes(pathParts[3])) {
       const currentPath = pathParts[3]; // Example: /event123/location or /event123/to-do
-  
-      console.log("HELLO ", currentPath);
-      // Call the API to update the last opened path
+        // Call the API to update the last opened path
       updateLastOpened(currentPath);
     }
   
@@ -140,7 +155,7 @@ export const HistoryProvider = ({ children }) => {
   
 
   return (
-    <HistoryContext.Provider value={{ history, updateEventPage, updateLastOpened, fetchLastUpdated, fetchLastOpened}}>
+    <HistoryContext.Provider value={{ history, eventStatus, fetchEventStatus, updateEventPage, updateLastOpened, fetchLastUpdated, fetchLastOpened}}>
       {children}
     </HistoryContext.Provider>
   );

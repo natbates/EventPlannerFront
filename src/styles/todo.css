@@ -1,0 +1,75 @@
+.to-do
+{
+    width: 100%;
+}
+
+
+.task-section ul
+{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.add-task
+{
+    width: 100%;
+    display: flex;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
+.to-do-creator
+{
+    font-weight: bold;
+}
+
+.add-task input
+{
+    flex: 1;
+    display: block;
+}
+
+.add-task button
+{
+    height: 50px;
+}
+
+.task-section .button-container
+{
+    margin-top: 0;
+    gap: 10px;
+}
+
+.task-section li
+{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.dotted
+{
+    width: 100%;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+
+.dotted .line
+{
+    display: block;
+    width: 100%;
+    border-top: 5px dashed var(--primary-colour);
+    opacity: 0.1;
+}
+
+.to-do-profile
+{
+    font-size: 1rem;
+    align-items: center;
+    display: flex;
+    gap: 10px;
+}

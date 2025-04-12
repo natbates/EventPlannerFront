@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../components/App";
 import { useHistory } from "../contexts/history";
 import "../styles/login.css";
+import ProfileSelector from "../components/ProfileSelector";
+import PageError from "../components/PageError";
 
 const Login = () => {
     const [event, setEvent] = useState(null);
@@ -16,6 +18,7 @@ const Login = () => {
     const [loginStep, setLoginStep] = useState("login");
     const [requestData, setRequestData] = useState();
     const { updateEventPage } = useHistory();
+    const [profileNum, setProfileNum] = useState(0);
 
     const event_id = useParams().event_id;
     const { fingerprint: userFingerprint, LogIn, authed } = useAuth();
@@ -23,9 +26,10 @@ const Login = () => {
 
     useEffect(() => {
 
+        setLoginError(true);
+
         const storedUser = JSON.parse(localStorage.getItem("user"));
         if (storedUser && event_id) {
-          console.log("WOOOOOOOOOP auto signing in ", event_id);
           console.log("trying local session auto sign in ", storedUser.email);
           LogIn(storedUser.email, event_id);
         }
@@ -45,7 +49,7 @@ const Login = () => {
             navigate(`/event/${event_id}`);
         }
         fetchEventData();
-        setAutoLogInEmail();
+        // setAutoLogInEmail();
     }, [event_id, authed, navigate, userFingerprint]);
 
     const setAutoLogInEmail = () => {
@@ -74,7 +78,7 @@ const Login = () => {
                 })
                 .catch((error) => {
                     console.error('Error during auto sign-in:', error);
-                });
+            });
         }
     };
 
@@ -125,6 +129,7 @@ const Login = () => {
                 username: username,
                 event_id: event_id,
                 time_requested: new Date().toISOString(),
+                profile_pic: profileNum,
             };
 
             // Send request to API
@@ -150,7 +155,7 @@ const Login = () => {
                     time_requested: new Date().toISOString(),
                 })
                 setLoginStep("pending"); // Go back to login step
-                setAutoLogInEmail();
+                // setAutoLogInEmail();
                 updateEventPage(event_id, "attendees");
             } else {
                 setLoginError("Request failed.");
@@ -185,38 +190,74 @@ const Login = () => {
         }
     };
 
-    
 
-    if (loginError) return <div><h1>{loginError}</h1><p>Are you sure thats the right event ID?</p></div>;
+    if (loginError) return <PageError error={"Something Went Wrong"} page={"Log In"} />;
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <div class="loader"><p>Fetching To Dos</p></div>;
 
     if (loginStep === "enter-username") {
         return (
             <div className="username-form">
-                <h1>Your Name</h1>
+
+                <div className="top-line">
+                    <button className="back-button" onClick={() => {setLoginEmail(""); setLoginStep("login-form")}}>
+                        <img src="/svgs/back-arrow.svg" alt="Back" />
+                    </button>
+                    <h1>Request To Join {event.title}</h1>
+                </div>
+
+                <div>
+                    <label>Profile Picture:</label>
+                    <ProfileSelector index={profileNum} onSelect={(newIndex) => setProfileNum(newIndex)} />
+                </div>
+
                 <form onSubmit={handleSetUsername}>
-                    <div>
+                    <div className="one-line-input">
+                        <div>
                         <label>First Name: </label>
                         <input
                             type="text"
                             value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
+                            onChange={(e) => {
+                                // Get the value, remove non-alphabetic characters, and limit length to 14
+                                let newValue = e.target.value.replace(/[^a-zA-Z]/g, "");
+            
+                                // Capitalize the first letter and lowercase the rest
+                                newValue = newValue.charAt(0).toUpperCase() + newValue.slice(1).toLowerCase();
+            
+                                // Cap length to 14 characters
+                                if (newValue.length <= 14) {
+                                    setFirstName(newValue);
+                                }
+                            }}
                             required
                         />
+                        </div>
+                        <div>
+                            <label>Last Name: </label>
+                            <input
+                                type="text"
+                                value={lastName}
+                                onChange={(e) => {
+                                    // Get the value, remove non-alphabetic characters, and limit length to 14
+                                    let newValue = e.target.value.replace(/[^a-zA-Z]/g, "");
+                
+                                    // Capitalize the first letter and lowercase the rest
+                                    newValue = newValue.charAt(0).toUpperCase() + newValue.slice(1).toLowerCase();
+                
+                                    // Cap length to 14 characters
+                                    if (newValue.length <= 14) {
+                                        setLastName(newValue);
+                                    }
+                                }}
+                                required
+                            />
+                        </div>
+                        <button type="submit">Request to Join</button>
+
                     </div>
-                    <div>
-                        <label>Last Name: </label>
-                        <input
-                            type="text"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <button onClick={() => {setLoginEmail(""); setLoginStep("login-form")}}>Go Back</button>
-                    <button type="submit">Request to Join</button>
                 </form>
+
                 {loginError && <p style={{ color: "red" }}>{loginError}</p>}
             </div>
         );
@@ -224,12 +265,12 @@ const Login = () => {
 
     if (loginStep === "pending") {
         return (
-            <div>
-                <p>Hi {requestData.username}</p>
+            <div className="pending-form">
+                <h1>Heya, {requestData.username.split(" ")[0]}</h1>
                 {requestData.status === "rejected" ? 
                 <p>Your request has been cancelled</p> :
-                <p>Your request is pending</p>}
-                <button onClick={() => { setLoginStep("login")}}>LogOut</button>
+                <p>Your request to join {event.title} is pending</p>}
+                <button className = "small-button" onClick={() => { setLoginStep("login")}}>LogOut</button>
             </div>
         );
     }
@@ -238,7 +279,7 @@ const Login = () => {
         <div className="login-form">
             <h1>Login / Sign In to {event.title}</h1>
             <form onSubmit={handleLoginSubmit}>
-                <div>
+                <span className="login-inputs">
                     <input
                         type="email"
                         placeholder="Please input your email..."
@@ -246,9 +287,8 @@ const Login = () => {
                         onChange={(e) => setLoginEmail(e.target.value)}
                         required
                     />
-                </div>
-
-                <button className = "login" type="submit"><img src = "/svgs/go.svg" alt = "login"></img></button>
+                    <button type="submit">GO</button>
+                </span>
             </form>
             {loginError && <p style={{ color: "red" }}>{loginError}</p>}
         </div>

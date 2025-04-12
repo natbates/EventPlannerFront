@@ -5,10 +5,50 @@
     gap: 10px;
 }
 
+.attendees-and-requests
+{
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+
+.request .profile
+{
+  height: 100%;
+  max-width: 90%;
+  flex: 1;
+}
+
+.attendees-and-requests .flexible
+{
+  flex: 1;
+}
+
+.attendees-section .profile
+{
+  width: 165px;
+}
+
+.attendees-section .profile p
+{
+  margin-right: 0;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin: 0;
+}
+
+.attendees
+{
+  width: 100%;
+}
+
 .profile .profile-image
 {
     width: 40px;
     height: 40px;
+    object-fit: contain;
 }
 
 .profile p
@@ -18,12 +58,48 @@
     margin-right: 5px;
 }
 
+.request-group-by-date h4
+{
+  margin: 0;
+  margin-bottom: 15px;
+}
+
+.request-group-by-date 
+{
+  margin-bottom: 20px;
+}
+
+p.you
+{
+  padding-bottom: 5px;
+  --s: 2px !important; 
+  animation: underline-animation-small 0.9s ease forwards;
+  margin: 0;
+  padding-top: 5px;
+
+}
+
+@keyframes underline-animation-small {
+  from {
+      background-size: 200% 100%, 0% 5px;
+  }
+  to {
+      background-size: 200% 100%, 100% 5px;
+  }
+}
+
+
 .profile-group {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     justify-content: flex-start;
   }
+
+.request-button
+{
+  margin: 0 !important;
+}
   
   .profile-container {
     padding: 12px;
@@ -32,91 +108,136 @@
     text-align: center;
     width: 190px;
     position: relative;
+    padding-left: 0;
+    justify-content: space-between;
+    padding-top: 5px;
   }
   
   .profile-container.request
   {
-    width: 240px;
-  }
-
-.dropdown
-{
-    height: 100%;
-    width: 20px;
-    position: relative;
-}
-  
-  .dropdown-button {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    width: 20px;
-    padding: 0 !important;
-    position: absolute;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    margin-top: 0 !important;
-  }
-
-  .dropdown-button img
-  {
     width: 100%;
-    height: auto;
+  }
+
+  .profile-dropdown-container {
+    position: relative;
+    display: inline-block;
   }
   
-  .dropdown-content {
+  .dropdown {
     display: none;
     position: absolute;
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 14px;
-    padding: 8px;
-    min-width: 120px;
-    z-index: 1;
-    right: -130;
+    top: 100%;
+    left: 0;
+    z-index: 10;
+    background-color: var(--background-colour);
+    border: 3px solid var(--primary-colour);
+    padding: 0.5rem;
+  }
+  
+  .profile-dropdown-container:hover .dropdown {
+    display: block;
+  }
+
+  .dropdown-content
+  {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
   
   .dropdown-content button {
-    display: block;
-    width: 100%;
     background: none;
     border: none;
-    padding: 8px;
-    text-align: left;
     cursor: pointer;
-    font-size: 14px;
+    padding: 15px 10px;
+    font-size: 0.9rem;
+    width: 100%;
+    text-align: start;
+    color: var(--primary-colour);
   }
-
   
-  .dropdown:hover .dropdown-content {
-    display: block;
+  .dropdown-content button:hover {
+    font-weight: bold;
   }
-  
   
   .profile-container button {
     margin-top: 8px;
     padding: 6px 12px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
     box-shadow: none;
     font-size: 14px;
   }
 
-.request-button
+.request .button-container
 {
-    width: 40px;
-    height: 40px;
-    padding: 0 !important;
-    margin-top: 0 !important;
-    margin-right: 5px;
+  margin: 0;
+  gap: 5px;
+  flex-direction: row !important;
+  height: 100%;
 }
 
-.request-button img
+.request p
 {
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  margin-top: auto;
+}
+
+.requests-section
+{
+  box-sizing: border-box;
+  width: 370px;
+  height: fit-content;
+}
+
+.requests-section .profile-group
+{
+  gap: 0px;
+}
+
+.attendees-and-requests .section h3, .attendees-and-requests .section h2
+{
+  text-align: start !important;
+}
+
+@media (max-width: 714px) {
+
+}
+
+@media (max-width: 914px) {
+  .attendees-and-requests
+  {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .attendees-and-requests .section
+  {
+    margin-bottom: 0;
+  }
+
+  .requests-section {
     width: 100%;
-    height: auto;
-    margin-top: 10px;
+  }
+
+  .request p
+  {
+    max-width: 430px;
+    flex: 1;
+  }
+}
+
+@media (max-width: 650px) {
+  .request p{
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 550px) {
+  .request p{
+    max-width: 150px;
+  }
 }

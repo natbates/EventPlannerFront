@@ -3,50 +3,82 @@ import { useAuth } from "../../contexts/auth";
 import { API_BASE_URL } from "../../components/App";
 import "../../styles/attendees.css";
 import { useNavigate } from "react-router-dom";
+import { Profiles } from "../../components/ProfileSelector";
+import { useNotification } from "../../contexts/notification";
+import PageError from "../../components/PageError";
 
-const Profile = ({name, you, role}) =>
-{
+const Profile = ({ name, you, role, profileNum }) => {
+  
+  const profile = Profiles.find((profile) => profile.id === Number(profileNum));
+
   return (
     <div className="profile">
-      <img src = {`/svgs/profile-${role}.svg`} className="profile-image"></img>
-      <p style={{ fontWeight: you ? "bold" : "normal" }}>{name}</p>
+      {/* Check if profile is found and display its image */}
+      {role != "request" && <img
+        src={profile ? profile.path : ""}
+        className="profile-image"
+        alt={profile ? profile.name : "Default profile"}
+      />}
+      <p className={you ? "you underline" : ""}>{name}</p>
     </div>
   );
-}
+};
 
-const generateFakeAttendees = (numAdmins = 5, numAttendees = 20) => {
+const generateFakeAttendees = (numAdmins = 5, numAttendees = 20, numRequests = 5) => {
+  const totalProfiles = Profiles.length; // Get the total number of profiles available
+
+  // Function to get profile number, cycling through available profiles
+  const getProfileNum = (index) => index % totalProfiles;
+
+  // Generate fake admins
   const fakeAdmins = Array.from({ length: numAdmins }, (_, i) => ({
-      user_id: `admin_${i + 1}`,
-      username: `Admin ${i + 1}`,
-      role: "admin",
+    user_id: `admin_${i + 1}`,
+    username: `Admin ${i + 1}`,
+    role: "admin",
+    profile_pic: getProfileNum(i) // Assign profile number based on index
   }));
 
+  // Generate fake attendees
   const fakeAttendees = Array.from({ length: numAttendees }, (_, i) => ({
-      user_id: `attendee_${i + 1}`,
-      username: `Attendee ${i + 1}`,
-      role: "attendee",
+    user_id: `attendee_${i + 1}`,
+    username: `Attendee ${i + 1}`,
+    role: "attendee",
+    profile_pic: getProfileNum(i + numAdmins) // Offset the index by the number of admins
+  }));
+
+  const generateRandomTime = () => {
+    const now = new Date();
+    const pastTime = now.getTime() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000); // up to 7 days ago
+    return new Date(pastTime).toISOString();
+  };
+
+  // Generate fake requests (requests don't need a profileNum, but you can add one if needed)
+  const fakeRequests = Array.from({ length: numRequests }, (_, i) => ({
+    username: `Requesting User ${i + 1}`,
+    time_requested: generateRandomTime(),
   }));
 
   return {
-      organiser: { user_id: "organiser_1", username: "Main Organiser", role: "organiser" },
-      attendees: [...fakeAdmins, ...fakeAttendees],
-      requests: [],
+    organiser: { user_id: "organiser_1", username: "Main Organiser", role: "organiser", profile_pic: 0 }, // Default to profile 0
+    attendees: [...fakeAdmins, ...fakeAttendees],
+    requests: fakeRequests,
   };
 };
-
 
 const Attendees = () => {
 
     const { data: attendeeData, error, loading, event_id, refetch, goEventPage} = useFetchEventData("attendees/fetch-attendees");
     const { user_id, name, role, createUser, authed, email: userEmail, fingerprint: userFingerprint, LogIn, LogOut} = useAuth();
     const navigate = useNavigate();
+    
+    const {notify, setNotifyLoad} = useNotification();
 
     const AcceptRequest = async (request) => {
-    
+        setNotifyLoad(true);
         // Ensure the request is valid before proceeding
         if (request === undefined || request.email === undefined || request.username === undefined) {
             console.error("Invalid request object:", request);
-            alert("Invalid request. Please try again.");
+            notify("Invalid request. Please try again.");
             return;
         }
     
@@ -54,15 +86,24 @@ const Attendees = () => {
             console.log("Processing request for:", request.username);
     
             // Call createUser to add the user to the event (attendee role)
-            const { email, username } = request;
+            const { email, username, profile_pic} = request;
             console.log("Creating user for:", email, username);
+
+            let profileNum = profile_pic;
+
+            console.log("LOOK HERE PLEASE ", profileNum);
     
-            const userResponse = await createUser(email, username, false, event_id, false); // Assuming false represents an attendee role
+            const userResponse = await createUser(  email, 
+              username, 
+              false, 
+              event_id, 
+              profile_pic,  
+              false           
+            );
             if (!userResponse) {
                 throw new Error("Failed to create user.");
             }
     
-            console.log("User created successfully:", userResponse);
     
             // Update the list of requests by removing the accepted request
             const updatedRequests = attendeeData.requests.filter((req) => req.email !== request.email);
@@ -89,18 +130,22 @@ const Attendees = () => {
             const data = await response.json();
             console.log("Request removed from event successfully:", data);
             refetch();
-            alert("Request accepted and user added to the event.");
+            notify("Request accepted and user added to the event.");
     
         } catch (error) {
             // Provide more meaningful error handling for various failures
             console.error("Error during request acceptance:", error.message || error);
-            alert(`There was an error accepting the request: ${error.message || "Unknown error"}`);
+            notify(`There was an error accepting the request: ${error.message || "Unknown error"}`);
+        } finally
+        {
+            setNotifyLoad(false); // Reset loading state
         }
     };
     
     const RejectRequest = async (request) => {
         if (window.confirm("Are you sure you want to reject this user?")) {
           try {
+            setNotifyLoad(true);
             // Send request to backend API to reject the request
             const response = await fetch(`${API_BASE_URL}/attendees/reject-request`, {
               method: 'POST',
@@ -119,11 +164,13 @@ const Attendees = () => {
               refetch();
     
             } else {
-              alert(`Failed to reject request: ${data.message}`);
+              notify(`Failed to reject request: ${data.message}`);
             }
           } catch (err) {
             console.error("Error rejecting request:", err);
-            alert("An error occurred while rejecting the request.");
+            notify("An error occurred while rejecting the request.");
+          } finally {
+            setNotifyLoad(false); // Reset loading state
           }
         }
     };
@@ -135,6 +182,7 @@ const Attendees = () => {
     const promoteUser = async (user_id) => {
         if (window.confirm("Are you sure you want to promote this user?")) {
           try {
+            setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/attendees/promote-user`, {
               method: "POST",
               headers: {
@@ -150,17 +198,21 @@ const Attendees = () => {
               throw new Error("Failed to promote user");
             }
         
-            alert("User promoted to admin successfully!");
+            notify("User promoted to admin successfully!");
             // Refresh attendee data to reflect updated roles
             refetch();
           } catch (err) {
-            alert("Error promoting user: " + err.message);
+            notify("Error promoting user: " + err.message);
+          } finally {
+            setNotifyLoad(false); // Reset loading state
           }
         }
     };
       
     const demoteUser = async (user_id) => {
+      setNotifyLoad(true);
         try {
+
           const response = await fetch(`${API_BASE_URL}/attendees/demote-user`, {
             method: "POST",
             headers: {
@@ -176,17 +228,20 @@ const Attendees = () => {
             throw new Error("Failed to demote user");
           }
       
-          alert("User demoted to attendee successfully!");
+          notify("User demoted to attendee successfully!");
           // Refresh attendee data to reflect updated roles
           refetch();
         } catch (err) {
-          alert("Error demoting user: " + err.message);
+          notify("Error demoting user: " + err.message);
+        } finally {
+          setNotifyLoad(false); // Reset loading state
         }
     };
       
     const kickUser = async (user_id) => {
         if (window.confirm("Are you sure you want to kick this person?")) {
           try {
+            setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/attendees/kick-user`, {
               method: "POST",
               headers: {
@@ -202,132 +257,169 @@ const Attendees = () => {
               throw new Error("Failed to remove user");
             }
         
-            alert("User removed successfully!");
+            notify("User removed successfully!");
             // Refresh attendee data to reflect the changes
             refetch();
           } catch (err) {
-            alert("Error removing user: " + err.message);
+            notify("Error removing user: " + err.message);
+          } finally {
+            setNotifyLoad(false); // Reset loading state
           }
         }
-    };  
+    }; 
+    
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>{error}</p>;
+    if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Attendees"} />;
+
+    if (loading) return <div class="loader"><p>Fetching Attendees</p></div>;
 
     return (
       <div className="attendees">
-        <div className="top-line">
-          <button className="back-button" onClick={() => { goEventPage(); }}>
-            <img src="/svgs/back-arrow.svg" alt="Back" />
-          </button>
-          <h2>Attendees</h2>
-        </div>
-    
-        <div className="section">
-          {attendeeData ? (
-            <div>
-              {/* Organiser Section */}
-              <h3>Organiser</h3>
-              <div className="profile-group">
-                {attendeeData.organiser ? (
-                  <div className="profile-container">
-                    <Profile name={attendeeData.organiser.username} you={user_id === attendeeData.organiser.user_id} role={"organiser"} />
-                    <div className="dropdown">
-                      <button className="dropdown-button"><img src = "/svgs/3dots.svg" alt = "drop-down"></img></button>
-                      <div className="dropdown-content">
-                      <button onClick={() => seeAvailability(attendeeData.organiser.user_id)}>See Availability</button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <p>No organiser found.</p>
-                )}
-              </div>
-    
-              {/* Admins Section */}
-              <h3>Admins</h3>
-
-              {attendeeData.attendees?.some(attendee => attendee.role === "admin") && (
-                <div className="profile-group">
-                  {attendeeData.attendees
-                    .filter(attendee => attendee.role === "admin")
-                    .map((attendee, index) => (
-                      <div key={index} className="profile-container">
-                        {user_id === attendee.user_id && <p>You</p>}
-                        <Profile name={attendee.username} you={user_id === attendee.user_id} role={"admin"}/>
-                          <div className="dropdown">
-                            <button className="dropdown-button"><img src = "/svgs/3dots.svg" alt = "drop-down"></img></button>
-                            <div className="dropdown-content">
-                            <button onClick={() => seeAvailability(attendee.user_id)}>See Availability</button>
-                            {role === "organiser" && (
-                              <>
-                                <button onClick={() => demoteUser(attendee.user_id)}>Demote</button>
-                                <button onClick={() => kickUser(attendee.user_id)}>Kick</button>
-                              </>
-                              )}
-                            </div>
-                          </div>
-                      </div>
-                    ))}
-                </div>
-              )}
-    
-              {/* Attendees Section */}
-              <h3>Attendees</h3>
-              <div className="profile-group">
-                {attendeeData.attendees?.some(attendee => attendee.role === "attendee") ? (
-                  attendeeData.attendees
-                    .filter(attendee => attendee.role === "attendee")
-                    .map((attendee, index) => (
-                      <div key={index} className="profile-container">
-                        {user_id === attendee.user_id && <p>You</p>}
-                        <Profile name={attendee.username} you={user_id === attendee.user_id} role={"attendee"}/>
-                          <div className="dropdown">
-                            <button className="dropdown-button"><img src = "/svgs/3dots.svg" alt = "drop-down"></img></button>
-                            <div className="dropdown-content">
-                              <button onClick={() => seeAvailability(attendee.user_id)}>See Availability</button>
-                              {role === "organiser" && (
-                              <>
-                                <button onClick={() => promoteUser(attendee.user_id)}>Promote</button>
-                                <button onClick={() => kickUser(attendee.user_id)}>Kick</button>
-                              </>
-                              )}
-                            </div>
-                          </div>
-                      </div>
-                    ))
-                ) : (
-                  <p>No attendees found.</p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <p>No attendee data available.</p>
-          )}
-        </div>
-    
-        {role !== "attendee" && (
-          <div className="section">
-            <h2>People Who Want to Join</h2>
-            {attendeeData.requests?.length > 0 ? (
-              <div className="profile-group">
-                {attendeeData.requests.map((request, index) => (
-                  request.status !== "rejected" && (
-                    <div className = "profile-container request" key={index}>
-                      <Profile name={request.username} role={"request"}/>
-                      <button className = "request-button" onClick={() => RejectRequest(request)}><img src = "/svgs/cross.svg" alt = "reject"></img></button>
-                      <button className = "request-button" onClick={() => AcceptRequest(request)}><img src = "/svgs/tick.svg" alt = "accept"></img></button>
-                    </div>
-                  )
-                ))}
-              </div>
-            ) : (
-              <p>No requests to join the event.</p>
-            )}
+          <div className="top-line">
+              <button className="back-button" onClick={() => { goEventPage(); }}>
+                  <img src="/svgs/back-arrow.svg" alt="Back" />
+              </button>
+              <h2>Attendees ({attendeeData?.attendees?.length + 1})</h2>
           </div>
-        )}
+  
+          <div className="attendees-and-requests">
+              <div className="section flexible attendees-section">
+                  {attendeeData ? (
+                      <div>
+                          {/* Organiser Section */}
+                          <h3>Organiser</h3>
+                          <div className="profile-group">
+                              {attendeeData.organiser ? (
+                                  <div className="profile-dropdown-container">
+                                      <Profile
+                                          name={attendeeData.organiser.username}
+                                          you={user_id === attendeeData.organiser.user_id}
+                                          role={"organiser"}
+                                          profileNum={attendeeData.organiser.profile_pic}
+                                      />
+                                      <div className="dropdown">
+                                          <div className="dropdown-content">
+                                              <button onClick={() => seeAvailability(attendeeData.organiser.user_id)}>
+                                                  See Availability
+                                              </button>
+                                          </div>
+                                      </div>
+                                  </div>
+                              ) : (
+                                  <p>No organiser found.</p>
+                              )}
+                          </div>
+  
+                          {/* Admins Section */}
+                          {attendeeData.attendees?.some(attendee => attendee.role === "admin") && (
+                              <>
+                                  <h3>Admins</h3>
+                                  <div className="profile-group">
+                                      {attendeeData.attendees
+                                          .filter(attendee => attendee.role === "admin")
+                                          .map((attendee, index) => (
+                                              <div key={index} className="profile-dropdown-container">
+                                                  <Profile
+                                                      name={attendee.username}
+                                                      you={user_id === attendee.user_id}
+                                                      role={"admin"}
+                                                      profileNum={attendee.profile_pic}
+                                                  />
+                                                  <div className="dropdown">
+                                                      <div className="dropdown-content">
+                                                          <button onClick={() => seeAvailability(attendee.user_id)}>
+                                                              See Availability
+                                                          </button>
+                                                          {role === "organiser" && (
+                                                              <>
+                                                                  <button onClick={() => demoteUser(attendee.user_id)}>Demote</button>
+                                                                  <button onClick={() => kickUser(attendee.user_id)}>Kick</button>
+                                                              </>
+                                                          )}
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          ))}
+                                  </div>
+                              </>
+                          )}
+  
+                          {/* Attendees Section */}
+                          {attendeeData.attendees?.some(attendee => attendee.role === "attendee") && (
+                              <>
+                                  <h3>Attendees</h3>
+                                  <div className="profile-group">
+                                      {attendeeData.attendees
+                                          .filter(attendee => attendee.role === "attendee")
+                                          .map((attendee, index) => (
+                                              <div key={index} className="profile-dropdown-container">
+                                                  <Profile
+                                                      name={attendee.username}
+                                                      you={user_id === attendee.user_id}
+                                                      role={"attendee"}
+                                                      profileNum={attendee.profile_pic}
+                                                  />
+                                                  <div className="dropdown">
+                                                      <div className="dropdown-content">
+                                                          <button onClick={() => seeAvailability(attendee.user_id)}>
+                                                              See Availability
+                                                          </button>
+                                                          {role === "organiser" && (
+                                                              <>
+                                                                  <button onClick={() => promoteUser(attendee.user_id)}>Promote</button>
+                                                                  <button onClick={() => kickUser(attendee.user_id)}>Kick</button>
+                                                              </>
+                                                          )}
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          ))}
+                                  </div>
+                              </>
+                          )}
+                      </div>
+                  ) : (
+                      <p>Loading attendees...</p>
+                  )}
+              </div>
+  
+              {/* Requests Section */}
+              {role !== "attendee" && attendeeData?.requests?.length > 0 && (() => {
+                  const groupedRequests = attendeeData.requests.reduce((groups, request) => {
+                      if (request.status === "rejected") return groups;
+                      const date = new Date(request.time_requested).toDateString();
+                      if (!groups[date]) groups[date] = [];
+                      groups[date].push(request);
+                      return groups;
+                  }, {});
+  
+                  return (
+                      <div className="section requests-section">
+                          <h2>Requests</h2>
+                          {Object.keys(groupedRequests).map(date => (
+                              <div key={date} className="request-group-by-date">
+                                  <h4>{date}</h4>
+                                  <div className="profile-group">
+                                      {groupedRequests[date].map((request, index) => (
+                                          <div className="profile-container request" key={index}>
+                                              <Profile
+                                                  name={`${request.username}`}
+                                                  role={"request"}
+                                              />
+                                              <div className="button-container">
+                                                  <button className="request-button" onClick={() => RejectRequest(request)}>✖</button>
+                                                  <button className="request-button" onClick={() => AcceptRequest(request)}>✔</button>
+                                              </div>
+                                          </div>
+                                      ))}
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
+                  );
+              })()}
+          </div>
       </div>
-    );
-}    
-
+  );
+}
 export default Attendees;

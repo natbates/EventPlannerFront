@@ -62,7 +62,7 @@ const UserCalender = () => {
   if (error) return (<p>Error: {error}</p>);
 
   return (
-    <div>
+    <div className="your-calendar">
 
       <div className="top-line">
         <button className="back-button" onClick={() => { goEventPage(); }}>

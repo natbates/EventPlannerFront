@@ -4,6 +4,8 @@ import { useAuth } from "../../contexts/auth";
 import useFetchEventData from "../../hooks/useFetchEventData";
 import { SharedCalendar } from "../../components/Calender";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../../contexts/notification";
+import PageError from "../../components/PageError";
 
 const AttendeeCalendar = () => {
     const { data: calenderData, error, loading, event_id, refetch, goEventPage } = useFetchEventData("calendar/fetch-calendar");
@@ -17,11 +19,16 @@ const AttendeeCalendar = () => {
     const [cancelReason, setCancelReason] = useState("");
     const [showCancelReasonInput, setShowCancelReasonInput] = useState(false);
 
+    const [dataLoad, setDataLoad] = useState(false);
+
     const navigate = useNavigate();
+    const { notify, setNotifyLoad } = useNotification();
 
     // Fetch attendee availability
     const fetchAttendeeAvailability = async () => {
         if (!event_id) return;
+
+        setDataLoad(true);
     
         try {
             const response = await fetch(`${API_BASE_URL}/calendar/fetch-availability/${event_id}`);
@@ -32,6 +39,8 @@ const AttendeeCalendar = () => {
         } catch (error) {
             console.error("Error fetching user availability:", error);
             setAttendeeAvailability(null);
+        } finally {
+            setDataLoad(false);
         }
     };
     
@@ -50,18 +59,17 @@ const AttendeeCalendar = () => {
         const eventEndDate = getDateWithoutTime(calenderData.latest_date);
         const selectedDate = getDateWithoutTime(date);
     
-        console.log(eventStartDate, selectedDate, eventEndDate);
-        console.log(selectedDate.getTime() === eventEndDate.getTime()); // Should be true now
-    
         return selectedDate >= eventStartDate && selectedDate <= eventEndDate;
     };
     
-
     // Select or Deselect Chosen Days
     const selectChosenDays = async (date) => {
+
+        console.log("Selected date:", date);
+
         // Check if the date is within the event duration before proceeding
         if (!isDateWithinEventDuration(date)) {
-            alert("You cannot select this date, it is outside the event duration.");
+            notify("You cannot select this date, it is outside the event duration.");
             return;
         }
     
@@ -76,7 +84,7 @@ const AttendeeCalendar = () => {
     
             // Prevent exceeding max selection
             if (prevSelectedDates?.length >= calenderData.duration) {
-                alert(`Max amount of chosen days selected (${calenderData.duration})`);
+                notify(`Max amount of chosen days selected (${calenderData.duration})`);
                 return prevSelectedDates;
             }
     
@@ -93,15 +101,14 @@ const AttendeeCalendar = () => {
 
         if ( selectedDates?.length != calenderData.duration)
         {
-            alert("please select all chosen days before confirming")
+            notify("please select all chosen days before confirming")
             return;
         }
-
         if (!reminderDate) {
-            alert("Please select a reminder date.");
+            notify("Please select a reminder date.");
             return;
         }
-
+        setNotifyLoad(true);
         try {
             const response = await fetch(`${API_BASE_URL}/events/confirm-event`, {
                 method: "POST",
@@ -110,17 +117,20 @@ const AttendeeCalendar = () => {
                 },
                 body: JSON.stringify({ 
                     event_id, 
-                    reminderDate, 
+                    reminder_date: reminderDate, 
                     selectedDates 
                 })
             });
             
             if (!response.ok) throw new Error("Failed to confirm event");
 
-            alert("Event confirmed successfully!");
+            notify("Event confirmed successfully!");
             refetch();
         } catch (err) {
             console.error("Error confirming event:", err);
+        } finally {
+            setNotifyLoad(false);
+            setIsSelectingDates(false);
         }
     };
 
@@ -133,6 +143,8 @@ const AttendeeCalendar = () => {
             return;
         }
 
+        setNotifyLoad(true);
+
         try {
             const response = await fetch(`${API_BASE_URL}/events/cancel-event`, {
                 method: "POST",
@@ -144,19 +156,22 @@ const AttendeeCalendar = () => {
 
             if (!response.ok) throw new Error("Failed to cancel event");
 
-            alert("Event canceled successfully!");
             refetch();
         } catch (err) {
             console.error("Error canceling event:", err);
         } finally {
             setShowCancelReasonInput(false);
             setCancelReason("");
+            setNotifyLoad(false);
         }
     };
 
+    if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Shared Calender"} />;
+
+    if (loading || dataLoad) return <div class="loader"><p>Fetching Calender Data</p></div>;
 
     return (
-        <div>
+        <div className="shared-calender">
             <div className="top-line">
                 <button className="back-button" onClick={() => { goEventPage(); }}>
                     <img src="/svgs/back-arrow.svg" alt="Back" />
@@ -164,11 +179,6 @@ const AttendeeCalendar = () => {
                 <h2>Shared Calender</h2>
             </div>
 
-            <button onClick={() => {navigate(`/event/${event_id}/settings`)}}>Change Duration or Available Days</button>
-
-            {isSelectingDates && 
-                <p>Remaining = {calenderData.duration - (selectedDates?.length || 0)}</p>
-            }
             <SharedCalendar 
                 data={calenderData} 
                 selectChosenDays={selectChosenDays} 
@@ -179,72 +189,82 @@ const AttendeeCalendar = () => {
             />  
 
             {/* Confirm Event Button */}
-            {role === "organiser" && calenderData?.status !== "confirmed" && (
-            <>
+            {role === "organiser" && calenderData?.status !== "confirmed" && !showCancelReasonInput && !isSelectingDates && (
+            <div className="button-container">
                 {!isSelectingDates && (
-                <button onClick={() => setIsSelectingDates(true)}>
+                <button className = "small-button" onClick={() => setIsSelectingDates(true)}>
                     Choose Dates
                 </button>
                 )}
 
-                {isSelectingDates && (
-                <button
-                    onClick={() => {
-                    setIsSelectingDates(false);
-                    setSelectedDates(null);
-                    }}
-                >
-                    Cancel
-                </button>
+
+                <button className = "small-button" onClick={() => {navigate(`/event/${event_id}/settings`)}}>Change Duration or Available Days</button>
+                
+                {role === "organiser" && calenderData?.status !== "canceled" && (
+                    <button className = "small-button" onClick={() => {setShowCancelReasonInput(true);}}>Cancel Event</button>
                 )}
-
-                {isSelectingDates && selectedDates?.length === calenderData.duration && (
-                <button onClick={confirmEvent}>
-                    Confirm
-                </button>
-                )}
-            </>
-            )}
-
-
-
-            {/* Cancel Event Button */}
-            {role === "organiser" && calenderData?.status !== "canceled" && (
-                <button onClick={() => {setShowCancelReasonInput(true);}}>Cancel Event</button>
+            </div>
             )}
 
             {/* Reminder Input */}
-            {selectedDates?.length == calenderData?.duration && (
-                <div>
-                    <h3>Set Reminder Date</h3>
+            {isSelectingDates && (
+                <div className="section reminder">
+
+                    
+                    <div className="reminder-count">
+                        <h3>Set Reminder Date</h3>
+                        <p>
+                        {calenderData.duration - (selectedDates?.length || 0) === 0
+                            ? "None Remaining"
+                            : `${calenderData.duration - (selectedDates?.length || 0)} Remaining`}
+                        </p>
+                    </div>
+                    <div className="date-selection">
                     <label>
-                        Reminder Date (Before event start, After current date):
+                        Reminder Date: </label>
                         <input
                             type="date"
                             value={reminderDate}
                             onChange={(e) => setReminderDate(e.target.value)}
                             required
                         />
-                    </label>
+                    </div>
+                    <div className="button-container">
+                        <button
+                            className = "small-button"
+                            onClick={() => {
+                            setIsSelectingDates(false);
+                            setSelectedDates(null);
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            disabled={!reminderDate}
+                            className = "small-button" 
+                            onClick={confirmEvent}>
+                            Confirm
+                        </button>
+                    </div>
                 </div>
             )}
 
             {/* Cancel Reason Input */}
             {showCancelReasonInput && (
-                <div>
+                <div className="section cancel-reason">
                     <h3>Provide a Reason for Cancelling</h3>
                     <form onSubmit={handleCancelSubmit}>
-                        <label>
-                            Cancel Reason:
-                            <textarea
-                                value={cancelReason}
-                                onChange={(e) => setCancelReason(e.target.value)}
-                                maxLength={255}
-                                required
-                            />
-                        </label>
-                        <button type="submit">Cancel Event</button>
-                        <button type="button" onClick={() => setShowCancelReasonInput(false)}>Cancel</button>
+                        <input
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                            maxLength={255}
+                            placeholder="Enter reason for cancellation..."
+                            required
+                        />
+                        <div className="button-container">
+                            <button className = "small-button" type="button" onClick={() => setShowCancelReasonInput(false)}>Close</button>
+                            <button className = "small-button" type="submit">Cancel Event</button>
+                        </div>
                     </form>
                 </div>
             )}

@@ -1,21 +1,29 @@
 import { useAuth } from "../../contexts/auth";
 import useFetchEventData from "../../hooks/useFetchEventData";
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { API_BASE_URL } from "../../components/App";
 import { useHistory } from "../../contexts/history";
+import "../../styles/comments.css";
+import { Profiles } from "../../components/ProfileSelector";
+import { useNotification } from "../../contexts/notification";
+import PageError from "../../components/PageError";
 
 const Comments = () =>
 {
-    const { data: commentData, error, loading, event_id, refetch, goEventPage } = useFetchEventData("comments/fetch-comments");
-    const { user_id, name, role } = useAuth();
-
+    const { data: commentData, error, event_id, loading, refetch, goEventPage } = useFetchEventData("comments/fetch-comments");
+    const { user_id, name, role, profile_pic} = useAuth();
+    const [commentsWithUserDetails, setCommentsWithUserDetails] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [replyTo, setReplyTo] = useState(null);
     const [replyText, setReplyText] = useState("");
     const [replyVisibility, setReplyVisibility] = useState({});
     const {updateEventPage, updateLastOpened} = useHistory();
+    const [secondaryloading, setLoading] = useState(true);
+    const {notify, setNotifyLoad} = useNotification();
     
     const handleDeleteComment = async (comment_id) => {
+        setNotifyLoad(true);
+
         const getAllReplies = (id) => {
         let replies = commentData.comments.filter((c) => c.reply_to === id);
         replies.forEach((reply) => {
@@ -37,35 +45,54 @@ const Comments = () =>
             if (!response.ok) throw new Error("Failed to delete comments");
         
             refetch();
+            setNotifyLoad(false);
         } catch (error) {
+            setNotifyLoad(false);
             console.error("Error deleting comment:", error);
         }
         }
     };
+
+    const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const handlePostComment = async (e) => {
+
+      e.preventDefault();
+
+      setReplyText("");
+      setReplyTo(null);
+
+      console.log("POSTING COMMENT ", newComment, replyText, replyTo);
+
+      handleAddComment(e, true);
+
+    }
   
-    const handleAddComment = async (e) => {
+    const handleAddComment = async (e, posting = false) => {
+      
         e.preventDefault();
-    
+
+        setNotifyLoad(true);
+
         // Validate if the comment is not empty
-        if (replyTo === null) {
-        if (newComment.trim() === '') {
-            alert('Comment cannot be empty');
-            return;
-        }
-        } else {
-        if (replyText.trim() === '') {
-            alert('Reply cannot be empty');
-            return;
-        }
+        if (replyTo === null )  {
+          if (newComment.trim() === '') {
+              alert('Comment cannot be empty');
+              return;
+          }
+          } else {
+          if (!posting && replyText.trim() === '') {
+              alert('Reply cannot be empty');
+              return;
+          }
         }
     
         // Prepare the comment object to send
         const commentData = {
-        event_id: event_id,
-        user_id: user_id,
-        username: name,
-        message: replyTo !== null ? replyText : newComment,
-        reply_to: replyTo,
+          event_id: event_id,
+          user_id: user_id,
+          message: replyTo !== null && !posting ? replyText : newComment,
+          reply_to: !posting ? (replyTo?.uuid || null) : null, // Null if no reply
         };
     
         try {
@@ -87,23 +114,75 @@ const Comments = () =>
         // Clear the comment inputs
         setNewComment('');
         setReplyText('');
-        setReplyTo(null); // Clear the reply-to field after submission
         refetch(); // Refresh event data
         updateEventPage(event_id, "comments")
         updateLastOpened("comments");
+        notify("Comment Posted!")
 
-        if (replyTo) {
-            setReplyVisibility((prev) => ({
-            ...prev,
-            [replyTo]: true, // Expand the replied-to comment thread
-            }));
-        }
+        if (!replyTo) {
+          console.log("Expanding visibility for top-level comment");
+          console.log("Result comment ID", result.comment.comment_id);
+          setReplyVisibility((prev) => ({
+              ...prev,
+              [result.comment.comment_id]: true,
+          }));
+          } else {
+              console.log("Expanding visibility for reply", replyTo);
+              setReplyVisibility((prev) => ({
+                  ...prev,
+                  [replyTo.uuid]: true,
+              }));
+          }
+
+          setReplyTo(null);
 
         } catch (error) {
         console.error('Error adding comment:', error);
-        alert('Error adding comment: ' + error.message);
+        notify('Error adding comment: ' + error.message);
+        setNotifyLoad(false);
         }
     };
+
+    const getUserNameAndProfilePic = async (user_id) => {
+      try {
+          const res = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${user_id}`);
+  
+          if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(errorData.message || "Error fetching username and profile pic.");
+          }
+  
+          const data = await res.json();
+          return data;
+      } catch (error) {
+          console.error("Error:", error);
+          return null; // Return null if there is an error
+      } finally {
+        setNotifyLoad(false);
+      }
+    };
+
+    useEffect(() => {
+        const fetchUserDetailsForComments = async () => {
+
+            const updatedComments = await Promise.all(
+                commentData.comments.map(async (comment) => {
+                    const userDetails = await getUserNameAndProfilePic(comment.user_id);
+                    if (userDetails) {
+                        comment.username = userDetails.name;
+                        comment.profile_pic = userDetails.profile_pic;
+                    }
+                    return comment;
+                })
+            );
+            setCommentsWithUserDetails(updatedComments);
+            setLoading(false);
+        };
+
+        if (commentData && commentData.comments && !error) {
+          fetchUserDetailsForComments();
+        }
+    }, [commentData]);
 
     const toggleReplies = (commentId) => {
         setReplyVisibility((prev) => ({
@@ -113,43 +192,60 @@ const Comments = () =>
     };
 
     const renderComment = (comment, level = 0) => {
+
         // Get replies, sorted oldest to newest
         const replies = commentData.comments && commentData.comments
           .filter((c) => c.reply_to === comment.uuid)
-          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       
         // Find the original comment being replied to
         const parentComment = commentData.comments.find((c) => c.uuid === comment.reply_to);
         const replyingToUsername = parentComment ? `@${parentComment.username} ` : "";
+        const profile = Profiles.find((profile) => profile.id === Number(comment.profile_pic));
+      
       
         return (
           <div key={comment.uuid} className="comment" style={{ marginLeft: `${level * 20}px` }}>
             <div className="comment-header">
-              <strong>{comment.username}</strong>
+              <div className="comment-info-delete">
+                <span>
+                  <img className="profile-pic" src={profile ? profile.path : ""} />
+                  <p className={`${comment.user_id === user_id ? "you underline" : ""}`}>{comment.username}{" "}</p>
+                  {new Date(comment.created_at).toDateString() === new Date().toDateString()
+                    ? `at ${new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                    : `on ${new Date(comment.created_at).toLocaleDateString()}`}
+                </span>
+                { (comment.user_id === user_id || role === "organiser") && <button className="small-button" onClick={() => {handleDeleteComment(comment.uuid)}}>🗑</button>}
+             </div>
               <p>{replyingToUsername}{comment.message}</p>
-              <p>{comment.created_at}</p>
               {/* Reply button */}
-              {replyTo === comment.uuid ? (
-                <form onSubmit={(e) => handleAddComment(e)}>
+              {replyTo?.uuid === comment.uuid ? (
+                <form onSubmit={(e) => {handleAddComment(e, false)}} className="reply-form">
                   <input
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Write a reply..."
-                  />
-                  <button type="submit">Send Reply</button>
+                    placeholder={
+                      replyTo?.user_id === user_id
+                        ? "Write a reply to yourself..."
+                        : `Write a reply to ${replyTo?.username}...`
+                    }                  />
+                  <div className="button-container">
+                    <button className = "small-button" type = "button" onClick={() => {setReplyTo(null)}}>Cancel</button>
+                    <button className = "small-button" type="submit">Send Reply</button>
+                  </div>
                 </form>
               ) : (
-                <button onClick={() => setReplyTo(comment.uuid)}>Reply</button>
+                <div className="reply-button-container">
+                <button className = "small-button" onClick={() => {setReplyTo(comment); setReplyText("")}}>Reply</button>
+
+                {replies.length > 0 && (
+                  <button className = "small-button" onClick={() => toggleReplies(comment.uuid)}>
+                    {replyVisibility[comment.uuid] ? "Hide Replies" : `Show Replies (${replies.length})`}
+                  </button>
+                )}
+                </div>
               )}
-              { (comment.user_id === user_id || role === "organiser") && <button onClick={() => {handleDeleteComment(comment.uuid)}}>Delete Comment</button>}
             </div>
-      
-            {/* Show Replies Button (Only for nested replies) */}
-            {replies.length > 0 && (
-              <button onClick={() => toggleReplies(comment.uuid)}>
-                {replyVisibility[comment.uuid] ? "Hide Replies" : `Show Replies (${replies.length})`}
-              </button>
-            )}
       
             {/* Render Replies if visible */}
             {replyVisibility[comment.uuid] && replies.length > 0 && (
@@ -161,12 +257,14 @@ const Comments = () =>
         );
     };
     
-
     const handleCommentChange = (e) => {
         setNewComment(e.target.value);
-      };
+    };
 
-    console.log(commentData);
+    if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Comments"} />;
+
+    if (loading || secondaryloading) return <div class="loader"><p>Fetching Comments</p></div>;
+
     return (
         <div className="comments">
           <div className="top-line">
@@ -184,19 +282,21 @@ const Comments = () =>
             placeholder="Add your comment here"
             rows="4"
           />
-          <button onClick={handleAddComment}>Post Comment</button>
+          <div className="button-container">
+            <button className = "small-button" onClick={() => {setNewComment("")}}>Clear Text</button>
+            <button className = "small-button" onClick={handlePostComment}>Post Comment</button>
+          </div>
          </div>
 
-        {commentData && commentData.comments != null && (
-          <>
-            {commentData.comments.length === 0 ? (
-              <p>No comments yet. Be the first to comment!</p>
-            ) : (
-                commentData.comments
-                .filter((comment) => comment.reply_to === null) // Only top-level comments
-                .map((comment) => renderComment(comment))
-            )}
-          </>
+         {console.log("here" + JSON.stringify(commentsWithUserDetails))}
+
+         {!loading && commentsWithUserDetails && commentsWithUserDetails.length > 0 && (
+          <div className="section">
+            {commentsWithUserDetails
+              .filter((comment) => comment.reply_to === null)
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .map((comment) => renderComment(comment))}
+          </div>
         )}
         </div>
     )

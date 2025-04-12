@@ -1,0 +1,41 @@
+/* HTML: <div class="loader"></div> */
+.loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 60px;
+    aspect-ratio: 2;
+    display: grid;
+    background:
+      radial-gradient(farthest-side,#000 15%,#0000 18%)0 0/50% 100%,
+      radial-gradient(50% 100% at 50% 160%,#fff 95%,#0000) 0 0   /50% 50%,
+      radial-gradient(50% 100% at 50% -60%,#fff 95%,#0000) 0 100%/50% 50%;
+    background-repeat: repeat-x;
+    animation: l2 1.5s infinite linear;
+  }
+
+  .loader p{
+    font-weight: bold;
+    width: fit-content;
+    text-align: center;
+    font-size: 2rem;
+    text-wrap: nowrap;
+    position: absolute;
+    left: 50%;
+    top: 50px;
+    transform: translateX(-50%);
+  }
+
+  @keyframes l2 {
+    0%,
+    15% {background-position:0   0,0 0,0 100%}
+    20%,
+    40% {background-position:5px 0,0 0,0 100%}
+    45%,
+    55% {background-position:0   0,0 0,0 100%}
+    60%,
+    80%{background-position:-5px 0,0 0,0 100%}
+    85%,
+    100% {background-position:0   0,0 0,0 100%}
+  }

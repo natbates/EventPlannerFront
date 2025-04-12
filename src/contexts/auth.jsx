@@ -8,6 +8,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user_id, setUser_id] = useState(null);
   const {event_id} = useParams();
+  const [profile_pic, setProfile_pic] = useState(null);
   const [email, setEmail] = useState(null);
   const [name, setName] = useState(null);
   const [role, setRole] = useState(null);
@@ -54,20 +55,26 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
+      console.log("TEST")
 
       if (data.authorized) {
+        console.log("GOOOD")
         const userDetails = {
           user_id: data.user_details.user_id,
           email: data.user_details.email,
           name: data.user_details.username,
           role: data.user_details.role,
+          profile_pic: data.user_details.profile_pic,
         };
 
         setUser_id(userDetails.user_id);
         setEmail(userDetails.email);
         setName(userDetails.name);
         setRole(userDetails.role);
+        setProfile_pic(userDetails.profile_pic);
         setAuthed(true);
+
+        console.log("User details: ", name);
 
         saveUserToStorage(userDetails); // 🔥 Save to local storage
         return true;
@@ -93,7 +100,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   // 🔹 Create a new user
-  const createUser = async (userEmail, userName, isOrganiser, event_id, autoSignIn = true) => {
+  const createUser = async (userEmail, userName, isOrganiser, event_id, profileNum = 0, autoSignIn = true) => {
+    console.log("Creaint user profile num ", profileNum);
+
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/users/create-user`, {
@@ -105,6 +114,7 @@ export const AuthProvider = ({ children }) => {
           fingerprint: fingerprint,
           role: isOrganiser ? "organiser" : "attendee",
           event_id: event_id || null,
+          profileNum: profileNum || 0,
         }),
       });
 
@@ -126,6 +136,7 @@ export const AuthProvider = ({ children }) => {
         setEmail(newUser.email);
         setName(newUser.name);
         setRole(newUser.role);
+        setProfile_pic(profileNum);
         setAuthed(true);
 
         saveUserToStorage(newUser);
@@ -146,15 +157,14 @@ export const AuthProvider = ({ children }) => {
     setName(null);
     setRole(null);
     setAuthed(false);
+    setProfile_pic(null);
     localStorage.removeItem("user"); // 🔥 Clear local storage
-
-    console.log("going to log in page from signout");
     navigate(`/event/${event_id}/login`);
   };
 
   return (
     <AuthContext.Provider value={{
-      user_id, LogIn, createUser, signOut, authed, email, name, fingerprint, loading, error, role
+      user_id, LogIn, createUser, signOut, authed, email, name, fingerprint, loading, error, role, profile_pic
     }}>
       {children}
     </AuthContext.Provider>

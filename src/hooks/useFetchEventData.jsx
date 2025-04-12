@@ -53,14 +53,14 @@ const useFetchEventData = (endpoint) => {
     };
 
     // 🔹 Fetch endpoint data only if event is valid
-    const fetchData = async () => {
+    const fetchData = async (refetch = false) => {
         if (!event_id || !authed) return;
 
         const eventData = await fetchEventStatus();
         if (!eventData) return; // Stop if event is canceled/confirmed
 
         try {
-            setLoading(true);
+
             const response = await fetch(`${API_BASE_URL}/${endpoint}?event_id=${event_id}`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
@@ -69,9 +69,10 @@ const useFetchEventData = (endpoint) => {
             if (!response.ok) throw new Error(`Failed to fetch ${endpoint}`);
 
             const result = await response.json();
+            await new Promise(resolve => setTimeout(resolve, 1000));
             setData(result);
         } catch (err) {
-            notify(`Error fetching ${endpoint}`);
+            notify(`${endpoint.split("/")[0]}: Failed to fetch data`);
             setError(err.message);
         } finally {
             setLoading(false);
@@ -83,10 +84,11 @@ const useFetchEventData = (endpoint) => {
     };
 
     useEffect(() => {
+        
         fetchData();
     }, [event_id]); // Dependency on event_id
 
-    return { data, event, error, loading, event_id, refetch: fetchData, goEventPage };
+    return { data, event, error, loading, event_id, refetch: fetchData, goEventPage, setError};
 };
 
 export default useFetchEventData;

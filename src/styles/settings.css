@@ -1,0 +1,49 @@
+
+.settings{
+    width: 100%;
+}
+
+.settings-input
+{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    margin-bottom: 20px;
+}
+
+.settings-input textarea
+{
+    margin: 0;
+}
+
+.settings .one-line-input p
+{
+    display: flex;
+    flex: 1;
+    margin: 0;
+}
+
+.settings-profile-input .profile-selector .profile-option
+{
+    min-width: 52px !important;
+}
+
+.settings .button-container
+{
+    justify-content: right;
+    margin-top: 25px;
+}
+
+.settings-buttons-event .button-container
+{
+    margin-top: 0px;
+
+}
+
+.settings-buttons-event 
+{
+    margin-top: 25px;
+    display: flex;
+    justify-content: space-between;
+}

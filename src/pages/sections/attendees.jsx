@@ -6,8 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { Profiles } from "../../components/ProfileSelector";
 import { useNotification } from "../../contexts/notification";
 import PageError from "../../components/PageError";
+import { useTheme } from "../../contexts/theme";
 
-const Profile = ({ name, you, role, profileNum }) => {
+export const Profile = ({ name, you, role, profileNum }) => {
   
   const profile = Profiles.find((profile) => profile.id === Number(profileNum));
 
@@ -70,8 +71,11 @@ const Attendees = () => {
     const { data: attendeeData, error, loading, event_id, refetch, goEventPage} = useFetchEventData("attendees/fetch-attendees");
     const { user_id, name, role, createUser, authed, email: userEmail, fingerprint: userFingerprint, LogIn, LogOut} = useAuth();
     const navigate = useNavigate();
+    const {theme} = useTheme();
     
     const {notify, setNotifyLoad} = useNotification();
+
+    console.log("on attendees page")
 
     const AcceptRequest = async (request) => {
         setNotifyLoad(true);
@@ -129,7 +133,7 @@ const Attendees = () => {
     
             const data = await response.json();
             console.log("Request removed from event successfully:", data);
-            refetch();
+            await refetch();
             notify("Request accepted and user added to the event.");
     
         } catch (error) {
@@ -161,7 +165,8 @@ const Attendees = () => {
             const data = await response.json();
         
             if (response.ok) {
-              refetch();
+              await refetch();
+              notify("Request rejected successfully!");
     
             } else {
               notify(`Failed to reject request: ${data.message}`);
@@ -198,9 +203,9 @@ const Attendees = () => {
               throw new Error("Failed to promote user");
             }
         
-            notify("User promoted to admin successfully!");
             // Refresh attendee data to reflect updated roles
-            refetch();
+            await refetch();
+            notify("User promoted to admin successfully!");
           } catch (err) {
             notify("Error promoting user: " + err.message);
           } finally {
@@ -228,9 +233,8 @@ const Attendees = () => {
             throw new Error("Failed to demote user");
           }
       
+          await refetch();
           notify("User demoted to attendee successfully!");
-          // Refresh attendee data to reflect updated roles
-          refetch();
         } catch (err) {
           notify("Error demoting user: " + err.message);
         } finally {
@@ -257,9 +261,8 @@ const Attendees = () => {
               throw new Error("Failed to remove user");
             }
         
+            await refetch();
             notify("User removed successfully!");
-            // Refresh attendee data to reflect the changes
-            refetch();
           } catch (err) {
             notify("Error removing user: " + err.message);
           } finally {
@@ -271,13 +274,15 @@ const Attendees = () => {
 
     if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Attendees"} />;
 
-    if (loading) return <div class="loader"><p>Fetching Attendees</p></div>;
+    if (loading) return <div className="loader"><p>Fetching Attendees</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     return (
       <div className="attendees">
           <div className="top-line">
               <button className="back-button" onClick={() => { goEventPage(); }}>
-                  <img src="/svgs/back-arrow.svg" alt="Back" />
+                  {theme === "dark" ? 
+                    <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
+                  <img src="/svgs/back-arrow.svg" alt="Back" />}
               </button>
               <h2>Attendees ({attendeeData?.attendees?.length + 1})</h2>
           </div>
@@ -287,8 +292,8 @@ const Attendees = () => {
                   {attendeeData ? (
                       <div>
                           {/* Organiser Section */}
-                          <h3>Organiser</h3>
-                          <div className="profile-group">
+                          <h2>Organiser</h2>
+                          <div className="profile-group organiser-group">
                               {attendeeData.organiser ? (
                                   <div className="profile-dropdown-container">
                                       <Profile
@@ -299,6 +304,7 @@ const Attendees = () => {
                                       />
                                       <div className="dropdown">
                                           <div className="dropdown-content">
+                                              <strong>{attendeeData.organiser.username}</strong>
                                               <button onClick={() => seeAvailability(attendeeData.organiser.user_id)}>
                                                   See Availability
                                               </button>
@@ -327,6 +333,7 @@ const Attendees = () => {
                                                   />
                                                   <div className="dropdown">
                                                       <div className="dropdown-content">
+                                                          <strong>{attendee.username}</strong>
                                                           <button onClick={() => seeAvailability(attendee.user_id)}>
                                                               See Availability
                                                           </button>
@@ -384,40 +391,24 @@ const Attendees = () => {
               </div>
   
               {/* Requests Section */}
-              {role !== "attendee" && attendeeData?.requests?.length > 0 && (() => {
-                  const groupedRequests = attendeeData.requests.reduce((groups, request) => {
-                      if (request.status === "rejected") return groups;
-                      const date = new Date(request.time_requested).toDateString();
-                      if (!groups[date]) groups[date] = [];
-                      groups[date].push(request);
-                      return groups;
-                  }, {});
-  
-                  return (
-                      <div className="section requests-section">
-                          <h2>Requests</h2>
-                          {Object.keys(groupedRequests).map(date => (
-                              <div key={date} className="request-group-by-date">
-                                  <h4>{date}</h4>
-                                  <div className="profile-group">
-                                      {groupedRequests[date].map((request, index) => (
-                                          <div className="profile-container request" key={index}>
-                                              <Profile
-                                                  name={`${request.username}`}
-                                                  role={"request"}
-                                              />
-                                              <div className="button-container">
-                                                  <button className="request-button" onClick={() => RejectRequest(request)}>✖</button>
-                                                  <button className="request-button" onClick={() => AcceptRequest(request)}>✔</button>
-                                              </div>
-                                          </div>
-                                      ))}
-                                  </div>
-                              </div>
-                          ))}
-                      </div>
-                  );
-              })()}
+              {role !== "attendee" && attendeeData?.requests?.length > 0 && (
+                <div className="section requests-section">
+                  <h2>Requests</h2>
+                  <div className="profile-group">
+                    {attendeeData.requests
+                      .filter(request => request.status !== "rejected")
+                      .map((request, index) => (
+                        <div className="profile-container request" key={index}>
+                          <Profile name={`${request.username}`}  profileNum={request.profile_pic}/>
+                          <div className="button-container">
+                            <button className="request-button" onClick={() => RejectRequest(request)}>✖</button>
+                            <button className="request-button" onClick={() => AcceptRequest(request)}>✔</button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
           </div>
       </div>
   );

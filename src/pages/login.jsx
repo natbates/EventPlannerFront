@@ -7,6 +7,10 @@ import { useHistory } from "../contexts/history";
 import "../styles/login.css";
 import ProfileSelector from "../components/ProfileSelector";
 import PageError from "../components/PageError";
+import { Profiles } from "../components/ProfileSelector";
+import { useTheme } from "../contexts/theme";
+import { useNotification } from "../contexts/notification";
+import { useRef } from "react";
 
 const Login = () => {
     const [event, setEvent] = useState(null);
@@ -19,43 +23,59 @@ const Login = () => {
     const [requestData, setRequestData] = useState();
     const { updateEventPage } = useHistory();
     const [profileNum, setProfileNum] = useState(0);
-
+    const { theme } = useTheme();
+    const {notify, setNotifyLoad} = useNotification();
     const event_id = useParams().event_id;
     const { fingerprint: userFingerprint, LogIn, authed } = useAuth();
     const navigate = useNavigate();
 
+    const fingerprintRef = useRef(userFingerprint);
     useEffect(() => {
+        fingerprintRef.current = userFingerprint;
+      }, [userFingerprint]);
 
-        setLoginError(true);
-
-        const storedUser = JSON.parse(localStorage.getItem("user"));
-        if (storedUser && event_id) {
-          console.log("trying local session auto sign in ", storedUser.email);
-          LogIn(storedUser.email, event_id);
-        }
-
-
-        if (event_id === undefined || event_id === "undefined") {
+      useEffect(() => {
+        const handleAuthInit = async () => {
+            
+          const storedUser = JSON.parse(localStorage.getItem("user"));
+          if (storedUser && event_id) {
+            console.log("Trying local session auto sign in ", storedUser.email);
+            await LogIn(storedUser.email, event_id); // ⬅️ optionally await if you want to wait before redirect
+          }
+      
+          if (!event_id || event_id === "undefined") {
             console.log("event_id is undefined. Redirecting to home.");
-            navigate(`/`); // Redirect to home page
-        } else {
+            navigate(`/`);
+            return;
+          } else {
             console.log("Event ID is defined:", event_id);
-        }
-
-        // Auto login logic only if event_id is valid
-        if (authed && event_id !== undefined) {
+          }
+      
+          if (authed && event_id) {
             console.log(location.pathname);
             console.log("GOING TO HOME PAGE FROM LOGIN");
             navigate(`/event/${event_id}`);
-        }
-        fetchEventData();
-        // setAutoLogInEmail();
-    }, [event_id, authed, navigate, userFingerprint]);
+          }
+
+          while (!fingerprintRef.current) {
+            console.log("Waiting for fingerprint...");
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+      
+          fetchEventData();
+          setAutoLogInEmail();
+        };
+      
+        handleAuthInit();
+      }, [event_id, authed, navigate, userFingerprint]);
+      
 
     const setAutoLogInEmail = () => {
 
         if (userFingerprint && event_id) {
             // Make API call to auto-sign-in endpoint using fetch
+            setNotifyLoad(true);
+            console.log("Auto sign-in with fingerprint:", userFingerprint);
             fetch(`${API_BASE_URL}/users/auto-sign-in`, {
                 method: 'POST', // Using POST method for sending data
                 headers: {
@@ -72,11 +92,14 @@ const Login = () => {
                         console.log(`Auto sign-in successful for: ${data.email}`);
                         // Handle the successful sign-in (e.g., redirect, set logged-in state)
                         setLoginEmail(data.email);
+                        setNotifyLoad(false);
                     } else {
+                        setNotifyLoad(false);
                         console.log('Fingerprint did not match any attendee or organiser');
                     }
                 })
                 .catch((error) => {
+                    setNotifyLoad(false);
                     console.error('Error during auto sign-in:', error);
             });
         }
@@ -95,6 +118,7 @@ const Login = () => {
           });
           if (!response.ok) {
             setLoginError("Event doesn't exist");
+            navigate("/event/"+event_id)
             throw new Error("Event doesn't exist");
           }
           const eventData = await response.json();
@@ -129,7 +153,7 @@ const Login = () => {
                 username: username,
                 event_id: event_id,
                 time_requested: new Date().toISOString(),
-                profile_pic: profileNum,
+                profile_pic: profileNum || 0,
             };
 
             // Send request to API
@@ -153,9 +177,10 @@ const Login = () => {
                     username: username,
                     event_id: event_id,
                     time_requested: new Date().toISOString(),
+                    profile_pic: profileNum
                 })
                 setLoginStep("pending"); // Go back to login step
-                // setAutoLogInEmail();
+                setAutoLogInEmail();
                 updateEventPage(event_id, "attendees");
             } else {
                 setLoginError("Request failed.");
@@ -193,7 +218,7 @@ const Login = () => {
 
     if (loginError) return <PageError error={"Something Went Wrong"} page={"Log In"} />;
 
-    if (loading) return <div class="loader"><p>Fetching To Dos</p></div>;
+    if (loading) return <div className="loader"><p>Logging In</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     if (loginStep === "enter-username") {
         return (
@@ -201,8 +226,10 @@ const Login = () => {
 
                 <div className="top-line">
                     <button className="back-button" onClick={() => {setLoginEmail(""); setLoginStep("login-form")}}>
-                        <img src="/svgs/back-arrow.svg" alt="Back" />
-                    </button>
+                        {theme === "dark" ? 
+                        <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
+                     <img src="/svgs/back-arrow.svg" alt="Back" />}
+                     </button>
                     <h1>Request To Join {event.title}</h1>
                 </div>
 
@@ -264,13 +291,19 @@ const Login = () => {
     }
 
     if (loginStep === "pending") {
+
+        console.log("requestData", requestData);
+
+        const profile = Profiles.find((profile) => profile.id === Number(requestData.profile_pic));
+
         return (
-            <div className="pending-form">
+            <div className="pending-form page-not-found page">
+                <img className="sad-cat" src={profile?.path} alt="Profile" />
                 <h1>Heya, {requestData.username.split(" ")[0]}</h1>
                 {requestData.status === "rejected" ? 
-                <p>Your request has been cancelled</p> :
-                <p>Your request to join {event.title} is pending</p>}
-                <button className = "small-button" onClick={() => { setLoginStep("login")}}>LogOut</button>
+                <h3>Your request has been cancelled</h3> :
+                <h3>Your request to join {event.title} is pending</h3>}
+                <button className = "small-button" onClick={() => { setLoginStep("login")}}>Back</button>
             </div>
         );
     }

@@ -22,7 +22,6 @@ const Home = () => {
         <button className="home-cta" onClick={handleCreateEventClick}>Create Event</button>
         <button className="home-cta" onClick={handleFindEventClick}>Find A Event</button>
       </div>
-
     </div>
   );
 };

@@ -7,6 +7,7 @@ import "../../styles/settings.css";
 import ProfileSelector from "../../components/ProfileSelector";
 import { useNotification } from "../../contexts/notification";
 import PageError from "../../components/PageError";
+import { useTheme } from "../../contexts/theme";
 
 const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -25,6 +26,7 @@ const Settings = () => {
     const {notify, setNotifyLoad} = useNotification();
     const [updating, setUpdating] = useState(false);
     const [eventUpdating, setEventUpdating] = useState(false);
+    const {theme} = useTheme();
 
     const [isEditing, setIsEditing] = useState({
         title: false,
@@ -165,6 +167,38 @@ const Settings = () => {
         setEditedEvent(initialEvent);
     }
 
+    const deleteEvent = async () => {
+
+        const isConfirmed = window.confirm("Are you sure you want to delete this event? This action cannot be undone.");
+    
+        if (!isConfirmed) {
+            return; // Stop the function if the user cancels
+        }
+    
+        try {
+            setNotifyLoad(true);
+            const response = await fetch(`${API_BASE_URL}/events/delete-event`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ event_id }),
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                notify("Event successfully deleted.");
+                navigate(`/`);
+            } else {
+                notify(data.message || "Failed to delete the event.");
+            }
+        } catch (error) {
+            console.error("Error deleting the event:", error);
+            notify("An error occurred while deleting the event.");
+        } finally {
+            setNotifyLoad(false);
+        }
+    };
+
     const migrateEvent = async () => {
         // Display a confirmation prompt
         const isConfirmed = window.confirm("Are you sure you want to migrate this event? This action cannot be undone.");
@@ -210,6 +244,38 @@ const Settings = () => {
             [field]: value,
         });
     }
+
+    const handleLeaveEvent = async () => {
+        // Display a confirmation prompt
+        const isConfirmed = window.confirm("Are you sure you want to leave this event? This action cannot be undone.");
+    
+        if (!isConfirmed) {
+            return; // Stop the function if the user cancels
+        }
+    
+        try {
+            setNotifyLoad(true);
+            const response = await fetch(`${API_BASE_URL}/users/leave-event`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ event_id, user_id }),
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                notify("Event successfully left.");
+                navigate(`/`);
+            } else {
+                notify(data.message || "Failed to leave the event.");
+            }
+        } catch (error) {
+            console.error("Error leaving event:", error);
+            notify("An error occurred while leaving the event.");
+        } finally {
+            setNotifyLoad(false);
+        }
+    };
 
     const handleSubmit = async () => {
 
@@ -285,18 +351,21 @@ const Settings = () => {
 
     if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Settings"} />;
 
-    if (loading) return <div class="loader"><p>Fetching Settings</p></div>;
+    if (loading) return <div className="loader"><p>Fetching Settings</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     return (
         <div className="settings">
             <div className="top-line">
                 <button className="back-button" onClick={() => { goEventPage(); }}>
-                    <img src="/svgs/back-arrow.svg" alt="Back" />
+                  {theme === "dark" ? 
+                    <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
+                  <img src="/svgs/back-arrow.svg" alt="Back" />}
                 </button>
                 <h2>Settings</h2>
             </div>
 
             <div className="section user-settings">
+                <h3>User Settings</h3>
                 {user_id && (
                     <div className="user-info">
                         <div className="one-line-input">
@@ -347,30 +416,36 @@ const Settings = () => {
                             <label>Profile Picture:</label>
                             <ProfileSelector index = {Number(editedUser?.profile_pic)} onSelect={(newIndex) => setEditedUser({ ...editedUser, profile_pic: newIndex })} />
                         </div>
-                        <div className="button-container">
-                            <button className="small-button" onClick={handleCancelEdit}     disabled={
-                                initialUser.firstName === editedUser.firstName &&
-                                initialUser.lastName === editedUser.lastName &&
-                                initialUser.email === editedUser.email &&
-                                initialUser.profile_pic === editedUser.profile_pic
-                            }>
-                                Cancel
-                            </button>
-                            <button  className="small-button" onClick={handleUserSubmit} disabled={
-                                updating ||
-                                (initialUser.firstName === editedUser.firstName &&
-                                initialUser.lastName === editedUser.lastName &&
-                                initialUser.email === editedUser.email &&
-                                initialUser.profile_pic === editedUser.profile_pic)
-                            }>
-                                Save Info
-                            </button>
+                        <div className="settings-buttons-user">
+                            {role != "organiser" ? (
+                            <button className="small-button leave-event" onClick={handleLeaveEvent}>Leave Event</button>) : <div></div>}
+                            <div className="button-container">
+                                <button className="small-button" onClick={handleCancelEdit}     disabled={
+                                    initialUser.firstName === editedUser.firstName &&
+                                    initialUser.lastName === editedUser.lastName &&
+                                    initialUser.email === editedUser.email &&
+                                    initialUser.profile_pic === editedUser.profile_pic
+                                }>
+                                    Cancel
+                                </button>
+                                <button  className="small-button" onClick={handleUserSubmit} disabled={
+                                    updating ||
+                                    (initialUser.firstName === editedUser.firstName &&
+                                    initialUser.lastName === editedUser.lastName &&
+                                    initialUser.email === editedUser.email &&
+                                    initialUser.profile_pic === editedUser.profile_pic)
+                                }>
+                                    Save Info
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
             </div>
-
+            
+            {role === "organiser" && (
             <div className="section event-settings">
+                <h3>Event Settings</h3>
                 {eventData && (
                     <div>
                         {/* Title */}
@@ -424,7 +499,10 @@ const Settings = () => {
                             />
                         </div>
                         <div className="settings-buttons-event">
-                            <button className="small-button" onClick={migrateEvent}>Migrate Event</button>
+                            <div className="button-container">
+                                <button className="small-button delete-event" onClick={deleteEvent}>Delete Event</button>
+                                <button className="small-button" onClick={migrateEvent}>Migrate Event</button>
+                            </div>
                             <div className="button-container">
                                 <button className="small-button" onClick={handleCancelEditEvent}     disabled={
                                     initialEvent.title === editedEvent.title &&
@@ -449,8 +527,7 @@ const Settings = () => {
                         </div>
                     </div>
                 )}
-            </div>
-
+            </div>)}
         </div>
     );
 };

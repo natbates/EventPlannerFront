@@ -13,6 +13,29 @@
     text-align: start;
 }
 
+.whats-new
+{
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 30px;
+}
+
+.whats-new h2
+{
+    margin: 0;
+    margin-bottom: 30px;
+}
+
+.whats-new ul
+{
+    padding-left: 20px;
+}
+
+.whats-new ul li
+{
+    margin-bottom: 20px;
+}
+
 .find-event-input
 {
     display: flex;
@@ -53,6 +76,7 @@
     .find-event-input
     {
         flex-direction: column;
+        gap: 20px;
     }
     .find-event h1
     {

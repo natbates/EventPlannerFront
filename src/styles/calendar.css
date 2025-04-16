@@ -23,7 +23,7 @@
     background-color: var(--primary-colour);
     color: var(--background-colour);
     padding: 10px;
-    margin: 0 5px;
+    margin-right: 15px;
     font-size: 1.2rem;
     border-radius: 0;
 }
@@ -61,23 +61,22 @@
 {
     border-top: none !important;
     flex: 0 0 !important;
-    min-height: 110px;
+    min-height: clamp(40px, 11.585vw, 110px);
     justify-content: center;
 }
 
 .rbc-toolbar .rbc-toolbar-label
 {
     text-align: end;
-    padding-right: 20px;
 }
 
 .rbc-day-bg
 {
     cursor: pointer;
     border: none !important;
-    outline: 3px solid black;
+    outline: 3px solid var(--primary-colour);
     outline-offset: 0px;
-    margin: 20px;
+    margin: 10px;
     background-clip: padding-box;
 }
 
@@ -148,7 +147,7 @@
 {
     transition: all 0.1s ease-in-out;
     outline-width: 6px;
-    outline-color: rgb(0, 0, 0) !important;
+    outline-color: var(--primary-colour) !important;
     transform: inherit;
     opacity: 1 !important;
 }
@@ -325,4 +324,270 @@
 {
     margin-top: 0px !important;
     justify-content: flex-end;
+}
+
+.shame-list-items
+{
+    display: flex;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.shame-list-items .profile
+{
+    gap: 15px !important;
+}
+
+.shame-info .created-at
+{
+    margin: 0 !important;
+    color: var(--accent-colour);
+}
+
+.shame-info
+{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 180px;
+}
+
+.shame-info strong
+{
+    overflow: hidden;
+    padding-bottom: 4px;
+    text-overflow: ellipsis;
+    width: fit-content;
+    max-width: 180px;
+}
+
+.shame-list h3
+{
+    margin: 0;
+}
+
+.rbc-button-link
+{
+    font-size: clamp(10px, 2.5vw, 24px);
+}
+
+.rbc-toolbar .rbc-toolbar-label
+{   
+    flex-grow: 1;
+}
+
+.shame-you
+{
+    border-bottom: 3px solid var(--accent-colour);
+    width: fit-content !important;
+    padding: 0px 2px ;
+    text-wrap: nowrap;
+    text-overflow: ellipsis !important;
+}
+
+.rbc-toolbar 
+{
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+}
+
+@media (max-width: 714px) {
+
+    .selected-date
+    {
+        outline-width: 4px !important;
+    }
+
+    .section.reminder
+    {
+        margin-top: 40px;
+    }
+
+    .reminder .date-selection
+    {
+        justify-content: flex-end;
+    }
+
+    .section.reminder .reminder-count
+    {
+        flex-grow: 0;
+        min-width: 100px;
+    }
+
+    .section.reminder 
+    {
+        gap: 10px;
+        flex-direction: column;
+    }
+
+    .section.reminder .button-container
+    {
+        margin-top: 20px;
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+
+    .section.reminder .button-container button
+    {
+        width: fit-content !important;
+        margin-top: 0px !important;
+        flex: 0 0 !important;
+    }
+
+    .rbc-calendar
+    {
+        padding: 0;
+    }
+
+    .rbc-month-row
+    {
+        min-height: clamp(45px, 11.585vw, 90px) !important;
+    }
+
+    .rbc-toolbar
+    {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .rbc-btn-group 
+    {
+        margin-right: auto;
+    }
+
+    .rbc-btn-group button
+    {
+        padding: 5px 5px;
+        font-size: 1rem !important;
+        margin-right: 5px;
+    }
+
+    .rbc-row-content
+    {
+        position: absolute;
+        left: 0px;
+        top: 0;
+        width: 100%;
+    }
+
+    .rbc-row-content .rbc-row
+    {
+        display: flex;
+        gap: 0px;
+    }
+
+    .rbc-button-link
+    {
+        font-size: clamp(12px, 3vw, 24px);
+    }
+
+    .rbc-day-bg
+    {
+        margin: 5;
+    }
+}
+
+.rbc-row-content {
+    pointer-events: none;
+}
+
+
+@media (max-width: 950px) {
+
+    .legend
+    {
+        flex-direction: column;
+        width: 100%;
+        gap: 5px;
+    }
+
+    .legend-item
+    {
+        flex-direction: row;
+    }
+
+    .your-calender-bottom
+    {
+        flex-direction: row;
+        gap: 10px;
+    }
+    .your-calender-bottom .button-container
+    {
+        margin-top: 0px !important;
+        justify-content: flex-end;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .your-calender-bottom .button-container button
+    {
+        width: fit-content;
+    }
+}
+
+@media (max-width: 850px) {
+
+    .shared-calender .button-container
+    {
+        justify-content: space-between;
+    }
+
+    .shared-calender .button-container button
+    {
+        flex: 1 1;
+    }
+
+}
+
+@media (max-width: 715px) {
+
+    .shared-calender .button-container .change-button
+    {
+       display: none;
+    }
+
+    .shared-calender .button-container
+    {
+        justify-content: flex-end;
+    }
+
+    .shared-calender .button-container button
+    {
+        width: fit-content !important;
+        flex: 0 0 !important;
+    }
+
+    .shame-list-items {
+        display: grid;
+        
+    }
+
+    .shame-list-items {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2 equal columns */
+        gap: 20px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .shame-list-items .profile {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    .shame-list-items .profile strong
+    {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
 }

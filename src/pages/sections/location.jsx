@@ -8,9 +8,11 @@ import L from "leaflet";
 import MapComponent from "../../components/Map";
 import { API_BASE_URL } from "../../components/App";
 import { useNotification } from "../../contexts/notification";
+import { useTheme } from "../../contexts/theme";
+import { useNavigate } from "react-router-dom";
 
 const Location = () => {
-    const { data: locationData, error, loading, event_id, refetch, goEventPage, setError } = useFetchEventData("location/fetch-location");
+    const { data: locationData, error, loading, event_id, refetch, goEventPage, setError, setLoading} = useFetchEventData("location/fetch-location");
     const { user_id, name, role } = useAuth();
     const { updateEventPage } = useHistory();
     const [location, setLocation] = useState(null); // State for storing fetched location
@@ -21,7 +23,18 @@ const Location = () => {
         country:  locationData?.location?.country || ""
     });
     const [initialLocation, setInitialLocation] = useState({});
-    const {notify, setNotifyLoad} = useNotification();
+    const {notify, setNotifyLoad, notifyLoad} = useNotification();
+    const {theme} = useTheme();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        setManualLocation({
+            address: locationData?.location?.address || "",
+            city:  locationData?.location?.city || "",
+            postcode:  locationData?.location?.postcode || "",
+            country:  locationData?.location?.country || ""
+        });}, 
+    [locationData]);
 
     const cancelManualInput = () => {
         // Reset manualLocation to initial values
@@ -41,11 +54,8 @@ const Location = () => {
             const coords = await geocodeAddress({ location: manualLocation });
     
             if (!coords) {
-                console.log("!!!!!!!!!!!!!!! No coordinates found for the provided address.");
+                console.log("No coordinates found for the provided address.");
             }
-
-            console.log("THIS Manual Location:", coords);
-
             // Check if coords is available, otherwise set lat and lon to 0
             const newLocation = {
                 ...manualLocation,
@@ -66,8 +76,6 @@ const Location = () => {
         }
     };
 
-    
-
     const geocodeAddress = async (locationData) => {
         const { address, city, postcode, country } = locationData.location;
     
@@ -77,11 +85,8 @@ const Location = () => {
             notify("Please provide a valid address before searching.");
             return null;
         }
-
         setNotifyLoad(true);
-    
-        console.log("Geocoding Address:", fullAddress);
-    
+        
         const apiKey = "f9dc74471bf04fdda78a121a06481d0c"; // Replace with your OpenCage API key
         const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(fullAddress)}&key=${apiKey}`;
     
@@ -222,7 +227,7 @@ const Location = () => {
 
 
     if (error) return <PageError error={error?.message || "Something Went Wrong"} page={"Location"} />;
-    if (loading) return <div className="loader"><p>Fetching Location</p></div>;
+    if (loading) return <div className="loader"><p>Fetching Location</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     const isLocationEmpty = Object.entries(manualLocation)
         .filter(([key]) => key !== 'lat' && key !== 'lon')
@@ -233,7 +238,9 @@ const Location = () => {
         <div className="location">
             <div className="top-line">
                 <button className="back-button" onClick={() => { goEventPage(); }}>
-                    <img src="/svgs/back-arrow.svg" alt="Back" />
+                    {theme === "dark" ? 
+                        <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
+                    <img src="/svgs/back-arrow.svg" alt="Back" />}
                 </button>
                 <h2>Location</h2>
             </div>
@@ -294,10 +301,11 @@ const Location = () => {
                         />
                     </label>
                     
-                    <button type="button" onClick={cancelManualInput}>Cancel</button>
-                    <button type="button" onClick={FindPlace}>Find</button>
-                    <button type="button" onClick={submitManualLocation} disabled={isLocationEmpty || JSON.stringify(initialLocation) === JSON.stringify(manualLocation)}>Submit</button>
-
+                    <div className="button-container">
+                        <button className="small-button" type="button" onClick={cancelManualInput}>Cancel</button>
+                        <button className="small-button" type="button" onClick={FindPlace}>Find</button>
+                        <button className="small-button" type="button" onClick={submitManualLocation} disabled={isLocationEmpty || JSON.stringify(initialLocation) === JSON.stringify(manualLocation)}>Submit</button>
+                    </div>
                     </div>
                 </form>
             </div>

@@ -10,23 +10,23 @@ import { useHistory } from "../contexts/history";
 import { formatDate } from "../components/Calender";
 import moment from "moment";
 import { Profiles } from "../components/ProfileSelector";
+import { useTheme } from "../contexts/theme";
+import Countdown from 'react-countdown';
+
+
 
 const EventPage = () => {
   const event_id = useParams().event_id;
   const [event, setEvent] = useState(null);
+  const {theme} = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastOpened, setLastOpened] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [availabilityEmpty, setAvailabilityEmpty] = useState(false);
-  const [countdown, setCountdown] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  });
+
   const navigate = useNavigate();
-  const { notify } = useNotification();
+  const { notify, setNotifyLoad } = useNotification();
   const { signOut, role, authed, user_id, profile_pic} = useAuth();
   const {fetchLastOpened, fetchLastUpdated, fetchEventStatus} = useHistory();
 
@@ -41,36 +41,59 @@ const EventPage = () => {
     { path: "/settings", label: "Settings", img: "/svgs/settings.svg"},
   ];
 
-  useEffect(() => {
-    if (event && event.chosen_dates && event.chosen_dates.length > 0) {
-      // Sort the chosen dates and get the earliest date
-      const sortedChosenDates = event.chosen_dates.map(date => moment(date)).sort((a, b) => a - b);
-      const earliestChosenDate = sortedChosenDates[0];
-  
-      const interval = setInterval(() => {
-        const now = moment();
-        const duration = moment.duration(earliestChosenDate.diff(now));
-  
-        if (duration.asSeconds() <= 0) {
-          clearInterval(interval);
-          setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        } else {
-          setCountdown({
-            days: duration.days(),
-            hours: duration.hours(),
-            minutes: duration.minutes(),
-            seconds: duration.seconds()
-          });
-        }
-      }, 1000);
-  
-      return () => clearInterval(interval);
+  const [attendeeDetails, setAttendeeDetails] = useState([]);
+  const [isComing, setIsComing] = useState(null);
+
+  const fetchUserDetails = async (userId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${userId}`);
+      if (!res.ok) throw new Error("Failed to fetch user");
+      return await res.json(); // { name, profile_pic }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      return { name: "Unknown", profile_pic: "/default-profile.png" };
     }
+  };
+
+  useEffect(() => {
+    const fetchUserComingStatus = async () => {
+      const res = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${user_id}`);
+      const data = await res.json();
+      setIsComing(data.is_coming);
+    };
+  
+    if (user_id) fetchUserComingStatus();
+  }, [user_id]);
+
+    const fetchAttendees = async () => {
+      if (!event) return;
+    
+      let details = [];
+    
+      if (Array.isArray(event.attendees) && event.attendees.length > 0) {
+        const attendeeDetails = await Promise.all(
+          event.attendees.map((userId) => fetchUserDetails(userId))
+        );
+        details = attendeeDetails;
+      }
+    
+      if (event.organiser_id) {
+        const organiserDetails = await fetchUserDetails(event.organiser_id);
+        details.unshift(organiserDetails); // Organiser first
+      }
+    
+      setAttendeeDetails(details);
+    };
+  
+
+  useEffect(() => {
+    fetchAttendees();
   }, [event]);
   
 
   const reopenEvent = async () => {
     try {
+      setNotifyLoad(true);
       const response = await fetch(`${API_BASE_URL}/events/reopen-event`, {
         method: "POST",
         headers: {
@@ -83,10 +106,13 @@ const EventPage = () => {
         throw new Error("Failed to reopen event");
       }
 
-      fetchEventData();
-      fetchEventStatus(event_id);
+      await fetchEventData();
+      await fetchEventStatus(event_id);
     } catch (err) {
       console.error("Error reopening event:", err);
+      notify("Failed to reopen event");
+    } finally {
+      setNotifyLoad(false);
     }
   };
 
@@ -118,8 +144,24 @@ const EventPage = () => {
       notify(err.message);
     } finally {
       setLoading(false);
+      setNotifyLoad(false);
     }
     
+  };
+
+  const renderer = ({ days, hours, minutes, seconds, completed }) => {
+    if (completed) {
+      return <span>Event started!</span>;
+    } else {
+      return (
+        <span>
+          <strong>{days}</strong> days{" "}
+          <strong>{hours}</strong> hours{" "}
+          <strong>{minutes}</strong> minutes{" "}
+          <strong>{seconds}</strong> seconds
+        </span>
+      );
+    }
   };
 
   const formatChosenDates = (chosenDatesInput) => {
@@ -148,7 +190,6 @@ const EventPage = () => {
     return `${formatDate(earliestDate)} to ${formatDate(latestDate)}`;
   };
   
-
   const fetchUserAvailability = async () => {
     if (user_id)
     {
@@ -168,14 +209,59 @@ const EventPage = () => {
     
         // Check if availability is empty
         if (!availabilityData || Object.keys(availabilityData).length === 0) {
-          setAvailabilityEmpty(true); // Mark availability as empty
+          setAvailabilityEmpty(true);
+  
+          // Check last reminded time from localStorage
+          const reminderKey = `availability-reminder-${user_id}`;
+          const lastReminded = localStorage.getItem(reminderKey);
+          const now = new Date().getTime();
+  
+          const eightHours = 8 * 60 * 60 * 1000;
+  
+          if (!lastReminded || now - parseInt(lastReminded, 10) > eightHours) {
+            notify("You have not entered your calendar availability.");
+            localStorage.setItem(reminderKey, now.toString()); // Update timestamp
+          }
+  
         } else {
-          setAvailabilityEmpty(false); // Availability exists
+          setAvailabilityEmpty(false);
         }
     
       } catch (err) {
         console.error("Error fetching availability:", err);
+      } finally {
+        setLoading(false);
       }
+    }
+  };
+
+  const handleToggleIsComing = async () => {
+    
+    let newStatus;
+    if (isComing === null) newStatus = true;
+    else if (isComing === true) newStatus = false;
+    else newStatus = null;
+  
+    try {
+      setNotifyLoad(true);
+      const response = await fetch(`${API_BASE_URL}/users/set-is-coming`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_id, is_coming: newStatus }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to update status");
+  
+      setIsComing(newStatus);
+      await fetchAttendees();
+    } catch (error) {
+      console.error("Error toggling is_coming:", error);
+      notify("Failed to update RSVP status");
+    } finally
+    {
+      setNotifyLoad(false);
     }
   };
 
@@ -186,24 +272,29 @@ const EventPage = () => {
     
   }, [authed, user_id]);
 
-  if (!authed && error === null && !loading) {
-    console.log("Redirecting as event exists and not logged in FROM EVENT");
-    navigate(`/event/${event_id}/login`);
-  }
+  useEffect(() => {
+    if (!authed && error === null && !loading) {
+      console.log("Redirecting as event exists and not logged in FROM EVENT");
+      navigate(`/event/${event_id}/login`);
+    }
+  }, [authed, error, loading, event_id, navigate]);
+  
 
   if (error) {
     return (
       <div className="page-not-found page">
-        <img className = "sad-cat" src="/svgs/sad-cat.svg" alt="Servers Down" />
+        {theme === "light" ?
+        <img className = "sad-cat" src="/svgs/cats/sad-cat.svg" alt="Servers Down" /> :
+        <img className = "sad-cat" src="/svgs/cats/sad-cat-white.svg" alt="Servers Down" />}
         <h1>{error}</h1>
-        <h3>Are you sure that's the right event ID?</h3>
+        <h3>Are you sure that's the right event ID? They can be changed!</h3>
         <button className = "small-button" onClick={() => navigate("/find-event")}>Try Again</button>
       </div>
     );
   }
   
 
-  if (loading) return <div class="loader"><p>Fetching Event</p></div>;
+  if (loading) return <div className="loader"><p>Fetching Event</p></div>;
 
   if (authed && event && event.status === "canceled") {
     const profile = Profiles.find((profile) => profile.id === Number(profile_pic));
@@ -217,7 +308,9 @@ const EventPage = () => {
     );
   }
 
+
   if (authed && event && event.status === "confirmed") {
+    
     const profile = Profiles.find((profile) => profile.id === Number(profile_pic));
 
     let formattedChosenDates;
@@ -234,8 +327,35 @@ const EventPage = () => {
         <img className="sad-cat" src={profile.path} alt="Confirmed" />
         <h1>{event.title} is Confirmed!</h1>
         <p>{formattedChosenDates} at {address}, {city}, {postcode}, {country}</p>
-        <strong> {countdown.days} days {countdown.hours} hours {countdown.minutes} minutes {countdown.seconds} seconds</strong>
-        {role === "organiser" && <button className="small-button" onClick={reopenEvent}>Reopen</button>}
+        {attendeeDetails.length > 0 && (
+          <div className="attendee-list">
+            {attendeeDetails.map((attendee, index) => {
+              console.log("Attendee details:", attendee);
+              const profile = Profiles.find((profile) => profile.id === Number(attendee.profile_pic)); // Assuming 'id' links attendees to profiles
+              return (
+                <div key={index} className="profile">
+                  <img src={profile?.path} alt={profile?.name || "Unknown"} className="profile-pic" />
+                  <p className={`${attendee.user_id === user_id ? "you underline" : ""}`}>{attendee?.name || "Unknown"}</p>
+                  <strong className="is_coming">
+                      {attendee.is_coming === 1 && "✔"}
+                      {attendee.is_coming === 0 && "✖"}
+                      {attendee.is_coming === null && "?"}
+                    </strong>
+                </div>
+              );
+            })
+            }
+          </div>
+        )}
+        <strong className="count-down"><Countdown date={moment(event.chosen_dates[0]).toDate()} renderer={renderer}/></strong>
+        <div className="button-container confirm-page-buttons">
+          <button className="small-button" onClick={handleToggleIsComing}>
+            {(isComing === null || isComing === undefined) && "I'm Coming!"}
+            {(isComing === true || isComing === 1) && "Cant Make It"}
+            {(isComing === false || isComing === 0) && "Undecided"}
+          </button>        
+          {role === "organiser" && <button className="small-button" onClick={reopenEvent}>Reopen</button>}
+        </div>
       </div>
     );
   }
@@ -253,6 +373,7 @@ const EventPage = () => {
         <>
       
           <div className="panels">
+            <div className="event-panels-mask">
             {routes.map(({ path, label, img }) => {
               // Filter lastOpened and lastUpdated for the current path
               const filteredLastOpened = lastOpened
@@ -272,14 +393,10 @@ const EventPage = () => {
                 <div className = "event-panel" key={path}>
                   <button className = "event-panel-button" onClick={() => navigate(`${location.pathname}${path}`)}>
                     <span>
-                      <img src = {img} alt = {path}></img>
+                      <img className = {theme === "dark" ? "light-up" : ""} src = {img} alt = {path}></img>
                       <h2>{label}</h2>
                     </span>
-                    {path === "/your-calendar" && availabilityEmpty && (
-                      <div className="warning">
-                        <img src = "/svgs/warning.svg"></img>
-                        <p>You have not entered your calender availability.</p>
-                    </div>)}
+
                     {showNotification && <div className="notifcation-circle">!</div>}
                   </button>
 
@@ -311,6 +428,7 @@ const EventPage = () => {
               </div>
               ) : <div></div>}
           </div> */}
+          </div>
         </>
       )}
     </div>

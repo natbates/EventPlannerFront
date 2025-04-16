@@ -39,6 +39,13 @@
     animation: slide-in 0.5s ease-in-out forwards;
     animation-delay: 0.5s;
     opacity: 0;
+    z-index: -10;
+    width: 10rem;
+}
+
+.cat-right-bottom
+{
+    display: none;
 }
 
 @keyframes slide-in
@@ -87,7 +94,7 @@
 }
 
 
-.cat-bottom {
+.cat-left {
     position: fixed;
     top: 550px;
     left: -148px;
@@ -95,6 +102,7 @@
     transform: rotate(90deg);
     animation: slide-up 0.5s ease-in-out forwards;
     animation-delay: 0.2s;
+    z-index: -10;
 }
 
 @keyframes slide-up {
@@ -123,11 +131,16 @@
 
     .home-page h1
     {
-        font-size: 3rem;
+        font-size: 3.4rem;
     }
     .home-cta
     {
         font-size: 0.8rem !important;
+    }
+
+    .home-page
+    {
+        margin-top: 30px;
     }
 }
 

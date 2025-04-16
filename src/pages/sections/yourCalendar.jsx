@@ -6,7 +6,8 @@ import MyCalendar from "../../components/Calender";
 import { useHistory } from "../../contexts/history";
 import PageError from "../../components/PageError";
 import { useNotification } from "../../contexts/notification";
-
+import { useTheme } from "../../contexts/theme";
+import { useNavigate } from "react-router-dom";
 
 const YourCalendar = () => {
     const { data: calenderData, error, loading, event_id, refetch, goEventPage } = useFetchEventData("calendar/fetch-calendar");
@@ -16,6 +17,8 @@ const YourCalendar = () => {
     const { notify, setNotifyLoad } = useNotification();
     const [secondaryloading, setSecondaryLoading] = useState(true);
     const [pendingAvailability, setPendingAvailability] = useState(false);
+    const {theme} = useTheme();
+    const navigate = useNavigate();
 
     const updateAvailability = async () => {
       setNotifyLoad(true);
@@ -58,6 +61,8 @@ const YourCalendar = () => {
     };    
 
     const processDate = async (date) => {
+
+        console.log("Processing date:", date);
         // Get the current status or default to "not available"
         const currentStatus = (pendingAvailability && pendingAvailability[date]) ?? null;
 
@@ -81,12 +86,6 @@ const YourCalendar = () => {
 
         setPendingAvailability((prev) => {
           const updated = { ...prev, [date]: newStatus };
-      
-          // Check if the new status is the same as the current status in userAvailability
-          if (newStatus === (userAvailability?.[date] ?? null)) {
-              // If no actual change, remove the entry from the updated object
-              delete updated[date];
-          }
       
           return { ...updated }; // Return the updated state
       });
@@ -155,14 +154,16 @@ const YourCalendar = () => {
 
     if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Your Calender"} />;
 
-    if (loading || secondaryloading) return <div class="loader"><p>Fetching Your Calender</p></div>;
+    if (loading || secondaryloading) return <div className="loader"><p>Fetching Your Calender</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     return (
         <div className="your-calendar">
             <div className="top-line">
               <button className="back-button" onClick={() => { goEventPage(); }}>
-                <img src="/svgs/back-arrow.svg" alt="Back" />
-              </button>
+                    {theme === "dark" ? 
+                      <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
+                    <img src="/svgs/back-arrow.svg" alt="Back" />}
+                </button>
               <h2>Your Calender</h2>
             </div>
             <MyCalendar data={calenderData} processDate={processDate} userAvailability={pendingAvailability} />  
@@ -191,8 +192,11 @@ const YourCalendar = () => {
                 <button className = "small-button" onClick={clearAvailability}>
                     Clear Availability
                 </button>
+                <button disabled={JSON.stringify(userAvailability) === JSON.stringify(pendingAvailability)} className="small-button" onClick={() => { setPendingAvailability(userAvailability); }}>
+                    Cancel
+                </button>
                 <button disabled={JSON.stringify(userAvailability) === JSON.stringify(pendingAvailability)} className="small-button" onClick={() => { updateAvailability(pendingAvailability); }}>
-                    Save Changes
+                    Save
                 </button>
               </div>
             </div>

@@ -1,40 +1,49 @@
 import "../styles/footer.css";
 import { Link } from "react-router-dom";
+import { useTheme } from "../contexts/theme";
 
 const Footer = () => {
+
+  const { theme } = useTheme(); 
+
+  // Define the icon sources based on the theme
+  const githubIcon = theme === "dark" ? "/svgs/socials/github-white.svg" : "/svgs/socials/github.svg";
+  const discordIcon = theme === "dark" ? "/svgs/socials/discord-white.svg" : "/svgs/socials/discord.svg";
+  const twitterIcon = theme === "dark" ? "/svgs/socials/twitter-white.svg" : "/svgs/socials/twitter.svg";
+
   return (
     <div className="footer-container">
       <footer className="footer">
         <div className="social-icons">
           <a
-            href="https://github.com/your_github_profile"  // Replace with your GitHub URL
+            href="https://github.com/natbates"  // Replace with your GitHub URL
             target="_blank"
             rel="noopener noreferrer"
           >
             <img
-              src="/svgs/socials/github.svg"
+              src={githubIcon}
               alt="Github"
               className="social-icon"
             />
           </a>
           <a
-            href="https://discord.gg/your_discord_invite"  // Replace with your Discord invite link
+            href="https://discord.gg/VmSqHaXtaQ"  // Replace with your Discord invite link
             target="_blank"
             rel="noopener noreferrer"
           >
             <img
-              src="/svgs/socials/discord.svg"
+              src={discordIcon}
               alt="Discord"
               className="social-icon"
             />
           </a>
           <a
-            href="https://twitter.com/your_twitter_handle"  // Replace with your Twitter URL
+            href="https://x.com/NathanBates04"  // Replace with your Twitter URL
             target="_blank"
             rel="noopener noreferrer"
           >
             <img
-              src="/svgs/socials/twitter.svg"
+              src={twitterIcon}
               alt="Twitter"
               className="social-icon"
             />

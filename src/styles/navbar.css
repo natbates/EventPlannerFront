@@ -22,12 +22,19 @@
     padding: 0;
     transition: transform 0.3s ease;
     position: relative;
+    border-radius: 50%;
+}
+
+.home-logo:hover
+{
+    transform: scale(1.05);
 }
 
 .nav-item.active
 {
-    outline: 3px solid var(--accent-colour);
+    outline: 4px solid var(--accent-colour);
     border-radius: 50%;
+    outline-offset: -3px;
 }
 
 .nav-item:hover:not(.active) {
@@ -37,6 +44,13 @@
 .nav-item.active:hover{
     cursor:not-allowed;
 }
+
+.light-up
+{
+    background-color: white;
+}
+
+
 .nav-icon {
     width: 40px;
     height: 40px;
@@ -44,19 +58,21 @@
 }
 
 @media (max-width: 650px) {
-    .event-links{
-        display: none;
+    .nav-item
+    {
+        animation-delay: 0s !important;
+        animation: none !important;
+        opacity: 1 !important;
     }
-    
 }
 
 .nav-item
 {
     opacity: 0;
-    animation: fly-down 1s ease-out, opacity-change 1s forwards;
+    animation: fly-down-this 1s ease-out, opacity-change 1s forwards;
 }
 
-@keyframes fly-down {
+@keyframes fly-down-this {
     0%
     {
         transform: translateY(-135px);
@@ -81,4 +97,133 @@
         opacity: 1;
     }
     
+}
+
+.close-mobile-nav
+{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    color: var(--primary-colour);
+}
+
+/* Burger Menu */
+.burger-menu {
+    display: none;
+  }
+  
+  /* Hide desktop nav on mobile */
+  .desktop-only {
+    display: flex;
+  }
+  
+  @media (max-width: 754px) {
+    .burger-menu {
+      display: block;
+    }
+
+    .nav-bar{
+        transition: all 0.3s ease-in-out;
+        padding-top: 20px;
+    }
+  
+    .desktop-only {
+      display: none;
+    }
+  
+    .mobile-nav {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      background-color: var(--background-colour);
+      border: 2px solid var(--primary-colour);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      gap: 10px;
+      z-index: 15;
+      padding-top: 30px;
+      animation: fly-left 0.2s ease-in-out forwards;
+    }
+
+    .mobile-nav h2
+    {
+        font-size: 2rem;
+        margin-top: 0;
+        margin-left: 10px;
+        color: var(--primary-colour);
+    }
+  
+    .mobile-nav-item {
+      background: none;
+      border: none;
+      color: var(--primary-colour);
+      font-size: 1.1rem;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .mobile-nav-item .nav-icon
+    {
+        border-radius: 50%;
+    }
+
+    .mobile-nav-item .nav-icon.active
+    {
+        background-color: var(--accent-colour) !important;
+    }
+  
+    .mobile-nav-item:hover {
+      background-color: var(--primary-colour);
+      color: white;
+      border-radius: 5px;
+    }
+  }
+  
+@keyframes fly-left {
+    0%
+    {
+        transform: translateX(-100%);
+    }
+    100%
+    {
+        transform: translateX(0);
+    }
+    
+}
+
+.tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    background-color: var(--accent-colour);
+    text-align: center;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    color: var(--primary-colour);
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip-wrapper:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
 }

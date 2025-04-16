@@ -42,3 +42,31 @@
 .thank-you-message {
     text-align: center;
 }
+
+
+@media (max-width: 714px) {
+    .contact h1 {
+        font-size: 3rem;
+    }
+    .contact-form {
+        padding-top: 0;
+    }
+    .contact-buttons {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .contact .one-line-input {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .contact .contact-buttons
+    {
+        flex-direction: row;
+        gap: 10px;
+        justify-content: flex-start;
+        align-items: flex-start;
+        margin-left: 0px;
+    }
+}

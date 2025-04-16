@@ -9,6 +9,7 @@ const MapComponent = ({ location, setLocation}) => {
   const markerRef = useRef(null); // Add this at the top, next to mapRef
 
   useEffect(() => {
+    
     if (
       mapContainerRef.current &&
       !mapRef.current &&

@@ -52,7 +52,7 @@ const CreateEvent = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const navigate = useNavigate();
   const { createUser } = useAuth();
-  const { notify, setNotifyLoad} = useNotification();
+  const { notify, setNotifyLoad, showFavouritePopup} = useNotification();
   const [error, setError] = useState(null);
   const [profileNum, setProfileNum] = useState(() => {
     return Math.floor(Math.random() * Profiles.length);
@@ -209,7 +209,11 @@ const CreateEvent = () => {
       if (!response.ok) throw new Error((await response.json()).message || "Failed to create event");
 
       const data = await response.json();
+      localStorage.removeItem('createEventData');
       navigate(`/event/${data.event_id}`);
+      showFavouritePopup();
+      notify("Event created successfully!");
+      localStorage.removeItem('createEventData');
     } catch (err) {
       setError("Error creating event: " + err.message);
       notify("Error: " + err.message);
@@ -223,21 +227,21 @@ const CreateEvent = () => {
       <h1>Create Event</h1>
       {validationErrors.dateRange && <div className="error-message">{validationErrors.dateRange}</div>}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="section">
 
         <section className="create-section">
           <div className="one-line-input">
             <div>
               <label>First Name:</label>
-              <input placeholder = "Your First Name..." type="text" name="firstName" value={formData.firstName} onChange={handleChange} />
+              <input required placeholder = "Your First Name..." type="text" name="firstName" value={formData.firstName} onChange={handleChange} />
             </div>
             <div>
               <label>Last Name:</label>
-              <input placeholder = "Your Last Name..." type="text" name="lastName" value={formData.lastName} onChange={handleChange} />
+              <input required placeholder = "Your Last Name..." type="text" name="lastName" value={formData.lastName} onChange={handleChange} />
             </div>
           </div>
           <label>Email:</label>
-          <input placeholder = "Your Email..." type="email" name="email" value={formData.email} onChange={handleChange} />
+          <input required placeholder = "Your Email..." type="email" name="email" value={formData.email} onChange={handleChange} />
 
           <label>Profile Picture:</label>
           <ProfileSelector index={profileNum} onSelect={(newIndex) => setProfileNum(newIndex)} />
@@ -267,8 +271,8 @@ const CreateEvent = () => {
 
           <div className="one-line-input">
             <div>
-              <label>Address:</label>
-              <input placeholder="Address..." required type="text" name="location.address" value={formData.location.address} onChange={handleChange} />
+              <label>Event Address:</label>
+              <input placeholder="Event Address..." required type="text" name="location.address" value={formData.location.address} onChange={handleChange} />
             </div>
             <div className="duration">
               <label>Duration (Days):</label>
@@ -277,18 +281,18 @@ const CreateEvent = () => {
           </div>
           <div className="one-line-input">
             <div>
-              <label>City:</label>
-              <input placeholder="City..." required type="text" name="location.city" value={formData.location.city} onChange={handleChange} />
+              <label>Event City:</label>
+              <input placeholder="Event City..." required type="text" name="location.city" value={formData.location.city} onChange={handleChange} />
             </div>
 
             <div>
-              <label>Postcode:</label>
-              <input placeholder="Post Code..."required type="text" name="location.postcode" value={formData.location.postcode} onChange={handleChange} />
+              <label>Event Postcode:</label>
+              <input placeholder="Event Post Code..."required type="text" name="location.postcode" value={formData.location.postcode} onChange={handleChange} />
             </div>
           </div>
           <div className="one-line-bottom">
             <div style={{ flex: 1 }}>
-            <label>Country:</label>
+            <label>Event Country:</label>
             <select
               name="location.country"
               value={formData.location.country}

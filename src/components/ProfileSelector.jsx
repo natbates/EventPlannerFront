@@ -10,12 +10,10 @@ export const Profiles = [
     { name: "Bear", id: 5, path: "/svgs/animals/bear.svg" },
     { name: "Chicken", id: 6, path: "/svgs/animals/chicken.svg" },
     { name: "Fluffy Cat", id: 7, path: "/svgs/animals/fluffy.svg" },
-    { name: "Monkey", id: 8, path: "/svgs/animals/monkey.svg" },
-    { name: "Polar Bear", id: 9, path: "/svgs/animals/polar-bear.svg" },
-    { name: "Rabbit", id: 10, path: "/svgs/animals/rabbit.svg" },
-    { name: "Rat", id: 11, path: "/svgs/animals/rat.svg" },
-    { name: "Squid", id: 12, path: "/svgs/animals/squid.svg" },
-    { name: "Wolf", id: 13, path: "/svgs/animals/wolf.svg" },
+    { name: "Polar Bear", id: 8, path: "/svgs/animals/polar-bear.svg" },
+    { name: "Rabbit", id: 9, path: "/svgs/animals/rabbit.svg" },
+    { name: "Rat", id: 10, path: "/svgs/animals/rat.svg" },
+    { name: "Wolf", id: 11, path: "/svgs/animals/wolf.svg" },
 
 ];
 

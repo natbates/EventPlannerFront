@@ -16,7 +16,8 @@ const NavBar = () => {
 
     const [lastOpened, setLastOpened] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
-
+    const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+    
     const [isOnHomeRoutes, setIsOnHomeRoutes] = useState(false);
     const [isOnEventHomePage, setIsOnEventHomePage] = useState(false);
     const [isOnLoginPage, setIsOnLoginPage] = useState(false);
@@ -84,6 +85,17 @@ const NavBar = () => {
         }
     };
 
+    const handleSignOut = () => {
+        const confirmSignOut = window.confirm("Are you sure you want to sign out?");
+        if (confirmSignOut) {
+            signOut(event_id);
+        }
+    };
+
+    const toggleMobileNav = () => {
+        setIsMobileNavOpen((prev) => !prev);
+      };
+
     const handleHomeNavigation = (path) => {
         navigate(`${path}`);
     }
@@ -104,82 +116,172 @@ const NavBar = () => {
     return (
         <nav className="nav-bar">
             <Link to="/">
-                <img className="nav-icon" src="/svgs/logo.svg" alt="Logo" />
+                {theme === "dark" ? 
+                <img className="nav-icon home-logo" src="/svgs/logo-white.svg" alt="Logo" /> : 
+                <img className="nav-icon home-logo" src="/svgs/logo.svg" alt="Logo" /> }
             </Link>
 
             {/* Show home routes if on any home-related page */}
             {isOnHomeRoutes && (
                 <div className="nav-links home-links">
                     {homeRoutes.map(({ path, label, img }, index) => (
-                        <button
-                            key={path}
-                            className={`nav-item ${location.pathname === path ? "active" : ""}`}
-                            onClick={() => handleHomeNavigation(path)}
-                            style={{ animationDelay: `${index * 0.03}s` }}
-
-                        >
-                            <img src={img} alt={label} className="nav-icon" />
-                        </button>
+                        <div className="tooltip-wrapper" key={path}>
+                            <button
+                                className={`nav-item ${theme === "dark" ? "light-up" : ""} ${location.pathname === path ? "active" : ""}`}
+                                onClick={() => handleHomeNavigation(path)}
+                                style={{ animationDelay: `${index * 0.03}s` }}
+                            >
+                                <img src={img} alt={label} className="nav-icon" />
+                            </button>
+                            <span className="tooltip-text">{label}</span>
+                        </div>
                     ))}
-                    <button
-                        className= "nav-item"
-                        onClick={() => toggleTheme()}
-                        style={{ animationDelay: `${4 * 0.03}s` }}
+
+                    <div className="tooltip-wrapper">
+                        <button
+                            className={`nav-item ${theme === "dark" ? "light-up" : ""}`}
+                            onClick={() => toggleTheme()}
+                            style={{ animationDelay: `${4 * 0.03}s` }}
                         >
-                        <img src="/svgs/theme.svg" alt="comments" className="nav-icon" />
-                    </button>    
+                            {theme === "light" ? 
+                                <img src="/svgs/lightmode.svg" alt="light mode" className="nav-icon" /> :
+                                <img src="/svgs/darkmode.svg" alt="dark mode" className="nav-icon" />}
+                        </button>
+                        <span className="tooltip-text">{theme === "light" ? "Light Mode" : "Dark Mode"}</span>
+                    </div>
                 </div>
             )}
 
+
             {isOnEventHomePage && authed && eventStatus !== "confirmed" && eventStatus !== "canceled" && (
-            <div className="nav-links">
-                <button
-                    className= "nav-item"
-                    onClick={() => signOut()}
-                    style={{ animationDelay: `${1 * 0.01}s` }}
-                >
-                    <img src="/svgs/logout.svg" alt="sign out" className="nav-icon" />
-                </button>   
-                <button
-                    className= "nav-item"
-                    onClick={() => navigate("/event/" + event_id + "/comments")}
-                    style={{ animationDelay: `${2 * 0.01}s` }}
-                >
-                    <img src="/svgs/comments.svg" alt="comments" className="nav-icon" />
-                    {showCommentNotification && <div className="notifcation-circle-comment"></div>}
-                </button>
-                <button
-                    className= "nav-item"
-                    onClick={() => toggleTheme()}
-                    style={{ animationDelay: `${3 * 0.01}s` }}
-                >
-                    <img src="/svgs/theme.svg" alt="comments" className="nav-icon" />
-                </button>      
-            </div>         
+                <div className="nav-links">
+                    <div className="tooltip-wrapper">
+                        <button
+                            className={`nav-item ${theme === "dark" ? "light-up" : ""}`}
+                            onClick={() => navigate("/event/" + event_id + "/comments")}
+                            style={{ animationDelay: `${1 * 0.01}s` }}
+                        >
+                            <img src="/svgs/comments.svg" alt="comments" className="nav-icon" />
+                            {showCommentNotification && <div className="notifcation-circle-comment"></div>}
+                        </button>
+                        <span className="tooltip-text">Comments</span>
+                    </div>
+
+                    <div className="tooltip-wrapper">
+                        <button
+                            className={`nav-item ${theme === "dark" ? "light-up" : ""}`}
+                            onClick={() => toggleTheme()}
+                            style={{ animationDelay: `${2 * 0.03}s` }}
+                        >
+                            {theme === "light" ? (
+                                <img src="/svgs/lightmode.svg" alt="light mode" className="nav-icon" />
+                            ) : (
+                                <img src="/svgs/darkmode.svg" alt="dark mode" className="nav-icon" />
+                            )}
+                        </button>
+                        <span className="tooltip-text">{theme === "light" ? "Light Mode" : "Dark Mode"}</span>
+                    </div>
+
+                    <div className="tooltip-wrapper">
+                        <button
+                            className={`nav-item ${theme === "dark" ? "light-up" : ""}`}
+                            onClick={() => handleSignOut()}
+                            style={{ animationDelay: `${3 * 0.05}s` }}
+                        >
+                            <img src="/svgs/logout.svg" alt="sign out" className="nav-icon" />
+                        </button>
+                        <span className="tooltip-text">Sign Out</span>
+                    </div>
+                </div>
             )}
 
             {/* Show event routes if NOT on event home page */}
             {!isOnEventHomePage && event_id && !isOnHomeRoutes && !isOnLoginPage && (
-                <div className="nav-links event-links">
-                    {eventRoutes.map(({ path, label, img }, index) => {
-                        const isCommentsRoute = path === "/comments";
-                        const showNotification = isCommentsRoute && showCommentNotification;
-                        
-                        return (
-                            <button
-                                key={path}
-                                className={`nav-item ${location.pathname.includes(path) ? "active" : ""}`}
-                                onClick={() => handleNavigation(path)}
-                                style={{ animationDelay: `${index * 0.01}s` }} // Delay increases per item
-                            >
-                                <img src={img} alt={label} className="nav-icon" />
-                                {/* Notification circle for comments */}
-                                {showNotification && <div className="notifcation-circle-comment"></div>}
-                            </button>
-                        );
-                    })}
+                <>
+                    {/* Burger Menu (Mobile only) */}
+                    <button onClick={toggleMobileNav} className={`burger-menu nav-item ${theme === "dark" ? "light-up" : ""}`}>
+                        <img className="nav-icon" src = "/svgs/burger.svg" alt="Menu" />
+                    </button>
+
+                    {/* Desktop/Event Nav */}
+                    <div className="nav-links event-links desktop-only">
+                        {eventRoutes.map(({ path, label, img }, index) => {
+                            const isCommentsRoute = path === "/comments";
+                            const showNotification = isCommentsRoute && showCommentNotification;
+
+                            return (
+                            <div key={path} className="tooltip-wrapper">
+                                <button
+                                    className={`nav-item ${theme === "dark" ? "light-up" : ""} ${location.pathname.includes(path) ? "active" : ""}`}
+                                    onClick={() => handleNavigation(path)}
+                                    style={{ animationDelay: `${index * 0.01}s` }}
+                                >
+                                    <img src={img} alt={label} className="nav-icon" />
+                                    {showNotification && <div className="notifcation-circle-comment"></div>}
+                                </button>
+                                <span className="tooltip-text">{label}</span>
+                            </div>
+                            );
+                        })}
+                    </div>
+
+
+                    {/* Mobile Nav Dropdown */}
+            {isMobileNavOpen && (
+                <div className="mobile-nav">
+                <h2>Menu</h2>
+                <button
+                    className="close-mobile-nav"
+                    onClick={() => setIsMobileNavOpen(false)}
+                    >
+                    ✕
+                    </button>
+
+                    {eventRoutes.map(({ path, label, img }) => (
+                    <button
+                        key={path}
+                        onClick={() => {
+                        handleNavigation(path);
+                        setIsMobileNavOpen(false); // Close after click
+                        }}
+                        className="mobile-nav-item"
+                    >
+                        <img src={img} alt={label} className={`nav-icon ${theme === "dark" ? "light-up" : ""} ${location.pathname.includes(path) ? "active" : ""}`} />
+                        {label}
+                    </button>
+                    ))}
                 </div>
+                )}
+            </>
             )}
+
+        {isOnEventHomePage && authed && (eventStatus === "confirmed" || eventStatus === "canceled" ) && (
+        <div className="nav-links">
+            <div className="tooltip-wrapper">
+                <button
+                    className={`nav-item ${theme === "dark" ? "light-up" : ""}`}
+                    onClick={() => toggleTheme()}
+                    style={{ animationDelay: `${4 * 0.03}s` }}
+                >
+                    {theme === "light" ? 
+                        <img src="/svgs/lightmode.svg" alt="light mode" className="nav-icon" /> :
+                        <img src="/svgs/darkmode.svg" alt="dark mode" className="nav-icon" />}
+                </button>
+                <span className="tooltip-text">{theme === "light" ? "Light Mode" : "Dark Mode"}</span>
+            </div>
+            <div className="tooltip-wrapper">
+                <button
+                className={`nav-item ${theme === "dark" ? "light-up" : ""}`}
+                onClick={() => handleSignOut()}
+                style={{ animationDelay: `${3 * 0.05}s` }}
+            >
+                <img src="/svgs/logout.svg" alt="sign out" className="nav-icon" />
+                </button>
+                <span className="tooltip-text">Sign Out</span>
+            </div>
+        </div>
+        )}
+
         </nav>
     );
 };

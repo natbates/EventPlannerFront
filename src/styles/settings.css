@@ -3,6 +3,12 @@
     width: 100%;
 }
 
+.settings h3
+{
+    margin: 0;
+    margin-bottom: 20px;
+}
+
 .settings-input
 {
     display: flex;
@@ -32,7 +38,7 @@
 .settings .button-container
 {
     justify-content: right;
-    margin-top: 25px;
+    margin-top: 0px;
 }
 
 .settings-buttons-event .button-container
@@ -46,4 +52,43 @@
     margin-top: 25px;
     display: flex;
     justify-content: space-between;
+}
+
+.delete-event, .leave-event
+{
+    background-color: var(--accent-colour) !important;
+}
+
+.settings-buttons-user
+{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+}
+
+.settings-profile-input .profile-selector .profile-option 
+{
+    min-width: 59px !important;
+}
+
+@media (max-width: 714px) {
+
+
+    .settings .one-line-input
+    {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .settings .button-container
+    {
+        flex-direction: row;
+    }
+
+    .settings-buttons-event
+    {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 20px;
+    }
 }

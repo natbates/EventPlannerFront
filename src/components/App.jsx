@@ -27,6 +27,7 @@ import PrivacyPolicy from "../pages/boring/privacyPolicy";
 import TOS from "../pages/boring/TOS";
 import { useNotification } from "../contexts/notification";
 import Contact from "../pages/boring/contact";
+import { useTheme } from "../contexts/theme";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 export { API_BASE_URL };
@@ -34,6 +35,7 @@ export { API_BASE_URL };
 const App = () => {
     const { notify } = useNotification();
     const [isBackendUp, setIsBackendUp] = useState(true);
+    const {theme} = useTheme();
 
     useEffect(() => {
       const checkBackend = async () => {
@@ -54,7 +56,9 @@ const App = () => {
         <div className="page-content">
             <div className="page-container">
               <div className="servers-down page">
-                <img className = "sad-cat" src="/svgs/sad-cat.svg" alt="Servers Down" />
+                {theme === 'dark' ? 
+                  <img className="sad-cat" src="/svgs/cats/sad-cat-white.svg" alt="Servers Down" /> : 
+                <img className = "sad-cat" src="/svgs/cats/sad-cat.svg" alt="Servers Down" />}
                 <h1>Sorry</h1>
                 <h3>We are currently experiencing issues with our servers. Please try again later.</h3>
               </div>
@@ -63,10 +67,16 @@ const App = () => {
       );
     }
 
+    const catRightSrc = theme === 'dark' ? '/svgs/cats/cat-right-white.svg' : '/svgs/cats/cat-right.svg';
+    const catLeftSrc = theme === 'dark' ? '/svgs/cats/cat-left-white.svg' : '/svgs/cats/cat-left.svg';
+    const catRightBottomSrc = theme === 'dark' ? '/svgs/cats/cat-right-bottom-white.svg' : '/svgs/cats/cat-right-bottom.svg';
+
     return (
         <div className="page-content">
-            <img onClick={() => { notify("Meow"); }} className="cat-right" src="/svgs/cat-right.svg" alt="cat" />
-            <img onClick={() => { notify("Mrrp"); }} className="cat-bottom" src="/svgs/bottom-cat.svg" alt="cat" />
+
+            <img onClick={() => { notify("Meow"); }} className="cat-right" src={catRightSrc} alt="cat" />
+            <img onClick={() => { notify("Mrrp"); }} className="cat-left" src={catLeftSrc} alt="cat" />
+            <img onClick={() => { notify("Mrrp"); }} className="cat-right-bottom" src={catRightBottomSrc} alt="cat" />
             <div className="page-container">
                 <NavBar />
                 <div className="page">

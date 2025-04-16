@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getFingerprint } from "../services/getUserCode";
 import { API_BASE_URL } from "../components/App";
+import { useNotification } from "./notification";
 
 const AuthContext = createContext();
 
@@ -17,9 +18,25 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);  // Add loading state for authentication
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const {notify} = useNotification();
+
+  const ReLogIn = async (eventId) => {
+    console.log("Reloogging in")
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+
+    if (storedUser && eventId) {
+      console.log("trying local session auto sign in ", storedUser.email);
+      let result = LogIn(storedUser.email, eventId);
+      return result;
+    } else {
+      console.log("No local session found, not auto signing in.");
+      console.log("event id ", eventId);
+    }
+  }
 
   // 🔹 Load user data from local storage
   useEffect(() => {    
+
     // Fetch fingerprint
     const fetchFingerprint = async () => {
       const print = await getFingerprint();
@@ -37,6 +54,10 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 Log in method
   const LogIn = async (userEmail, eventId) => {
+
+    console.log("Logging in with email: ", userEmail);
+    console.log("Event ID: ", eventId);
+
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/users/login`, {
@@ -55,10 +76,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      console.log("TEST")
 
       if (data.authorized) {
-        console.log("GOOOD")
         const userDetails = {
           user_id: data.user_details.user_id,
           email: data.user_details.email,
@@ -74,15 +93,16 @@ export const AuthProvider = ({ children }) => {
         setProfile_pic(userDetails.profile_pic);
         setAuthed(true);
 
-        console.log("User details: ", name);
+        console.log("is AUTHED?: ", authed);
 
         saveUserToStorage(userDetails); // 🔥 Save to local storage
         return true;
-      } else if (data.status === "pending") {
+      } else if (data.status === "pending" || data.status === "rejected") {
         return {
           status: data.request_details.status,
           username: data.request_details.username,
           email: data.request_details.email,
+          profile_pic: data.request_details.profile_pic,
           promptShowSubmitted: true,
         };
       } else {
@@ -94,6 +114,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       setError(error.message);
+      notify("Failed to log in. Please try again.", 5000); // Show notification on error
     } finally {
       setLoading(false);
     }
@@ -138,7 +159,6 @@ export const AuthProvider = ({ children }) => {
         setRole(newUser.role);
         setProfile_pic(profileNum);
         setAuthed(true);
-
         saveUserToStorage(newUser);
       }
 
@@ -164,7 +184,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{
-      user_id, LogIn, createUser, signOut, authed, email, name, fingerprint, loading, error, role, profile_pic
+      user_id, LogIn, createUser, signOut, authed, email, name, fingerprint, loading, error, role, profile_pic, ReLogIn
     }}>
       {children}
     </AuthContext.Provider>

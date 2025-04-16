@@ -3,6 +3,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Events</title>
+    <link rel="icon" href="/caticon.ico" type="image/x-icon" />
+    <script>
+        (function () {
+          document.documentElement.classList.add("preload");
+      
+          const savedTheme = localStorage.getItem("theme");
+          if (savedTheme) {
+            document.documentElement.setAttribute("data-theme", savedTheme);
+          } else {
+            const hour = new Date().getHours();
+            const defaultTheme = hour >= 19 || hour < 7 ? "dark" : "light";
+            document.documentElement.setAttribute("data-theme", defaultTheme);
+          }
+      
+          // Remove preload class after render
+          window.addEventListener("DOMContentLoaded", () => {
+            document.documentElement.classList.remove("preload");
+          });
+        })();
+    </script>
+
 </head>
 <body>
     <div id = "root"></div>

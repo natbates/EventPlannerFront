@@ -11,6 +11,7 @@ export const NotificationProvider = ({ children }) => {
   const [notifyLoadExiting, setNotifyLoadExiting] = useState(false);
   const activeMessages = useRef(new Set());
   const prevNotifyLoad = useRef(notifyLoad); // Track previous state of notifyLoad
+  const [isFavouritePopupVisible, setFavouritePopupVisible] = useState(false);
 
   // Function to trigger a new notification
   const notify = (message, duration = 3000) => {
@@ -37,6 +38,45 @@ export const NotificationProvider = ({ children }) => {
     }, duration);
   };
 
+  const showFavouritePopup = () => {
+    if (false)
+    {
+      setTimeout(() => {
+        setFavouritePopupVisible(true);
+      }, 3000); // 3000 milliseconds = 3 seconds
+    }
+  };
+  
+  // Function to close the "Add to Favourites" pop-up
+  const closeFavouritePopup = () => {
+    setFavouritePopupVisible(false);
+  };
+
+  const handleAddToFavourites = () => {
+    const title = document.title;
+    const url = window.location.href;
+  
+    // Ensure it's an event page (adjust the regex if your route is different)
+    const isEventPage = /^https?:\/\/[^/]+\/event\/[^/]+$/.test(url);
+  
+    if (!isEventPage) {
+      return;
+    }
+  
+    // Detect browser
+    const isFirefox = navigator.userAgent.toLowerCase().includes("firefox");
+    const isIE = window.external && "AddFavorite" in window.external;
+  
+    if (isIE) {
+      window.external.AddFavorite(url, title);
+    } else if (isFirefox) {
+      alert("Press Ctrl+D (or ⌘+D on Mac) to bookmark this page.");
+    } else {
+      alert("Press Ctrl+D (or ⌘+D on Mac) to add this page to your favourites.");
+    }
+  };
+  
+
   // Detect when notifyLoad changes from true to false
   useEffect(() => {
     if (prevNotifyLoad.current && !notifyLoad) {
@@ -60,8 +100,12 @@ export const NotificationProvider = ({ children }) => {
     return () => clearTimeout(timeoutId); // Cleanup the timeout if component unmounts or changes
   }, [notifyLoad]);
 
+  const storedTheme = localStorage.getItem("theme") || "light";
+
+  console.log("Stored theme:", storedTheme);
+
   return (
-    <NotificationContext.Provider value={{ notify, setNotifyLoad, notifyLoad }}>
+    <NotificationContext.Provider value={{ notify, setNotifyLoad, notifyLoad, showFavouritePopup}}>
       {children}
 
       {/* Notification UI */}
@@ -90,6 +134,32 @@ export const NotificationProvider = ({ children }) => {
           </div>
         </div>
       ) : null}
+
+      {isFavouritePopupVisible && (
+        <div className="popup-overlay">
+          <div className="popup-extra-cancel" onClick={closeFavouritePopup}>✕</div>
+          <div className="popup-content">
+
+            {storedTheme === "light" ? 
+            <img className="pop-up-cat" src="/svgs/cats/happycat.svg" alt="Happy Cat" /> :
+            <img className="pop-up-cat" src="/svgs/cats/happycat-white.svg" alt="Happy Cat" />}
+            
+            <h2>Add to Favourites</h2>
+            <p>Would you like to add this page to your favourites?</p>
+            
+            <div className="button-container">
+            <button className="small-button" onClick={closeFavouritePopup}>Close</button>
+            <button
+              onClick={handleAddToFavourites}
+              className="small-button"
+            >
+              ⭐ Add to Favourites
+            </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </NotificationContext.Provider>
   );
 };

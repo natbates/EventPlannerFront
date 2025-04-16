@@ -4,12 +4,18 @@ import { useNotification } from "./notification";
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(() => {
-    // Try to load saved theme or default to "light"
-    return localStorage.getItem("theme") || "light";
-  });
+  const { notify } = useNotification();
 
-  const {notify} = useNotification();
+  const getDefaultTheme = () => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) return savedTheme;
+
+    const hour = new Date().getHours();
+    // Use dark theme from 7PM to 7AM
+    return hour >= 19 || hour < 7 ? "dark" : "light";
+  };
+
+  const [theme, setTheme] = useState(getDefaultTheme);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme); // for Tailwind/custom styles
@@ -17,9 +23,8 @@ export const ThemeProvider = ({ children }) => {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"))
-    notify("Theme changed", 2000); // Notify user of theme change
-};
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

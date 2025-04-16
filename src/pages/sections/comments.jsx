@@ -7,6 +7,7 @@ import "../../styles/comments.css";
 import { Profiles } from "../../components/ProfileSelector";
 import { useNotification } from "../../contexts/notification";
 import PageError from "../../components/PageError";
+import { useTheme } from "../../contexts/theme";
 
 const Comments = () =>
 {
@@ -19,8 +20,10 @@ const Comments = () =>
     const [replyVisibility, setReplyVisibility] = useState({});
     const {updateEventPage, updateLastOpened} = useHistory();
     const [secondaryloading, setLoading] = useState(true);
-    const {notify, setNotifyLoad} = useNotification();
-    
+    const {notify, setNotifyLoad, notifyLoad} = useNotification();
+    const {theme} = useTheme();
+    const [visibleTopLevelCount, setVisibleTopLevelCount] = useState(6);
+
     const handleDeleteComment = async (comment_id) => {
         setNotifyLoad(true);
 
@@ -44,8 +47,7 @@ const Comments = () =>
         
             if (!response.ok) throw new Error("Failed to delete comments");
         
-            refetch();
-            setNotifyLoad(false);
+            await refetch();
         } catch (error) {
             setNotifyLoad(false);
             console.error("Error deleting comment:", error);
@@ -114,7 +116,7 @@ const Comments = () =>
         // Clear the comment inputs
         setNewComment('');
         setReplyText('');
-        refetch(); // Refresh event data
+        await refetch(); // Refresh event data
         updateEventPage(event_id, "comments")
         updateLastOpened("comments");
         notify("Comment Posted!")
@@ -137,9 +139,9 @@ const Comments = () =>
           setReplyTo(null);
 
         } catch (error) {
-        console.error('Error adding comment:', error);
-        notify('Error adding comment: ' + error.message);
-        setNotifyLoad(false);
+          console.error('Error adding comment:', error);
+          notify('Error adding comment: ' + error.message);
+          setNotifyLoad(false);
         }
     };
 
@@ -156,15 +158,14 @@ const Comments = () =>
           return data;
       } catch (error) {
           console.error("Error:", error);
+          setNotifyLoad(false);
           return null; // Return null if there is an error
-      } finally {
-        setNotifyLoad(false);
       }
     };
 
     useEffect(() => {
         const fetchUserDetailsForComments = async () => {
-
+            setLoading(true);
             const updatedComments = await Promise.all(
                 commentData.comments.map(async (comment) => {
                     const userDetails = await getUserNameAndProfilePic(comment.user_id);
@@ -177,6 +178,7 @@ const Comments = () =>
             );
             setCommentsWithUserDetails(updatedComments);
             setLoading(false);
+            setNotifyLoad(false);
         };
 
         if (commentData && commentData.comments && !error) {
@@ -263,13 +265,15 @@ const Comments = () =>
 
     if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Comments"} />;
 
-    if (loading || secondaryloading) return <div class="loader"><p>Fetching Comments</p></div>;
+    if ((loading || secondaryloading) && !notifyLoad) return <div className="loader"><p>Fetching Comments</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     return (
         <div className="comments">
           <div className="top-line">
               <button className="back-button" onClick={() => { goEventPage(); }}>
-                <img src="/svgs/back-arrow.svg" alt="Back" />
+                  {theme === "dark" ? 
+                    <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
+                  <img src="/svgs/back-arrow.svg" alt="Back" />}
               </button>
               <h2>Comments</h2>
           </div>
@@ -295,9 +299,26 @@ const Comments = () =>
             {commentsWithUserDetails
               .filter((comment) => comment.reply_to === null)
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .slice(0, visibleTopLevelCount)
               .map((comment) => renderComment(comment))}
           </div>
         )}
+        {commentsWithUserDetails.filter(c => c.reply_to === null).length > visibleTopLevelCount && (
+          <div className="show-more-container">
+            <button className="small-button" onClick={() => setVisibleTopLevelCount(prev => prev + 6)}>
+              Show More Comments
+            </button>
+          </div>
+        )}
+
+        {visibleTopLevelCount > 6 && (
+          <div className="show-less-container">
+            <button className="small-button" onClick={() => setVisibleTopLevelCount(6)}>
+              Show Less
+            </button>
+          </div>
+        )}
+
         </div>
     )
 }

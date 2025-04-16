@@ -48,14 +48,22 @@
     flex-direction: column;
     gap: 20px;
     margin-top: 20px;
+    position: relative;
 }
 
-.panels .event-panel {
+.event-panel {
     position: relative;
-    width: 100%; 
-    height: 100; 
-    max-width: 100%;
-    border: 3px solid var(--primary-colour);
+    height: 100px; /* Match this to your mask-image blocks */
+    outline: 3px solid var(--primary-colour);
+    background-color: transparent;
+    z-index: 2;
+    box-sizing: border-box;
+}
+
+.event-panel:hover
+{
+    outline-color: var(--accent-colour);
+    outline-width: 6px;
 }
 
 .panels .event-panel > * {
@@ -89,6 +97,7 @@
 {
     width: 60px;
     height: auto;
+    border-radius: 50%;
 }
 
 .event-panel-button h2
@@ -192,4 +201,97 @@
 .comment-button img
 {
     width: 100%;
+}
+
+
+.event-panels-mask {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 1;
+}
+  
+  /* .event-panels-mask::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("/public/svgs/pattern.svg");
+    background-position: right center;
+    background-size: cover;
+    background-repeat: repeat;
+    z-index: -1;
+    opacity: 1;
+  
+    mask-image: 
+    linear-gradient(to right, transparent 30%, rgb(0, 0, 0) 100%),
+    repeating-linear-gradient(to bottom,
+        black 0, black 100px,
+        transparent 100px, transparent 120px
+      );
+  
+    mask-composite: intersect;
+    -webkit-mask-composite: destination-in;
+  
+    mask-size: 100% 100%, 100% 100%, 100% 120px;
+    mask-repeat: no-repeat, no-repeat, repeat;
+  }
+   */ 
+
+   .attendee-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .attendee-list .profile {
+    width: 150px;
+    text-align: center;
+}
+
+.attendee-list .profile p
+{
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.attendee-list .profile .is_coming
+{
+    margin: 0 !important;
+}
+
+ @media (max-width: 714px) {
+
+
+
+    .event-panels-mask
+    {
+        gap: 30px;
+    }
+
+    .top-line h2 {
+        font-size: 2rem;
+    }
+
+    .event
+    {
+        padding-bottom: 30px;
+    }
+}
+
+.confirm-page-buttons
+{
+    margin-top: 10px;
+}
+
+.count-down
+{
+    margin-top: 20px !important;
 }

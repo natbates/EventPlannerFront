@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
 import { useNotification } from "../contexts/notification";
 import { API_BASE_URL } from "../components/App";
+import { useRef } from "react";
 
 const useFetchEventData = (endpoint) => {
     const { event_id } = useParams();
@@ -10,22 +11,44 @@ const useFetchEventData = (endpoint) => {
     const [event, setEvent] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [loggin, setLoggingIn] = useState(false);
 
-    const { authed } = useAuth();
+    const { authed, loading: authLoading, ReLogIn} = useAuth(); // 👈 renamed loading to authLoading
     const navigate = useNavigate();
     const { notify } = useNotification();
 
     useEffect(() => {
-        if (!authed) {
-            console.log("going to login page from useFetchEventData")
-            navigate(`/event/${event_id}/login`);
-        }
-    }, [authed, event_id, navigate, location]);
+        const checkAuth = async () => {
+            setLoggingIn(true);
+            if (authLoading) return; // Wait until auth check is done
+    
+            if (!authed) {
+                const result = await ReLogIn(event_id);
+                
+                console.log("ReLogIn result: ", result);
+                console.log("Authed after ReLogIn: ", authed);
+                setLoggingIn(false);
+                // If user is now authed after ReLogIn, skip redirect
+                if (!result && !authed) {
+                    console.log("Going to login page from useFetchEventData");
+                    navigate(`/event/${event_id}/login`);
+                }
+            } else
+            {
+                setLoggingIn(false);
+            }
+        };
+    
+        checkAuth();
+    }, [authed, authLoading, event_id, navigate]);
+    
 
     // 🔹 Fetch event status before fetching other data
     const fetchEventStatus = async () => {
-        if (!event_id || !authed) return;
-
+        if (!event_id || !authedRef.current) {
+            console.log("Skipping fetchEventStatus — event_id or auth missing", { event_id, authed: authedRef.current });
+            return;
+        }
         try {
             const response = await fetch(`${API_BASE_URL}/events/fetch-event/${event_id}`, {
                 method: "GET",
@@ -52,32 +75,62 @@ const useFetchEventData = (endpoint) => {
         }
     };
 
+    const authedRef = useRef(authed);
+    const logginRef = useRef(loggin);
+
+    useEffect(() => {
+        authedRef.current = authed;
+    }, [authed]);
+      
+    useEffect(() => {
+        logginRef.current = loggin;
+    }, [loggin]);
+      
+
+
     // 🔹 Fetch endpoint data only if event is valid
     const fetchData = async (refetch = false) => {
-        if (!event_id || !authed) return;
-
-        const eventData = await fetchEventStatus();
-        if (!eventData) return; // Stop if event is canceled/confirmed
-
-        try {
-
-            const response = await fetch(`${API_BASE_URL}/${endpoint}?event_id=${event_id}`, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-            });
-
-            if (!response.ok) throw new Error(`Failed to fetch ${endpoint}`);
-
-            const result = await response.json();
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setData(result);
-        } catch (err) {
-            notify(`${endpoint.split("/")[0]}: Failed to fetch data`);
-            setError(err.message);
-        } finally {
-            setLoading(false);
+        console.log("Fetching data for endpoint: ", endpoint);
+      
+        while (logginRef.current || !authedRef.current) {
+            console.log("Waiting... Authed?", authedRef.current, "Logging in?", logginRef.current);
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
-    };
+
+        console.log("Authed and not logging in, proceeding to fetch data.");
+      
+        if (!event_id || !authedRef.current) {
+          console.log("No event_id or not authenticated, stopping fetchData.");
+          return;
+        }
+      
+        const eventData = await fetchEventStatus();
+        
+        if (!eventData) {
+            console.log("Event data is null, stopping fetchData.");
+            return;
+        }
+      
+        try {
+          const response = await fetch(`${API_BASE_URL}/${endpoint}?event_id=${event_id}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          });
+      
+          if (!response.ok) throw new Error(`Failed to fetch ${endpoint}`);
+      
+          const result = await response.json();
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log("Fetched data: ", result);
+          setData(result);
+        } catch (err) {
+          notify(`${endpoint.split("/")[0]}: Failed to fetch data`);
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
 
     const goEventPage = () => {
         navigate(`/event/${event_id}`);

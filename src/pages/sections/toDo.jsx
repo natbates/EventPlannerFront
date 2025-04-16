@@ -7,6 +7,8 @@ import "../../styles/todo.css";
 import { useNotification } from "../../contexts/notification";
 import { Profiles } from "../../components/ProfileSelector";
 import PageError from "../../components/PageError";
+import { useTheme } from "../../contexts/theme";
+import { useNavigate } from "react-router-dom";
 
 const ToDo = () => {
     const { data: toDoData, error, loading, event_id, refetch, goEventPage } = useFetchEventData("to-do/fetch-to-do");
@@ -14,11 +16,12 @@ const ToDo = () => {
     const { user_id, name, role, profile_pic } = useAuth();
     const { updateEventPage, updateLastOpened } = useHistory();
     const { notify, setNotifyLoad} = useNotification();
-
-    // State to hold the updated task data with profiles
+    const {theme} = useTheme();
+    const navigate = useNavigate();
     const [updatedToDoData, setUpdatedToDoData] = useState({ to_do: [], done: [] });
     const [secondaryloading, setSecondaryLoading] = useState(true);
     // Fetch user profiles and update tasks with username and profile_pic
+    
     useEffect(() => {
         const fetchProfile = async (userId) => {
             try {
@@ -99,8 +102,8 @@ const ToDo = () => {
                 setNewTask("");
                 updateEventPage(event_id, "to-do");
                 updateLastOpened("to-do");
-                notify("New Task Added!");
                 await refetch();
+                notify("New Task Added!");
             } else {
                 throw new Error("Failed to add task!");
             }
@@ -121,7 +124,10 @@ const ToDo = () => {
                 body: JSON.stringify({ event_id, task_id }),
             });
 
-            if (response.ok) await refetch();
+            if (response.ok)            {
+                await refetch();
+                notify("Task Moved to Done!");
+            }
             else{
                 throw new Error("Failed to move task!");
             }
@@ -143,7 +149,11 @@ const ToDo = () => {
                 body: JSON.stringify({ event_id, task_id }),
             });
 
-            if (response.ok) await refetch();
+            if (response.ok) 
+            {
+                await refetch();
+                notify("Task Moved Back to To Do!");
+            }
             else throw new Error("Failed to move task!");
         } catch (error) {
             console.error("Error moving task:", error);
@@ -162,7 +172,10 @@ const ToDo = () => {
                 body: JSON.stringify({ event_id, task_id }),
             });
 
-            if (response.ok) await refetch();
+            if (response.ok){
+                await refetch();
+                notify("Task Deleted!");
+            }
             else throw new Error("Failed to delete task!");
         } catch (error) {
             console.error("Error deleting task:", error);
@@ -174,13 +187,15 @@ const ToDo = () => {
 
     if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"To Do"} />;
 
-    if (loading || secondaryloading) return <div class="loader"><p>Fetching To Dos</p></div>;
+    if (loading || secondaryloading) return <div className="loader"><p>Fetching To Dos</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     return (
         <div className="to-do">
             <div className="top-line">
                 <button className="back-button" onClick={() => { goEventPage(); }}>
-                    <img src="/svgs/back-arrow.svg" alt="Back" />
+                    {theme === "dark" ? 
+                        <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
+                    <img src="/svgs/back-arrow.svg" alt="Back" />}
                 </button>
                 <h2>To Do</h2>
             </div>

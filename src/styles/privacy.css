@@ -1,3 +1,10 @@
 .privacy-policy h1 {
     font-size: 4rem;
 }
+
+.privacy-policy  {
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    max-height: 2400px;
+}

@@ -5,6 +5,7 @@ import { useState } from "react";
 import "../styles/calendar.css";
 import { Profiles } from "./ProfileSelector";
 import { useAuth } from "../contexts/auth";
+import { useNavigate } from "react-router-dom";
 
 const localizer = momentLocalizer(moment);
 
@@ -72,25 +73,29 @@ const SharedCalendarComponent = ({
     return {};
   };
 
+  const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   return (
     <>
       <Calendar
         localizer={localizer}
+        longPressThreshold={1} 
+        selectable={true}
         startAccessor="start"
         endAccessor="end"
-        views={{ month: true }} // Show only month view
-        defaultView="month" // Default to month view
+        views={{ month: true }} 
+        defaultView="month" 
         defaultDate={earliestDate}
-        selectable
-        min={earliestDate} // Restrict selection to earliestDate
-        max={latestDate} // Restrict selection to latestDate
+        min={earliestDate} 
+        max={latestDate} 
         onSelectSlot={(slotInfo) => {
+          console.log("Selected slot:", slotInfo);
           const selectedDate = new Date(slotInfo.start);
           if (selectedDate >= earliestDate && selectedDate <= latestDate) {
-            onSelectDate(formatDateToYYYYMMDD(selectedDate)); // Call parent function on date select
+            onSelectDate(formatDateToYYYYMMDD(selectedDate));
           }
         }}
-        dayPropGetter={dayPropGetter} // Apply the dayPropGetter to apply styles to days
+        dayPropGetter={dayPropGetter} 
       />
     </>
   );
@@ -145,7 +150,10 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
   if (!data || !attendeeData) return <p>Loading calendar...</p>;
 
 
+  console.log("Calender Data", data);
+
   const {user_id} = useAuth();
+  const navigate = useNavigate();
 
   const earliestDate = new Date(data.earliest_date || "2024-01-01");
   const latestDate = new Date(data.latest_date || "2024-12-31");
@@ -325,12 +333,13 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
     <>
       <Calendar
         localizer={localizer}
+        longPressThreshold={1}
         startAccessor="start"
         endAccessor="end"
         views={{ month: true }}
         defaultView="month"
         defaultDate={earliestDate}
-        selectable
+        selectable={true}
         min={earliestDate}
         max={latestDate}
         onSelectSlot={(slotInfo) => {
@@ -355,56 +364,55 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
         dayPropGetter={dayPropGetterMain} 
       />
 
-{!isSelectingDates && selectedDate && 
-  <div className="section selected-dates">
-    <h3>Selected Date: {selectedDate ? formatDate(selectedDate) : "None"}</h3>
-    <div className= "availability-group-container">
-      {selectedDate && (
-        <>
-          {!availabilityMap[selectedDate] && <p>None</p>}
+      {!isSelectingDates && selectedDate && 
+        <div className="section selected-dates">
+          <h3>Selected Date: {selectedDate ? formatDate(selectedDate) : "None"}</h3>
+          <div className= "availability-group-container">
+            {selectedDate && (
+              <>
+                {!availabilityMap[selectedDate] && <p>None</p>}
 
-          {/* Group entries by status */}
-          {["available", "tentative", "not available"].map((statusKey) => {
-            const statusLabel = {
-              available: "Available",
-              tentative: "Tentative",
-              "not available": "Not Available"
-            }[statusKey];
+                {/* Group entries by status */}
+                {["available", "tentative", "not available"].map((statusKey) => {
+                  const statusLabel = {
+                    available: "Available",
+                    tentative: "Tentative",
+                    "not available": "Not Available"
+                  }[statusKey];
 
-            const filtered = (availabilityMap[selectedDate] || []).filter(entry => entry.status === statusKey);
+                  const filtered = (availabilityMap[selectedDate] || []).filter(entry => entry.status === statusKey);
 
-            if (filtered.length === 0) return null;
+                  if (filtered.length === 0) return null;
 
-            return (
-              <div key={statusKey} className="availability-group">
-                <h4>{statusLabel} ({filtered.length})</h4>
-                <ul className="attendee-availability-list">
-                  {filtered.map((entry, index) => {
-                    console.log("ENTRY ", entry);
-                    const profile = Profiles.find((profile) => profile.id === Number(entry.profile_pic));
-                    return (
-                      <li key={index} className="attendee-availability-list-item">
-                        <div className="entry">
-                          <img
-                            className="profile-pic"
-                            src={profile ? profile.path : ""}
-                            alt={profile?.name || "profile"}
-                          />
-                          <p className={`${entry.user_id === user_id ? "you underline" : ""}`}>{entry.username}</p>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            );
-          })}
-        </>
-      )}
-    </div>
-  </div>
-}
-
+                  return (
+                    <div key={statusKey} className="availability-group">
+                      <h4>{statusLabel} ({filtered.length})</h4>
+                      <ul className="attendee-availability-list">
+                        {filtered.map((entry, index) => {
+                          console.log("ENTRY ", entry);
+                          const profile = Profiles.find((profile) => profile.id === Number(entry.profile_pic));
+                          return (
+                            <li key={index} className="attendee-availability-list-item">
+                              <div className="entry">
+                                <img
+                                  className="profile-pic"
+                                  src={profile ? profile.path : ""}
+                                  alt={profile?.name || "profile"}
+                                />
+                                <p style = {{cursor: "pointer"}} onClick = {() => {navigate(`/event/${data.event_id}/attendee-calender/${entry.user_id}`)}} className={`${entry.user_id === user_id ? "you underline" : ""}`}>{entry.username}</p>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </div>
+        </div>
+      }
     </>
   );
 };

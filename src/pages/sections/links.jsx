@@ -7,6 +7,8 @@ import { useNotification } from "../../contexts/notification";
 import "../../styles/links.css";
 import useFetchEventData from "../../hooks/useFetchEventData";
 import PageError from "../../components/PageError";
+import { useTheme } from "../../contexts/theme";
+import { useNavigate } from "react-router-dom";
 
 const Links = () => {
     const { data: linksData, error, loading, event_id, refetch, goEventPage} = useFetchEventData("links/fetch-links");
@@ -14,10 +16,11 @@ const Links = () => {
     const [newLink, setNewLink] = useState(""); 
     const { updateEventPage, updateLastOpened } = useHistory();
     const { notify, setNotifyLoad} = useNotification();
-
+    const {theme} = useTheme();
     // State to store the added_by_name for each link
     const [linkUsernames, setLinkUsernames] = useState({});
     const [secondaryloading, setSecondaryLoading] = useState(true);
+    const navigate = useNavigate();
 
     // Fetch the user's name based on their user_id
     const fetchUsername = async (userId) => {
@@ -126,41 +129,20 @@ const Links = () => {
 
     console.log("Loadig Links", loading, secondaryloading, linksData);
 
-    if (loading || secondaryloading) return <div class="loader"><p>Fetching Links</p></div>;
+    if (loading || secondaryloading) return <div className="loader"><p>Fetching Links</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     return (
         <div className="links">
             <div className="top-line">
                 <button className="back-button" onClick={() => { goEventPage(); }}>
-                    <img src="/svgs/back-arrow.svg" alt="Back" />
+                  {theme === "dark" ? 
+                    <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
+                  <img src="/svgs/back-arrow.svg" alt="Back" />}
                 </button>
                 <h2>Links</h2>
             </div>
 
-            <div className="section">
-                <h2>Invite Link</h2>
-                <div className="invite-link-qr-code">
-                    <div>
-                        <a href={`${location.host}/event/${event_id}`} target="_blank" rel="noopener noreferrer">
-                            {`${location.host}/event/${event_id}`}
-                        </a>
-                        <button className="small-button" onClick={() => {
-                            navigator.clipboard.writeText(`${location.host}/event/${event_id}`);
-                            notify("Link copied to clipboard!");
-                        }}>Copy Link</button>
-                    </div>
-                    <QRCodeCanvas 
-                        value={`${location.host}/event/${event_id}`} 
-                        size={128}   
-                        bgColor="white"
-                        fgColor="black" 
-                        className="qr"
-                    />
-                </div>
-            </div>
-
             <form onSubmit={handleAddLink} className="add-link-form">
-                <h2>Useful Links</h2>
                 <div className="add-link">
                     <div>
                         <input
@@ -199,6 +181,29 @@ const Links = () => {
                 </ul>
               </div>
             )}
+
+            <div className="section">
+                <h2>Invite Link</h2>
+                <div className="invite-link-qr-code">
+                    <div>
+                        <a href={`${location.host}/event/${event_id}`} target="_blank" rel="noopener noreferrer">
+                            {`${location.host}/event/${event_id}`}
+                        </a>
+                        <button className="small-button" onClick={() => {
+                            navigator.clipboard.writeText(`${location.host}/event/${event_id}`);
+                            notify("Link copied to clipboard!");
+                        }}>Copy Link</button>
+                    </div>
+                    <QRCodeCanvas 
+                        value={`${location.host}/event/${event_id}`} 
+                        size={128}   
+                        bgColor="white"
+                        fgColor="black" 
+                        className="qr"
+                    />
+                </div>
+            </div>
+
         </div>
     );
 };

@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import useFetchEventData from "../hooks/useFetchEventData";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
+import { useTheme } from "../contexts/theme";
 
 const UserCalender = () => {
  const { data: calenderData, event_id, refetch, goEventPage } = useFetchEventData("calendar/fetch-calendar");
@@ -15,6 +16,7 @@ const UserCalender = () => {
   const { user_id, name, role } = useAuth();
   const [username, setUsername] = useState(null);
   const navigate = useNavigate();
+  const {theme} = useTheme();
 
   useEffect(() => {
     const fetchAvailability = async () => {
@@ -57,16 +59,19 @@ const UserCalender = () => {
     }
   }, [user_id_param, user_id]);
 
-  if (loading) return (<p>Loading availability...</p>);
+  if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Attendees Calender"} />;
 
-  if (error) return (<p>Error: {error}</p>);
+  if (loading) return <div className="loader"><p>Fetching Attendees Calender</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
+
 
   return (
     <div className="your-calendar">
 
       <div className="top-line">
-        <button className="back-button" onClick={() => { goEventPage(); }}>
-            <img src="/svgs/back-arrow.svg" alt="Back" />
+          <button className="back-button" onClick={() => { goEventPage(); }}>
+            {theme === "dark" ? 
+              <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
+            <img src="/svgs/back-arrow.svg" alt="Back" />}
         </button>
         <h2>{username?.name} Calendar</h2>
       </div>

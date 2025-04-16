@@ -1,3 +1,24 @@
 .tos h1 {
     font-size: 4rem;
 }
+
+.tos {
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    max-height: 2400px;
+}
+  
+.rpv-core__viewer {
+    height: 100%;
+    width: 100%;
+}
+  
+.rpv-core__inner-pages {
+    flex-direction: column; /* stack pages vertically */
+}
+  
+.rpv-core__page-layer:not(:first-child),
+.rpv-core__canvas-layer:not(:first-child) {
+    display: none !important; /* hide all pages except the first one */
+}

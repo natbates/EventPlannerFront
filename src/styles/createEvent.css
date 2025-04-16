@@ -22,8 +22,9 @@
     flex-direction: column;
     position: relative;
     width: 100%;
-    margin-top: 0px;
+    margin-top: 20px;
     padding-bottom: 50px;
+    box-sizing: border-box;
 }
 
 .create-event-container .button-container
@@ -167,9 +168,50 @@
         margin-left: 0;
         margin-top: 10px;
     }
-    .button-container
+
+
+    .create-event-container .button-container
     {
         flex-direction: column;
         gap: 10px;
+    }
+
+    .create-section
+    {
+        padding-top: 0;
+        margin-bottom: 20px;
+    }
+
+    .duration
+    {
+        width: 100%;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .create-event-container .one-line-input
+    {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .create-event-container .one-line-bottom
+    {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .create-event-container .section
+    {
+        padding: 0;
+        margin-top: 0;
+        border: none;
+    }
+
+    .create-buttons
+    {
+        margin: 0;
+        margin-top: 20px;
+        gap: 20px;
     }
 }

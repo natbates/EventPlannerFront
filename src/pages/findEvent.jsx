@@ -56,6 +56,16 @@ const FindEvent = () => {
         </div>
         <button onClick={handleFindEvent}>Find Event</button>
       </span>
+
+      <div className="section whats-new">
+      <h2>Coming Soon</h2>
+        <ul>
+          <li>Like fellow attendees comments, polls, and links</li>
+          <li>More efficient, secure, and smarter code</li>
+          <li>Private attendee calendars for hiding your availability</li>
+          <li>More cats</li>
+        </ul>
+      </div>
     </div>
   );
 };

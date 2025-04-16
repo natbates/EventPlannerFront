@@ -8,6 +8,8 @@ import "../../styles/polls.css";
 import { useNotification } from "../../contexts/notification";
 import { Profiles } from "../../components/ProfileSelector";
 import PageError from "../../components/PageError";
+import { useTheme } from "../../contexts/theme";
+import { useNavigate } from "react-router-dom";
 
 const Polls = () =>
 {
@@ -17,7 +19,7 @@ const Polls = () =>
     const [userDetailsMap, setUserDetailsMap] = useState({});
     const { notify, setNotifyLoad} = useNotification();
     const [secondaryloading, setSecondaryLoading] = useState(true);
-
+    const {theme} = useTheme();
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [priority, setPriority] = useState("level-1");
@@ -25,13 +27,14 @@ const Polls = () =>
     const [message, setMessage] = useState("");
     const [selectedOption, setSelectedOption] = useState(null);
     const [pendingVotes, setPendingVotes] = useState({});
-
+    const navigate = useNavigate();
     const {updateEventPage, updateLastOpened} = useHistory();
     const [showUnansweredPolls, setShowUnansweredPolls] = useState(false);
+    const [visiblePollsCount, setVisiblePollsCount] = useState(3);
 
     const fetchUserDetails = async (userId) => {
       try {
-        const res = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${user_id}`);
+        const res = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${userId}`);
         if (!res.ok) throw new Error("Failed to fetch user");
         return await res.json(); // { name, profile_pic }
       } catch (error) {
@@ -236,20 +239,22 @@ const Polls = () =>
 
     if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Polls"} />;
 
-    if (loading || secondaryloading) return <div class="loader"><p>Fetching Polls</p></div>;
+    if (loading || secondaryloading) return <div className="loader"><p>Fetching Polls</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     return (
     <div className="polls">
 
         <div className="top-line-polls">
           <div className="top-line">
-            <button className="back-button" onClick={() => { goEventPage(); }}>
-              <img src="/svgs/back-arrow.svg" alt="Back" />
-            </button>
+             <button className="back-button" onClick={() => { goEventPage(); }}>
+                {theme === "dark" ? 
+                  <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
+                <img src="/svgs/back-arrow.svg" alt="Back" />}
+              </button>
             <h2>Polls</h2>
           </div>
           <span>
-            <p>Show Only Unanswered Polls</p>
+            <p>Show Unvoted</p>
           <button 
           onClick={toggleUnansweredPolls}
           className={`small-button toggle-unanswered-polls ${showUnansweredPolls ? 'active' : ''}`}
@@ -287,6 +292,7 @@ const Polls = () =>
                 // If showUnansweredPolls is false, include all polls
                 return true;
               })
+              .slice(0, visiblePollsCount)
               .map((pollId) => {
                 // Define allOptions outside of the JSX
                 const allOptions = Object.keys(pollsData.polls[pollId].options).map((option) => ({
@@ -364,7 +370,7 @@ const Polls = () =>
                                 ></div>)}
                               <p>{option}</p>
                             </button>
-                            {pendingVotes[pollId] === option && <img className = "pending-poll-chosen" src = "/svgs/tick.svg"></img>}
+                            {pendingVotes[pollId] === option && <p className = "pending-poll-chosen" src = "/svgs/tick.svg">✔</p>}
                             {hasVoted && pendingVotes[pollId] != option && (
                               <span
                                 className={`vote-count`}
@@ -421,6 +427,26 @@ const Polls = () =>
           )}
         </div>
 
+        {Object.keys(pollsData.polls).length > 3 && (
+          <div className="show-more-less-buttons">
+            {visiblePollsCount < Object.keys(pollsData.polls).length && (
+              <button
+                className="small-button"
+                onClick={() => setVisiblePollsCount((prev) => prev + 3)}
+              >
+                Show More
+              </button>
+            )}
+            {visiblePollsCount > 3 && (
+              <button
+                className="small-button"
+                onClick={() => setVisiblePollsCount(3)}
+              >
+                Show Less
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="poll-form section">
           <h2>Create a Poll</h2>

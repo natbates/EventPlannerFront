@@ -1,7 +1,11 @@
 import "../../styles/contact.css";
 import { useState } from "react";
+import { useNotification } from "../../contexts/notification";
 
 const Contact = () => {
+
+    const {notify, setNotifyLoad} = useNotification();
+
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -28,11 +32,40 @@ const Contact = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Here you can add your form submission logic, like sending the form data to an API
-        console.log("Form submitted:", formData);
-        setFormSubmitted(true);
+
+        try {
+            setNotifyLoad(true);
+            const response = await fetch("https://formspree.io/f/mwpljbze", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    email: formData.email,
+                    message: formData.message,
+                }),
+            });
+
+            if (response.ok) {
+                setFormSubmitted(true);
+                setError(null);
+                notify("Message submitted successfully!");
+            } else {
+                const data = await response.json();
+                throw new Error(data.error || "Something went wrong.");
+            }
+        } catch (err) {
+            setError(err.message);
+            notify("Form submission error:", err);
+        } finally
+        {
+            setNotifyLoad(false);
+        }
     };
 
     return (

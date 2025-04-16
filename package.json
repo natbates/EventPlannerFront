@@ -25,6 +25,7 @@
         "axios": "^1.8.4",
         "bootstrap": "^5.3.3",
         "classnames": "^2.5.1",
+        "country-list": "^2.3.0",
         "cross-spawn": "^7.0.6",
         "dotenv": "^16.4.5",
         "firebase": "^11.0.2",

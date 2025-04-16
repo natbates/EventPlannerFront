@@ -120,7 +120,6 @@ const useFetchEventData = (endpoint) => {
           if (!response.ok) throw new Error(`Failed to fetch ${endpoint}`);
       
           const result = await response.json();
-          await new Promise(resolve => setTimeout(resolve, 1000));
           console.log("Fetched data: ", result);
           setData(result);
         } catch (err) {

@@ -390,8 +390,30 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
         min={earliestDate}
         max={latestDate}
         onSelectSlot={(slotInfo) => {
-          const selected = new Date(slotInfo.start);
-          if (selected >= earliestDate && selected <= latestDate) {
+          console.log("Selected slot:", slotInfo);
+  
+          // Convert the selected slot to a Date object
+          const selectedDate = new Date(slotInfo.start);
+          console.log("Selected Date (raw):", selectedDate);
+  
+          // Format the dates as "YYYY-MM-DD" for consistent comparison
+          const formattedSelectedDate = formatDateToYYYYMMDD(selectedDate);
+          const formattedEarliestDate = formatDateToYYYYMMDD(earliestDate);
+          const formattedLatestDate = formatDateToYYYYMMDD(latestDate);
+  
+          console.log("Formatted Selected Date:", formattedSelectedDate);
+          console.log("Formatted Earliest Date:", formattedEarliestDate);
+          console.log("Formatted Latest Date:", formattedLatestDate);
+  
+          // Perform the date comparison
+          const isWithinRange = (formattedSelectedDate >= formattedEarliestDate && formattedSelectedDate <= formattedLatestDate);
+          const isExactMatch = (formattedSelectedDate === formattedEarliestDate || formattedSelectedDate === formattedLatestDate);
+  
+          console.log("Is Selected Date within range:", isWithinRange);
+          console.log("Is Selected Date exact match with Earliest or Latest:", isExactMatch);
+  
+          // If the selected date is within range or matches either the earliest or latest date, call onSelectDate
+          if (isWithinRange || isExactMatch) {
 
             if (isSelectingDates)
             {

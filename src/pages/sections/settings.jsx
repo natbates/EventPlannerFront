@@ -282,10 +282,11 @@ const Settings = () => {
         today.setHours(0, 0, 0, 0); // Set to midnight to ignore time part
     
         // Calculate the duration in days between earliest and latest date
-        const calculatedDuration = Math.floor((latestDate - earliestDate) / (1000 * 60 * 60 * 24)); // duration in days
-    
+        const millisecondsPerDay = 1000 * 60 * 60 * 24;
+        const calculatedDuration = Math.floor((latestDate - earliestDate) / millisecondsPerDay) + 1; 
+            
         // Check if earliestDate is before latestDate
-        if (earliestDate >= latestDate) {
+        if (earliestDate > latestDate) {
             notify("Earliest date must be before the latest date.");
             return;
         }

@@ -97,12 +97,14 @@ const CreateEvent = () => {
       notify(errors.earliest_date);
     }
 
-    if (earliestDate >= latestDate) {
+    if (earliestDate > latestDate) {
       errors.dateRange = "Earliest date must be before the latest date.";
       notify(errors.dateRange);
     }
 
-    const calculatedDuration = Math.floor((latestDate - earliestDate) / (1000 * 60 * 60 * 24));
+    const millisecondsPerDay = 1000 * 60 * 60 * 24;
+    const calculatedDuration = Math.floor((latestDate - earliestDate) / millisecondsPerDay) + 1;
+    
     if (calculatedDuration < Number(duration)) {
       errors.duration = `The duration between the earliest and latest date (${calculatedDuration} days) is shorter than the entered duration (${duration} days).`;
       notify(errors.duration);

@@ -22,6 +22,22 @@
     width: 100%;
 }
 
+
+.username-form
+{
+    width: 100%;
+}
+
+.username-form .one-line-input
+{
+    flex-direction: column;
+}
+
+.username-form .one-line-input input
+{
+    width: 100%;
+}
+
 .login-inputs
 {
     display: flex;

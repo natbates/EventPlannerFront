@@ -25,12 +25,9 @@ const useFetchEventData = (endpoint) => {
             if (!authed) {
                 const result = await ReLogIn(event_id);
                 
-                console.log("ReLogIn result: ", result);
-                console.log("Authed after ReLogIn: ", authed);
                 setLoggingIn(false);
                 // If user is now authed after ReLogIn, skip redirect
                 if (!result && !authed) {
-                    console.log("Going to login page from useFetchEventData");
                     navigate(`/event/${event_id}/login`);
                 }
             } else
@@ -46,7 +43,6 @@ const useFetchEventData = (endpoint) => {
     // 🔹 Fetch event status before fetching other data
     const fetchEventStatus = async () => {
         if (!event_id || !authedRef.current) {
-            console.log("Skipping fetchEventStatus — event_id or auth missing", { event_id, authed: authedRef.current });
             return;
         }
         try {
@@ -62,7 +58,6 @@ const useFetchEventData = (endpoint) => {
 
             // 🔥 Redirect if event is canceled or confirmed
             if (eventData.status === "confirmed" || eventData.status === "canceled") {
-                console.log("GOING TO HOME PAGE");
                 navigate(`/event/${event_id}`);
                 return null; // Stop fetching additional data
             }
@@ -90,18 +85,15 @@ const useFetchEventData = (endpoint) => {
 
     // 🔹 Fetch endpoint data only if event is valid
     const fetchData = async (refetch = false) => {
-        console.log("Fetching data for endpoint: ", endpoint);
     
         const timeoutDuration = 5000;
     
         try {
             if (!logginRef.current && authedRef.current) {
-                console.log("Already authenticated, skipping wait.");
             } else {
                 // 🔹 Wait for authentication to complete
                 await new Promise((resolve, reject) => {
                     const interval = setInterval(() => {
-                        console.log("Waiting... Authed?", authedRef.current, "Logging in?", logginRef.current);
                         
                         if (!logginRef.current && authedRef.current) {
                             clearInterval(interval);
@@ -117,13 +109,11 @@ const useFetchEventData = (endpoint) => {
             }
     
             if (!event_id || !authedRef.current) {
-                console.log("No event_id or not authenticated, stopping fetchData.");
                 return;
             }
     
             const eventData = await fetchEventStatus();
             if (!eventData) {
-                console.log("Event data is null, stopping fetchData.");
                 return;
             }
     
@@ -136,7 +126,6 @@ const useFetchEventData = (endpoint) => {
             if (!response.ok) throw new Error(`Failed to fetch ${endpoint}`);
     
             const result = await response.json();
-            console.log("Fetched data: ", result);
             setData(result);
     
         } catch (err) {

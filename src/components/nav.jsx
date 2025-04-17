@@ -78,7 +78,6 @@ const NavBar = () => {
 
     const handleNavigation = (path) => {
         if (event_id === null || event_id === undefined) {
-            console.log("No event_id found, redirecting to /find-event");
             navigate("/find-event");
         } else {
             navigate(event_id ? `/event/${event_id}${path}` : path);

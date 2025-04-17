@@ -22,16 +22,11 @@ export const AuthProvider = ({ children }) => {
   const intervalRef = useRef(null);
 
   const ReLogIn = async (eventId) => {
-    console.log("Reloogging in")
     const storedUser = JSON.parse(localStorage.getItem("user"));
 
     if (storedUser && eventId) {
-      console.log("trying local session auto sign in ", storedUser.email);
       let result = LogIn(storedUser.email, eventId);
       return result;
-    } else {
-      console.log("No local session found, not auto signing in.");
-      console.log("event id ", eventId);
     }
   }
 
@@ -39,12 +34,10 @@ export const AuthProvider = ({ children }) => {
     const token = sessionStorage.getItem("token");
   
     if (!token) {
-      console.log("No token found. Skipping interval setup.");
       return;
     }
   
     if (intervalRef.current) {
-      console.log("Interval already running, not setting another.");
       return;
     }
   
@@ -63,11 +56,9 @@ export const AuthProvider = ({ children }) => {
       }
     };
   
-    console.log("✅ Starting token expiry interval...");
     checkTokenExpiry();
   
     intervalRef.current = setInterval(() => {
-      console.log("⏱️ Checking token expiry...");
       checkTokenExpiry();
     }, 60 * 1000); 
   };
@@ -75,7 +66,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     return () => {
-      console.log("💥 Unmounting or event_id changed. Cleaning up interval...");
       stopTokenExpiryInterval();
     };
   }, [event_id]);
@@ -83,11 +73,8 @@ export const AuthProvider = ({ children }) => {
 
   const stopTokenExpiryInterval = () => {
     if (intervalRef.current) {
-      console.log("🛑 Clearing token expiry interval...");
       clearInterval(intervalRef.current);
       intervalRef.current = null;
-    } else {
-      console.log("No interval running to stop.");
     }
   };
   
@@ -114,12 +101,8 @@ export const AuthProvider = ({ children }) => {
   const LogIn = async (userEmail, eventId) => {
 
     if (authed) { 
-      console.log("Already authenticated, skipping login.");
       return;
     }
-
-    console.log("Logging in with email: ", userEmail);
-    console.log("Event ID: ", eventId);
 
     try {
       setLoading(true);
@@ -188,7 +171,6 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 Create a new user
   const createUser = async (userEmail, userName, isOrganiser, event_id, profileNum = 0, autoSignIn = true) => {
-    console.log("Creaint user profile num ", profileNum);
 
     try {
       setLoading(true);

@@ -157,7 +157,6 @@ const Polls = () =>
 
     const removeVote = async (pollId, selectedOption) => {
 
-      console.log("Removing vote for pollId:", pollId, "and selectedOption:", selectedOption);
       setNotifyLoad(true);
       try {
         const response = await fetch(`${API_BASE_URL}/polls/remove-vote`, {
@@ -172,7 +171,7 @@ const Polls = () =>
         });
     
         if (response.ok) {
-          console.log("Vote removed successfully");
+          notify("Vote removed successfully");
           refetch(); // Optionally refresh the poll data after the vote is removed
         } else {
           console.error("Failed to remove vote");
@@ -203,7 +202,6 @@ const Polls = () =>
         
             refetch();
             notify("Poll deleted successfully!");
-            console.log("Poll deleted successfully");
           } catch (error) {
             console.error("Error deleting poll:", error);
             notify(error.message || "An error occurred while deleting the poll.");

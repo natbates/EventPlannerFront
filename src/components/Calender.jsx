@@ -53,29 +53,17 @@ const SharedCalendarComponent = ({
     const formattedDate = formatDateToYYYYMMDD(date);
     const formattedEarliestDate = formatDateToYYYYMMDD(earliestDate);
     const formattedLatestDate = formatDateToYYYYMMDD(latestDate);
-  
-    console.log("Checking date:", formattedDate);
-    console.log("Earliest date allowed:", formattedEarliestDate);
-    console.log("Latest date allowed:", formattedLatestDate);
-  
+
     const isBeforeEarliest = formattedDate < formattedEarliestDate;
     const isAfterLatest = formattedDate > formattedLatestDate;
     const isExactEarliest = formattedDate === formattedEarliestDate;
     const isExactLatest = formattedDate === formattedLatestDate;
-  
-    console.log("Is before earliest:", isBeforeEarliest);
-    console.log("Is after latest:", isAfterLatest);
-    console.log("Is exact earliest:", isExactEarliest);
-    console.log("Is exact latest:", isExactLatest);
-  
     // Only grey out if outside range and not equal to boundary dates
     if ((isBeforeEarliest || isAfterLatest) && !isExactEarliest && !isExactLatest) {
-      console.log("Date is outside allowed range. Applying grey-out.");
       return { className: "grey-out" };
     }
   
     const status = userAvailability?.[formattedDate];
-    console.log("Availability status for this date:", status);
   
     if (status === "available") {
       return { className: "available-date" };
@@ -89,7 +77,6 @@ const SharedCalendarComponent = ({
       return { className: "tentative-date" };
     }
   
-    console.log("No specific status. Returning empty props.");
     return {};
   };
   
@@ -108,35 +95,23 @@ const SharedCalendarComponent = ({
         min={earliestDate}
         max={latestDate}
         onSelectSlot={(slotInfo) => {
-          console.log("Selected slot:", slotInfo);
   
           // Convert the selected slot to a Date object
           const selectedDate = new Date(slotInfo.start);
-          console.log("Selected Date (raw):", selectedDate);
   
           // Format the dates as "YYYY-MM-DD" for consistent comparison
           const formattedSelectedDate = formatDateToYYYYMMDD(selectedDate);
           const formattedEarliestDate = formatDateToYYYYMMDD(earliestDate);
           const formattedLatestDate = formatDateToYYYYMMDD(latestDate);
   
-          console.log("Formatted Selected Date:", formattedSelectedDate);
-          console.log("Formatted Earliest Date:", formattedEarliestDate);
-          console.log("Formatted Latest Date:", formattedLatestDate);
-  
           // Perform the date comparison
           const isWithinRange = (formattedSelectedDate >= formattedEarliestDate && formattedSelectedDate <= formattedLatestDate);
           const isExactMatch = (formattedSelectedDate === formattedEarliestDate || formattedSelectedDate === formattedLatestDate);
   
-          console.log("Is Selected Date within range:", isWithinRange);
-          console.log("Is Selected Date exact match with Earliest or Latest:", isExactMatch);
-  
           // If the selected date is within range or matches either the earliest or latest date, call onSelectDate
           if (isWithinRange || isExactMatch) {
-            console.log("Selected date is valid. Calling onSelectDate with:", formattedSelectedDate);
             onSelectDate(formattedSelectedDate);
-          } else {
-            console.log("Selected date is outside the valid range. Not calling onSelectDate.");
-          }
+          } 
         }}
         dayPropGetter={dayPropGetter}
       />
@@ -158,10 +133,6 @@ const MyCalendar = ({ data, processDate, userAvailability }) => {
     end: new Date(date),
     allDay: true,
   }));
-
-
-  console.log("Earliest Date:", earliestDate); 
-  console.log("Latest Date:", latestDate);
 
   return (
     <>
@@ -195,9 +166,6 @@ const buildAvailabilityMap = (rawAvailability) => {
 
 export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelectingDates, selectedDates}) => {
   if (!data || !attendeeData) return <p>Loading calendar...</p>;
-
-
-  console.log("Calender Data", data);
 
   const {user_id} = useAuth();
   const navigate = useNavigate();
@@ -238,8 +206,6 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
   });
 
   const newavailabilityMap = buildAvailabilityMap(availabilityMap);
-
-  console.log("New Availability Map", newavailabilityMap);
 
   const dayPropGetterMain = (date) => {
     const log = dayPropGetter(date);
@@ -399,27 +365,18 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
         min={earliestDate}
         max={latestDate}
         onSelectSlot={(slotInfo) => {
-          console.log("Selected slot:", slotInfo);
   
           // Convert the selected slot to a Date object
           const selectedDate = new Date(slotInfo.start);
-          console.log("Selected Date (raw):", selectedDate);
   
           // Format the dates as "YYYY-MM-DD" for consistent comparison
           const formattedSelectedDate = formatDateToYYYYMMDD(selectedDate);
           const formattedEarliestDate = formatDateToYYYYMMDD(earliestDate);
           const formattedLatestDate = formatDateToYYYYMMDD(latestDate);
   
-          console.log("Formatted Selected Date:", formattedSelectedDate);
-          console.log("Formatted Earliest Date:", formattedEarliestDate);
-          console.log("Formatted Latest Date:", formattedLatestDate);
-  
           // Perform the date comparison
           const isWithinRange = (formattedSelectedDate >= formattedEarliestDate && formattedSelectedDate <= formattedLatestDate);
           const isExactMatch = (formattedSelectedDate === formattedEarliestDate || formattedSelectedDate === formattedLatestDate);
-  
-          console.log("Is Selected Date within range:", isWithinRange);
-          console.log("Is Selected Date exact match with Earliest or Latest:", isExactMatch);
   
           // If the selected date is within range or matches either the earliest or latest date, call onSelectDate
           if (isWithinRange || isExactMatch) {
@@ -467,7 +424,6 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
                       <h4>{statusLabel} ({filtered.length})</h4>
                       <ul className="attendee-availability-list">
                         {filtered.map((entry, index) => {
-                          console.log("ENTRY ", entry);
                           const profile = Profiles.find((profile) => profile.id === Number(entry.profile_pic));
                           return (
                             <li key={index} className="attendee-availability-list-item">

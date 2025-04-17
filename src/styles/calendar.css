@@ -312,6 +312,16 @@
     gap: 10px;
 }
 
+.attendees-calendar .rbc-day-bg
+{
+    cursor: auto !important;
+}
+
+.attendees-calendar
+{
+    width: 100%;
+}
+
 .reminder .date-selection
 {
     display: flex;

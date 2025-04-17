@@ -86,7 +86,7 @@ const UserCalender = () => {
 
 
   return (
-    <div className="your-calendar">
+    <div className="attendees-calendar">
 
       <div className="top-line">
           <button className="back-button" onClick={() => { goEventPage(); }}>

@@ -79,36 +79,51 @@ const SharedCalendarComponent = ({
     <>
       <Calendar
         localizer={localizer}
-        longPressThreshold={1} 
+        longPressThreshold={1}
         selectable={true}
         startAccessor="start"
         endAccessor="end"
-        views={{ month: true }} 
-        defaultView="month" 
+        views={{ month: true }}
+        defaultView="month"
         defaultDate={earliestDate}
-        min={earliestDate} 
-        max={latestDate} 
+        min={earliestDate}
+        max={latestDate}
         onSelectSlot={(slotInfo) => {
           console.log("Selected slot:", slotInfo);
+  
+          // Convert the selected slot to a Date object
           const selectedDate = new Date(slotInfo.start);
-        
-          // Format the dates as "YYYY-MM-DD" to ensure consistency in comparison
+          console.log("Selected Date (raw):", selectedDate);
+  
+          // Format the dates as "YYYY-MM-DD" for consistent comparison
           const formattedSelectedDate = formatDateToYYYYMMDD(selectedDate);
           const formattedEarliestDate = formatDateToYYYYMMDD(earliestDate);
           const formattedLatestDate = formatDateToYYYYMMDD(latestDate);
-        
-          // Compare the formatted dates
-          if ((formattedSelectedDate >= formattedEarliestDate && formattedSelectedDate <= formattedLatestDate) || 
-              formattedSelectedDate === formattedEarliestDate || formattedSelectedDate === formattedLatestDate) {
-            console.log("Selected date:", selectedDate);
+  
+          console.log("Formatted Selected Date:", formattedSelectedDate);
+          console.log("Formatted Earliest Date:", formattedEarliestDate);
+          console.log("Formatted Latest Date:", formattedLatestDate);
+  
+          // Perform the date comparison
+          const isWithinRange = (formattedSelectedDate >= formattedEarliestDate && formattedSelectedDate <= formattedLatestDate);
+          const isExactMatch = (formattedSelectedDate === formattedEarliestDate || formattedSelectedDate === formattedLatestDate);
+  
+          console.log("Is Selected Date within range:", isWithinRange);
+          console.log("Is Selected Date exact match with Earliest or Latest:", isExactMatch);
+  
+          // If the selected date is within range or matches either the earliest or latest date, call onSelectDate
+          if (isWithinRange || isExactMatch) {
+            console.log("Selected date is valid. Calling onSelectDate with:", formattedSelectedDate);
             onSelectDate(formattedSelectedDate);
+          } else {
+            console.log("Selected date is outside the valid range. Not calling onSelectDate.");
           }
         }}
-        dayPropGetter={dayPropGetter} 
+        dayPropGetter={dayPropGetter}
       />
     </>
   );
-};
+  
 
 // MyCalendar Component
 const MyCalendar = ({ data, processDate, userAvailability }) => {

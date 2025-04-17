@@ -162,7 +162,7 @@ const NavBar = () => {
                             style={{ animationDelay: `${1 * 0.01}s` }}
                         >
                             <img src="/svgs/comments.svg" alt="comments" className="nav-icon" />
-                            {showCommentNotification && <div className="notifcation-circle-comment"></div>}
+                            {/* {showCommentNotification && <div className="notifcation-circle-comment"></div>} */}
                         </button>
                         <span className="tooltip-text">Comments</span>
                     </div>

@@ -218,7 +218,7 @@ const NavBar = () => {
                                     style={{ animationDelay: `${index * 0.01}s` }}
                                 >
                                     <img src={img} alt={label} className="nav-icon" />
-                                    {showNotification && <div className="notifcation-circle-comment"></div>}
+                                    {/* {showNotification && <div className="notifcation-circle-comment"></div>} */}
                                 </button>
                                 <span className="tooltip-text">{label}</span>
                             </div>

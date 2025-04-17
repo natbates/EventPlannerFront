@@ -35,6 +35,7 @@ const EventPage = () => {
     { path: "/attendees", label: "Attendees", img: "/svgs/attendees.svg"},
     { path: "/shared-calendar", label: "Shared Calendar", img: "/svgs/shared-calender.svg"},
     { path: "/links", label: "Links", img: "/svgs/links.svg"},
+    { path: "/comments", label: "Comments", img: "/svgs/comments.svg"},
     { path: "/polls", label: "Polls", img: "/svgs/polls.svg"},
     { path: "/location", label: "Location", img: "/svgs/location.svg"},
     { path: "/your-calendar", label: "Your Calendar", img: "/svgs/your-calender.svg"},

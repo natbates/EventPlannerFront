@@ -123,7 +123,7 @@ const SharedCalendarComponent = ({
       />
     </>
   );
-  
+} 
 
 // MyCalendar Component
 const MyCalendar = ({ data, processDate, userAvailability }) => {

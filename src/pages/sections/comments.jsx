@@ -260,8 +260,11 @@ const Comments = () =>
     };
     
     const handleCommentChange = (e) => {
-        setNewComment(e.target.value);
-    };
+      // Ensure that the comment does not exceed 100 characters
+      if (e.target.value.length <= 10) {
+          setNewComment(e.target.value);
+      }
+  };
 
     if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Comments"} />;
 

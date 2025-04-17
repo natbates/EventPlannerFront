@@ -91,44 +91,66 @@ const useFetchEventData = (endpoint) => {
     // 🔹 Fetch endpoint data only if event is valid
     const fetchData = async (refetch = false) => {
         console.log("Fetching data for endpoint: ", endpoint);
-      
-        while (logginRef.current || !authedRef.current) {
-            console.log("Waiting... Authed?", authedRef.current, "Logging in?", logginRef.current);
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        console.log("Authed and not logging in, proceeding to fetch data.");
-      
-        if (!event_id || !authedRef.current) {
-          console.log("No event_id or not authenticated, stopping fetchData.");
-          return;
-        }
-      
-        const eventData = await fetchEventStatus();
         
-        if (!eventData) {
-            console.log("Event data is null, stopping fetchData.");
-            return;
-        }
+        const timeoutDuration = 5000; // Timeout after 5 seconds (adjust as needed)
+        
+        const waitForAuth = new Promise((resolve, reject) => {
+          const interval = setInterval(() => {
+            console.log("Waiting... Authed?", authedRef.current, "Logging in?", logginRef.current);
+            
+            if (!logginRef.current && authedRef.current) {
+              clearInterval(interval);
+              resolve();
+            }
+          }, 100);
+          
+          setTimeout(() => {
+            clearInterval(interval);
+            reject(new Error("Authentication timed out"));
+          }, timeoutDuration);
+        });
       
         try {
+          // Wait for either successful authentication or timeout
+          await waitForAuth;
+          console.log("Authed and not logging in, proceeding to fetch data.");
+          
+          if (!event_id || !authedRef.current) {
+            console.log("No event_id or not authenticated, stopping fetchData.");
+            return;
+          }
+          
+          const eventData = await fetchEventStatus();
+          
+          if (!eventData) {
+            console.log("Event data is null, stopping fetchData.");
+            return;
+          }
+          
           const response = await fetch(`${API_BASE_URL}/${endpoint}?event_id=${event_id}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
           });
-      
+          
           if (!response.ok) throw new Error(`Failed to fetch ${endpoint}`);
-      
+          
           const result = await response.json();
           console.log("Fetched data: ", result);
           setData(result);
+          
         } catch (err) {
-          notify(`${endpoint.split("/")[0]}: Failed to fetch data`);
+          // If an error occurs in either authentication or fetching data, handle it
+          if (err.message === "Authentication timed out") {
+            notify("Authentication timed out, please try again later.");
+          } else {
+            notify(`${endpoint.split("/")[0]}: Failed to fetch data`);
+          }
           setError(err.message);
         } finally {
           setLoading(false);
         }
-      };
+    };
+      
       
 
     const goEventPage = () => {

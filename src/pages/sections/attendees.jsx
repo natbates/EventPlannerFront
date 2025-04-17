@@ -108,7 +108,6 @@ const Attendees = () => {
                 throw new Error("Failed to create user.");
             }
     
-    
             // Update the list of requests by removing the accepted request
             const updatedRequests = attendeeData.requests.filter((req) => req.email !== request.email);
             console.log("Updated requests list:", updatedRequests);

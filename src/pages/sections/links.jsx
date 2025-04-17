@@ -73,7 +73,7 @@ const Links = () => {
         };
 
         fetchNamesForLinks();
-    }, [linksData]);
+    }, [linksDataFromAPI]);
 
     const handleAddLink = async (e) => {
         e.preventDefault();

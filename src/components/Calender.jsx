@@ -91,7 +91,7 @@ const SharedCalendarComponent = ({
         onSelectSlot={(slotInfo) => {
           console.log("Selected slot:", slotInfo);
           const selectedDate = new Date(slotInfo.start);
-          if (selectedDate >= earliestDate && selectedDate <= latestDate) {
+          if ((selectedDate >= earliestDate && selectedDate <= latestDate) || (selectedDate === earliestDate || selectedDate === latestDate)) {
             onSelectDate(formatDateToYYYYMMDD(selectedDate));
           }
         }}

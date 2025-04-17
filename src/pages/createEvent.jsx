@@ -104,7 +104,7 @@ const CreateEvent = () => {
 
     const millisecondsPerDay = 1000 * 60 * 60 * 24;
     const calculatedDuration = Math.floor((latestDate - earliestDate) / millisecondsPerDay) + 1;
-    
+
     if (calculatedDuration < Number(duration)) {
       errors.duration = `The duration between the earliest and latest date (${calculatedDuration} days) is shorter than the entered duration (${duration} days).`;
       notify(errors.duration);
@@ -182,6 +182,10 @@ const CreateEvent = () => {
         profileNum
       );
 
+      if (!organiser_id) throw new Error("Failed to create user.");
+
+      console.log("Organiser ID:", organiser_id);
+
       const eventPayload = {
         ...formData,
         organiser_id,
@@ -197,9 +201,10 @@ const CreateEvent = () => {
       });
 
       if (!response.ok) throw new Error((await response.json()).message || "Failed to create event");
-
+      
       const data = await response.json();
       localStorage.removeItem("createEventData");
+      console.log("Event created:", data);
       navigate(`/event/${data.event_id}`);
       showFavouritePopup();
       notify("Event created successfully!");

@@ -164,6 +164,8 @@ const YourCalendar = () => {
 
     if (loading || secondaryloading) return <div className="loader"><p>Fetching Your Calender</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
+    console.log("Calendar Data:", calenderData);
+
     return (
         <div className="your-calendar">
             <div className="top-line">

@@ -116,6 +116,10 @@ const MyCalendar = ({ data, processDate, userAvailability }) => {
     allDay: true,
   }));
 
+
+  console.log("Earliest Date:", earliestDate); 
+  console.log("Latest Date:", latestDate);
+
   return (
     <>
   <SharedCalendarComponent

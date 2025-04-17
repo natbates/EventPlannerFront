@@ -279,32 +279,31 @@ const EventPage = () => {
   }, [authed, user_id]);
 
   const LogInFromEvent = async () => {
-
     setNotifyLoad(true);
-
+  
     const storedUser = JSON.parse(localStorage.getItem("user"));
+    let data = null;
+  
     if (storedUser && event_id) {
       console.log("Trying local session auto sign in ", storedUser.email);
-      await LogIn(storedUser.email, event_id); // ⬅️ optionally await if you want to wait before redirect
+      data = await LogIn(storedUser.email, event_id); // Await login result
     }
-
-    setNotifyLoad(false);
-
-    if (!authed && error === null) {
-      console.log("Redirecting as event exists and not logged in FROM EVENT");
+  
+    if (data === true) {
+      setNotifyLoad(false);
+    } else {
       navigate(`/event/${event_id}/login`);
-    } else
-    {
-      console.log("Logged in from event!");
     }
-
   }
 
   useEffect(() => {
 
-    LogInFromEvent();
+    if (!authed && event_id){
+      console.log("User not authenticated. Attempting to log in from event page.");
+      LogInFromEvent();
+    }
 
-  }, [authed, error, loading, event_id, navigate]);
+  }, [authed, event_id]);
   
 
   if (error) {

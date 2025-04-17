@@ -417,15 +417,15 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
 
             if (isSelectingDates)
             {
-              selectChosenDays(formatDateToYYYYMMDD(selected));
+              selectChosenDays(formatDateToYYYYMMDD(selectedDate));
             } else
             {
-              if (selectedDate === formatDateToYYYYMMDD(selected))
+              if (selectedDate === formatDateToYYYYMMDD(selectedDate))
               {
                 setSelectedDate(null);
               }
               else{
-                setSelectedDate(formatDateToYYYYMMDD(selected));
+                setSelectedDate(formatDateToYYYYMMDD(selectedDate));
               }
             }
           }

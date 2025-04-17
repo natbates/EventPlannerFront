@@ -92,6 +92,7 @@ const SharedCalendarComponent = ({
           console.log("Selected slot:", slotInfo);
           const selectedDate = new Date(slotInfo.start);
           if ((selectedDate >= earliestDate && selectedDate <= latestDate) || (selectedDate === earliestDate || selectedDate === latestDate)) {
+            console.log("Selected date:", selectedDate);
             onSelectDate(formatDateToYYYYMMDD(selectedDate));
           }
         }}
@@ -122,13 +123,13 @@ const MyCalendar = ({ data, processDate, userAvailability }) => {
 
   return (
     <>
-  <SharedCalendarComponent
-      events={events}
-      earliestDate={earliestDate}
-      latestDate={latestDate}
-      onSelectDate={processDate} // Passing processDate function from parent to SharedCalendarComponent
-      userAvailability={userAvailability}
-    />
+     <SharedCalendarComponent
+        events={events}
+        earliestDate={earliestDate}
+        latestDate={latestDate}
+        onSelectDate={processDate} // Passing processDate function from parent to SharedCalendarComponent
+        userAvailability={userAvailability}
+      />
     </>
   );
 };

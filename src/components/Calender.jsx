@@ -239,6 +239,8 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
 
   const newavailabilityMap = buildAvailabilityMap(availabilityMap);
 
+  console.log("New Availability Map", newavailabilityMap);
+
   const dayPropGetterMain = (date) => {
     const log = dayPropGetter(date);
 
@@ -319,7 +321,14 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
     }
   
     // Check if the date is outside the valid range
-    if (date < earliestDate || date > latestDate) {
+    const formatted = formatDateToYYYYMMDD(date);
+    const earliest = formatDateToYYYYMMDD(earliestDate);
+    const latest = formatDateToYYYYMMDD(latestDate);
+
+    const isWithinRange = (formatted >= earliest && formatted <= latest);
+    const isExactMatch = (formatted === earliest || formatted === latest);
+    
+    if (!isWithinRange && !isExactMatch) {
       return { className: "grey-out", style: {opacity: isSelectingDates ? "0.6" : "1" }};
     }
   

@@ -81,7 +81,7 @@
 .create-input-container .character-counter-bottom
 {
     transform: none;
-    top: -20px;
+    bottom: 30px;
 }
 
 .create-input-container input
@@ -151,6 +151,17 @@
 {
     display: flex;
 }
+
+input, select {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
+}
+
+input[type="date"] {
+    height: 50px;
+}
+
 
 .duration
 {

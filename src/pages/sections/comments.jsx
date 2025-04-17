@@ -221,7 +221,7 @@ const Comments = () =>
     const renderComment = (comment, level = 0) => {
 
         // Get replies, sorted oldest to newest
-        const replies = commentData.comments && commentData.comments
+        const replies = commentsWithUserDetails && commentsWithUserDetails
           .filter((c) => c.reply_to === comment.uuid)
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 

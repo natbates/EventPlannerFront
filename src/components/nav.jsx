@@ -148,7 +148,7 @@ const NavBar = () => {
                                 <img src="/svgs/lightmode.svg" alt="light mode" className="nav-icon" /> :
                                 <img src="/svgs/darkmode.svg" alt="dark mode" className="nav-icon" />}
                         </button>
-                        <span className="tooltip-text">{theme === "light" ? "Light Mode" : "Dark Mode"}</span>
+                        <span className="tooltip-text">{theme != "light" ? "Light Mode" : "Dark Mode"}</span>
                     </div>
                 </div>
             )}

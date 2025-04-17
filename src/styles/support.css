@@ -90,3 +90,20 @@
 {
     margin-top: 10px;
 }
+
+.simple-list {
+    padding-left: 1.5rem;
+    margin: 1rem 0 1.5rem;
+}
+  
+.simple-list li {
+    margin-bottom: 0.5rem;
+    list-style-type: disc;
+}
+  
+.section-header {
+    font-size: 1.25rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}

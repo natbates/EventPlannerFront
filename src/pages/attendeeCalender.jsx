@@ -50,7 +50,6 @@ const UserCalender = () => {
             );
             if (!res.ok) throw new Error("Failed to fetch availability");
             const data = await res.json();
-            console.log("fetched availability →", data);
             setAvailability(data);
           })(),
           (async () => {
@@ -66,7 +65,6 @@ const UserCalender = () => {
             );
             if (!res.ok) throw new Error("Failed to fetch username");
             const data = await res.json();
-            console.log("fetched username →", data);
             setUsername(data.name);  // or data.username depending on your payload
           })(),
         ]);

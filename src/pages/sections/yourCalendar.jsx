@@ -48,7 +48,6 @@ const YourCalendar = () => {
         }
     
         const responseData = await response.json();
-        console.log("Availability updated successfully:", responseData);
         updateEventPage(event_id, "calender");
         updateLastOpened("calender");
         fetchUserAvailability(); // Refetch to reflect changes
@@ -63,11 +62,9 @@ const YourCalendar = () => {
 
     const processDate = async (date) => {
 
-        console.log("Processing date:", date);
         // Get the current status or default to "not available"
         const currentStatus = (pendingAvailability && pendingAvailability[date]) ?? null;
 
-        console.log("Current Status:" + currentStatus);
 
         // Define the new status cycle
         let newStatus;
@@ -81,17 +78,12 @@ const YourCalendar = () => {
           newStatus = "available"; // Default cycle
         }
 
-        console.log("New Status:", newStatus);
-
-        console.log("Pending Availability:", pendingAvailability);
-
         setPendingAvailability((prev) => {
           const updated = { ...prev, [date]: newStatus };
       
           return { ...updated }; // Return the updated state
       });
 
-      console.log("Pending Availability After:", pendingAvailability);
     };
 
     const fetchUserAvailability = async () => {
@@ -149,7 +141,6 @@ const YourCalendar = () => {
   
           setUserAvailability({});
           setPendingAvailability({});
-          console.log("Availability cleared successfully!");
           fetchUserAvailability();
       } catch (err) {
           console.error("Error clearing availability:", err);
@@ -164,7 +155,6 @@ const YourCalendar = () => {
 
     if (loading || secondaryloading) return <div className="loader"><p>Fetching Your Calender</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
-    console.log("Calendar Data:", calenderData);
 
     return (
         <div className="your-calendar">

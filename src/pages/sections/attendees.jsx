@@ -84,15 +84,11 @@ const Attendees = () => {
         }
     
         try {
-            console.log("Processing request for:", request.username);
     
             // Call createUser to add the user to the event (attendee role)
             const { email, username, profile_pic} = request;
-            console.log("Creating user for:", email, username);
 
             let profileNum = profile_pic;
-
-            console.log("LOOK HERE PLEASE ", profileNum);
     
             const userResponse = await createUser(  email, 
               username, 
@@ -107,7 +103,6 @@ const Attendees = () => {
     
             // Update the list of requests by removing the accepted request
             const updatedRequests = attendeeData.requests.filter((req) => req.email !== request.email);
-            console.log("Updated requests list:", updatedRequests);
     
             // Now, update the requests in the event
             const response = await fetch(`${API_BASE_URL}/attendees/update-requests`, {
@@ -129,7 +124,6 @@ const Attendees = () => {
             }
     
             const data = await response.json();
-            console.log("Request removed from event successfully:", data);
             await refetch();
             notify("Request accepted and user added to the event.");
     

@@ -26,7 +26,6 @@ const AttendeeCalendar = () => {
     const navigate = useNavigate();
     const { notify, setNotifyLoad } = useNotification();
 
-    console.log("Attendee Calendar Rendered ", attendeeAvailability);
 
     // Fetch attendee availability
     const fetchAttendeeAvailability = async () => {
@@ -74,8 +73,6 @@ const AttendeeCalendar = () => {
     // Select or Deselect Chosen Days
     const selectChosenDays = async (date) => {
 
-        console.log("Selected date:", date);
-
         // Check if the date is within the event duration before proceeding
         if (!isDateWithinEventDuration(date)) {
             notify("You cannot select this date, it is outside the event duration.");
@@ -98,7 +95,6 @@ const AttendeeCalendar = () => {
             }
     
             // Add the new date
-            console.log(prevSelectedDates);
             if (prevSelectedDates != null)  return [...prevSelectedDates, date];
             else { return [date]}
         });

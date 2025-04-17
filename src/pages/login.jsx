@@ -45,33 +45,25 @@ const Login = () => {
             
           const storedUser = JSON.parse(localStorage.getItem("user"));
           if (storedUser && event_id) {
-            console.log("Trying local session auto sign in ", storedUser.email);
             await LogIn(storedUser.email, event_id); // ⬅️ optionally await if you want to wait before redirect
           }
       
           if (!event_id || event_id === "undefined") {
-            console.log("event_id is undefined. Redirecting to home.");
             navigate(`/`);
             return;
-          } else {
-            console.log("Event ID is defined:", event_id);
-          }
+          } 
       
           if (authed && event_id) {
-            console.log(location.pathname);
-            console.log("GOING TO HOME PAGE FROM LOGIN");
             navigate(`/event/${event_id}`);
           }
           const startTime = Date.now();
           while (!fingerprintRef.current && !authed) {
-            console.log("Waiting for fingerprint...");
             
             // Wait for the poll interval before checking again
             await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
           
             // Check if the maximum wait time has been exceeded
             if (Date.now() - startTime > MAX_WAIT_TIME) {
-              console.log("Max wait time reached. Exiting fingerprint wait.");
               break; // Exit the loop after the max wait time
             }
           }
@@ -89,7 +81,6 @@ const Login = () => {
         if (userFingerprint && event_id) {
             // Make API call to auto-sign-in endpoint using fetch
             setNotifyLoad(true);
-            console.log("Auto sign-in with fingerprint:", userFingerprint);
             fetch(`${API_BASE_URL}/users/auto-sign-in`, {
                 method: 'POST', // Using POST method for sending data
                 headers: {
@@ -103,13 +94,11 @@ const Login = () => {
                 .then((response) => response.json()) // Parse the response as JSON
                 .then((data) => {
                     if (data.success) {
-                        console.log(`Auto sign-in successful for: ${data.email}`);
                         // Handle the successful sign-in (e.g., redirect, set logged-in state)
                         setLoginEmail(data.email);
                         setNotifyLoad(false);
                     } else {
                         setNotifyLoad(false);
-                        console.log('Fingerprint did not match any attendee or organiser');
                     }
                 })
                 .catch((error) => {
@@ -308,8 +297,6 @@ const Login = () => {
     }
 
     if (loginStep === "pending") {
-
-        console.log("requestData", requestData);
 
         const profile = Profiles.find((profile) => profile.id === Number(requestData.profile_pic));
 

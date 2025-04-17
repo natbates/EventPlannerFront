@@ -68,8 +68,6 @@ const Comments = () =>
       setReplyText("");
       setReplyTo(null);
 
-      console.log("POSTING COMMENT ", newComment, replyText, replyTo);
-
       handleAddComment(e, true);
 
     }
@@ -326,7 +324,6 @@ const Comments = () =>
           </div>
          </div>
 
-         {console.log("here" + JSON.stringify(commentsWithUserDetails))}
 
          {!loading && commentsWithUserDetails && commentsWithUserDetails.length > 0 && (
           <div className="section">

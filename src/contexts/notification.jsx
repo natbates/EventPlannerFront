@@ -16,7 +16,6 @@ export const NotificationProvider = ({ children }) => {
   // Function to trigger a new notification
   const notify = (message, duration = 3000) => {
     if (activeMessages.current.has(message)) {
-      console.log("Duplicate notification skipped:", message);
       return;
     }
 
@@ -101,8 +100,6 @@ export const NotificationProvider = ({ children }) => {
   }, [notifyLoad]);
 
   const storedTheme = localStorage.getItem("theme") || "light";
-
-  console.log("Stored theme:", storedTheme);
 
   return (
     <NotificationContext.Provider value={{ notify, setNotifyLoad, notifyLoad, showFavouritePopup}}>

@@ -55,7 +55,6 @@ const ToDo = () => {
 
                 for (const task of allTasks) {
                     const profileData = await fetchProfile(task.creator_id);
-                    console.log("Profile Data: ", profileData);
                     
                     const updatedTask = {
                         ...task,

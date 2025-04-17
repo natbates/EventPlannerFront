@@ -39,7 +39,6 @@ const Location = () => {
     const cancelManualInput = () => {
         // Reset manualLocation to initial values
         setManualLocation(initialLocation);
-        console.log("Manual location reset to initial values:", initialLocation);
     };
 
     const handleManualInputChange = (e) => {
@@ -96,7 +95,6 @@ const Location = () => {
     
             if (data.results && data.results.length > 0) {
                 const { lat, lng } = data.results[0].geometry;
-                console.log("Geocoded Location:", { lat, lon: lng });
                 setLocation({ lat, lon: lng });
                 return { lat, lon: lng };
             } else {
@@ -114,7 +112,6 @@ const Location = () => {
     
 
     const setNewLocation = async (coords) => {
-        console.log("Clicked Coordinates:", coords.lon, coords.lat);
     
         const apiKey = "f9dc74471bf04fdda78a121a06481d0c";
         setNotifyLoad(true);
@@ -125,7 +122,6 @@ const Location = () => {
             if (data.results.length === 0) throw new Error("Reverse geocoding failed.");
     
             const components = data.results[0].components;
-            console.log("Reverse Geocoded Components:", components);
     
             // Create the new location object
             const newLocation = {
@@ -153,10 +149,7 @@ const Location = () => {
             return;
         }
     
-        console.log("Updating Location:", newLocation);
         setNotifyLoad(true);
-
-        console.log("API URL:", `${API_BASE_URL}/location/update-location`);
 
         try {
             const res = await fetch(`${API_BASE_URL}/location/update-location`, {
@@ -214,7 +207,6 @@ const Location = () => {
 
         if (locationData.location?.lat && locationData.location?.lon) {
             // If latitude and longitude are already available, set them directly
-            console.log("Setting Location from API:", locationData.location.lat, locationData.location.lon);
             setLocation({ lat: locationData.location.lat, lon: locationData.location.lon });
             setManualLocation(locationData.location); // Set initial manual location
             setInitialLocation(locationData.location); // Store the initial state

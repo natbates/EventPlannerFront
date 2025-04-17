@@ -292,9 +292,7 @@ const EventPage = () => {
     {
       setLoading(true);
       fetchUserAvailability();
-    } else {
-      console.log("User not authenticated or user_id is missing. Skipping fetchEventData.");
-    }
+    } 
     
   }, [authed, user_id]);
 
@@ -305,7 +303,6 @@ const EventPage = () => {
     let data = null;
   
     if (storedUser && event_id) {
-      console.log("Trying local session auto sign in ", storedUser.email);
       data = await LogIn(storedUser.email, event_id); // Await login result
     }
   
@@ -319,7 +316,6 @@ const EventPage = () => {
   useEffect(() => {
 
     if (!authed && event_id && event){
-      console.log("User not authenticated. Attempting to log in from event page.");
       LogInFromEvent();
     }
 
@@ -376,7 +372,6 @@ const EventPage = () => {
         {attendeeDetails.length > 0 && (
           <div className="attendee-list">
             {attendeeDetails.map((attendee, index) => {
-              console.log("Attendee details:", attendee);
               const profile = Profiles.find((profile) => profile.id === Number(attendee.profile_pic)); // Assuming 'id' links attendees to profiles
               return (
                 <div key={index} className="profile">

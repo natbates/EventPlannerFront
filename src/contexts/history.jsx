@@ -27,7 +27,6 @@ export const HistoryProvider = ({ children }) => {
         }
       });
       const data = await res.json();
-      console.log("Event status data:", data.status);
       setEventStatus(data.status); // e.g., "active", "confirmed", "cancelled"
     } catch (error) {
       console.error("Failed to fetch event status", error);
@@ -98,19 +97,16 @@ export const HistoryProvider = ({ children }) => {
       }
   
       const data = await response.json();
-      console.log("Last opened path updated successfully:", data);
     } catch (error) {
       console.error("Error updating last opened path:", error);
     }
   };
   
   const updateEventPage = async (event_id, pathname) => {
-    console.log("Updating event page last opened for event:", event_id, "at path:", pathname);
     if (!authed || !event_id) return;
   
     try {
       const utcTime = moment().utc().format(); // Strict UTC timestamp
-      console.log("UTC TIME:", utcTime);
   
       const response = await fetch(`${API_BASE_URL}/events/update-last-update`, {
         method: "POST",
@@ -127,7 +123,6 @@ export const HistoryProvider = ({ children }) => {
       }
   
       const data = await response.json();
-      console.log("Event last opened path updated successfully:", data);
     } catch (error) {
       console.error("Error updating event last opened path:", error);
     }

@@ -135,7 +135,6 @@ const Settings = () => {
 
             notify("Info updated successfully.");
             const isAuthed = await LogIn(editedUser.email, event_id);
-            console.log("User updated successfully:", name);
             if (isAuthed)
             {
                 setInitialUser({
@@ -145,7 +144,6 @@ const Settings = () => {
                     profile_pic: editedUser.profile_pic || 0, // Update with the correct profile_pic if available
                 });
             }    
-            console.log("Inital User updated successfully:", initialUser);
         } catch (error) {
             console.error("Error updating user:", error);
             notify("There was a problem updating your user information. ");

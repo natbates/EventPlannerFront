@@ -184,7 +184,6 @@ const CreateEvent = () => {
 
       if (!organiser_id) throw new Error("Failed to create user.");
 
-      console.log("Organiser ID:", organiser_id);
 
       const eventPayload = {
         ...formData,
@@ -204,7 +203,6 @@ const CreateEvent = () => {
       
       const data = await response.json();
       localStorage.removeItem("createEventData");
-      console.log("Event created:", data);
       navigate(`/event/${data.event_id}`);
       showFavouritePopup();
       notify("Event created successfully!");

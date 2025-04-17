@@ -40,9 +40,33 @@
 }
 
 .thank-you-message {
-    text-align: center;
+    text-align: start;
 }
 
+.contact-form label
+{
+    margin-bottom: 10px;
+}
+
+.contact .character-counter-bottom
+{
+    transform: translateY(-20px);
+}
+
+
+@media (max-width: 530px) {
+    .contact textarea {
+        padding-bottom: 100px;
+    }
+    
+}
+
+.contact input
+{
+    margin-top: 10px;
+    margin-bottom: 15px;
+    width: 100%;
+}
 
 @media (max-width: 714px) {
     .contact h1 {

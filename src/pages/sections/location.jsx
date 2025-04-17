@@ -6,7 +6,6 @@ import PageError from "../../components/PageError";
 import { useEffect, useState, useRef } from "react";
 import L from "leaflet";
 import MapComponent from "../../components/Map";
-import { API_BASE_URL } from "../../components/App";
 import { useNotification } from "../../contexts/notification";
 import { useTheme } from "../../contexts/theme";
 import { useNavigate } from "react-router-dom";

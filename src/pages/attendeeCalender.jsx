@@ -19,10 +19,18 @@ const UserCalender = () => {
   const navigate = useNavigate();
   const {theme} = useTheme();
 
+
   useEffect(() => {
     const fetchAvailability = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/calendar/fetch-user-availability/${user_id_param}`);
+        const res = await fetch(`${API_BASE_URL}/calendar/fetch-user-availability/${user_id_param}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${sessionStorage.getItem("token")}`,
+          },
+        });
+        
         if (!res.ok) throw new Error("Failed to fetch availability");
 
         const data = await res.json();
@@ -35,7 +43,14 @@ const UserCalender = () => {
 
     const fetchUserName = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${user_id_param}`);
+        const res = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${user_id_param}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${sessionStorage.getItem("token")}`,
+          },
+        });
+        
         if (!res.ok) throw new Error("Failed to fetch username");
 
         const data = await res.json();

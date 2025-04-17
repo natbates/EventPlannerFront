@@ -209,6 +209,7 @@ const Login = () => {
         setLoginError(null);
 
         try {
+            setNotifyLoad(true);
             const result = await LogIn(loginEmail, event_id);
 
             if (result === true) {
@@ -226,6 +227,8 @@ const Login = () => {
             }
         } catch (err) {
             setLoginError(err.message);
+        } finally {
+            setNotifyLoad(false);
         }
     };
 

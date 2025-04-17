@@ -99,7 +99,7 @@ const EventPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-        },
+          "Authorization": `Bearer ${sessionStorage.getItem("token")}`},
         body: JSON.stringify({ event_id }),
       });
 
@@ -209,7 +209,7 @@ const EventPage = () => {
   };
   
   const fetchUserAvailability = async () => {
-    if (user_id)
+    if (user_id || !authed) return; 
     {
       try {
         const response = await fetch(`${API_BASE_URL}/calendar/fetch-user-availability/${user_id}`, {

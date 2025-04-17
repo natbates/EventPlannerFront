@@ -16,7 +16,7 @@ export const HistoryProvider = ({ children }) => {
 
 
   const fetchEventStatus = async (event_id) => {
-    if (!event_id) return;
+    if (!event_id || !authed) return;
 
     try {
       const res = await fetch(`${API_BASE_URL}/events/fetch-event-status?event_id=${event_id}`, {
@@ -37,7 +37,7 @@ export const HistoryProvider = ({ children }) => {
 
   const fetchLastOpened = async (user_id) => {
 
-    if (!user_id || user_id===undefined || user_id==="undefined") {return;}
+    if (!user_id || user_id===undefined || user_id==="undefined" || !authed) {return;}
 
     try {
       const response = await fetch(`${API_BASE_URL}/users/fetch-last-opened`, {
@@ -59,7 +59,7 @@ export const HistoryProvider = ({ children }) => {
   };
 
   const fetchLastUpdated = async (event_id) => {
-    if (!event_id) {return};
+    if (!event_id || !authed) {return};
     try {
       const response = await fetch(`${API_BASE_URL}/events/fetch-last-update`, {
         method: "POST",
@@ -81,7 +81,7 @@ export const HistoryProvider = ({ children }) => {
   };
 
   const updateLastOpened = async (path) => {
-  
+    if (!user_id || user_id === undefined || user_id === "undefined" || !authed) return;
     try {
       const response = await fetch(`${API_BASE_URL}/users/update-last-opened`, {
         method: "POST",
@@ -106,6 +106,7 @@ export const HistoryProvider = ({ children }) => {
   
   const updateEventPage = async (event_id, pathname) => {
     console.log("Updating event page last opened for event:", event_id, "at path:", pathname);
+    if (!authed || !event_id) return;
   
     try {
       const utcTime = moment().utc().format(); // Strict UTC timestamp

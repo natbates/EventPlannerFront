@@ -155,7 +155,9 @@ const Location = () => {
     
         console.log("Updating Location:", newLocation);
         setNotifyLoad(true);
-    
+
+        console.log("API URL:", `${API_BASE_URL}/location/update-location`);
+
         try {
             const res = await fetch(`${API_BASE_URL}/location/update-location`, {
               method: "PUT",

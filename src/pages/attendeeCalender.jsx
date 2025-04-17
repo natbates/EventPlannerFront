@@ -6,6 +6,7 @@ import useFetchEventData from "../hooks/useFetchEventData";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
 import { useTheme } from "../contexts/theme";
+import PageError from "../components/PageError";
 
 const UserCalender = () => {
  const { data: calenderData, event_id, refetch, goEventPage } = useFetchEventData("calendar/fetch-calendar");

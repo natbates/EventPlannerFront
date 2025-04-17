@@ -51,12 +51,31 @@ const SharedCalendarComponent = ({
   // Function to grey out dates outside the range
   const dayPropGetter = (date) => {
     const formattedDate = formatDateToYYYYMMDD(date);
+    const formattedEarliestDate = formatDateToYYYYMMDD(earliestDate);
+    const formattedLatestDate = formatDateToYYYYMMDD(latestDate);
   
-    if (date < earliestDate || date > latestDate) {
+    console.log("Checking date:", formattedDate);
+    console.log("Earliest date allowed:", formattedEarliestDate);
+    console.log("Latest date allowed:", formattedLatestDate);
+  
+    const isBeforeEarliest = formattedDate < formattedEarliestDate;
+    const isAfterLatest = formattedDate > formattedLatestDate;
+    const isExactEarliest = formattedDate === formattedEarliestDate;
+    const isExactLatest = formattedDate === formattedLatestDate;
+  
+    console.log("Is before earliest:", isBeforeEarliest);
+    console.log("Is after latest:", isAfterLatest);
+    console.log("Is exact earliest:", isExactEarliest);
+    console.log("Is exact latest:", isExactLatest);
+  
+    // Only grey out if outside range and not equal to boundary dates
+    if ((isBeforeEarliest || isAfterLatest) && !isExactEarliest && !isExactLatest) {
+      console.log("Date is outside allowed range. Applying grey-out.");
       return { className: "grey-out" };
     }
   
     const status = userAvailability?.[formattedDate];
+    console.log("Availability status for this date:", status);
   
     if (status === "available") {
       return { className: "available-date" };
@@ -65,15 +84,15 @@ const SharedCalendarComponent = ({
     if (status === "not available") {
       return { className: "not-available-date" };
     }
-
+  
     if (status === "tentative") {
       return { className: "tentative-date" };
     }
   
+    console.log("No specific status. Returning empty props.");
     return {};
   };
-
-  const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
 
   return (
     <>

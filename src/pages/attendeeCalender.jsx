@@ -94,7 +94,7 @@ const UserCalender = () => {
               <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
             <img src="/svgs/back-arrow.svg" alt="Back" />}
         </button>
-        <h2>{username?.name} Calendar</h2>
+        <h2>{username?.split(" ")[0] || "User"}'s Calendar</h2>
       </div>
 
       {!availability && <p style={{marginBottom: "30px"}}>Attendee has not added any avilability yet! Please remind them too</p>}

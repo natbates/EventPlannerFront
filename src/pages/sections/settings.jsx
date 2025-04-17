@@ -8,6 +8,7 @@ import ProfileSelector from "../../components/ProfileSelector";
 import { useNotification } from "../../contexts/notification";
 import PageError from "../../components/PageError";
 import { useTheme } from "../../contexts/theme";
+import { charLimits } from "../createEvent";
 
 const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -98,10 +99,6 @@ const Settings = () => {
             // Remove any numbers
             value = value.replace(/[0-9]/g, '');
     
-            // Limit the length to 15 characters
-            if (value.length > 15) {
-                value = value.slice(0, 15);
-            }
         }
     
         // Update the state with the validated value
@@ -371,46 +368,57 @@ const Settings = () => {
                         <div className="one-line-input">
                             <div className="settings-input">
                                 <label>First Name:</label>{" "}
-                                <input
-                                    type="text"
-                                    value={editedUser.firstName}
-                                    onChange={(e) => handleUserInputChange(e, "firstName")}
-                                    maxLength={15}
-                                    pattern="[A-Za-z]*"
-                                    onInput={(e) => {
-                                        // Capitalize first letter, rest lowercase
-                                        const value = e.target.value;
-                                        const formattedValue =
-                                            value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-                                        e.target.value = formattedValue;
-                                    }}
-                                />
+                                <div className="poll-input-container">
+                                    <input
+                                        type="text"
+                                        value={editedUser.firstName}
+                                        onChange={(e) => handleUserInputChange(e, "firstName")}
+                                        maxLength={charLimits.firstName}
+                                        pattern="[A-Za-z]*"
+                                        onInput={(e) => {
+                                            // Capitalize first letter, rest lowercase
+                                            const value = e.target.value;
+                                            const formattedValue =
+                                                value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+                                            e.target.value = formattedValue;
+                                        }}
+                                        
+                                    />
+                                    <p className="character-counter">{editedUser.firstName.length}/{charLimits.firstName}</p>
+                                </div>
                             </div>
                             <div className="settings-input">
                                 <label>Last Name:</label>{" "}
-                                <input
-                                    type="text"
-                                    value={editedUser.lastName}
-                                    onChange={(e) => handleUserInputChange(e, "lastName")}
-                                    maxLength={15}
-                                    pattern="[A-Za-z]*"
-                                    onInput={(e) => {
-                                        // Capitalize first letter, rest lowercase
-                                        const value = e.target.value;
-                                        const formattedValue =
-                                            value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-                                        e.target.value = formattedValue;
-                                    }}
-                                />
+                                <div className="poll-input-container">
+                                    <input
+                                        type="text"
+                                        value={editedUser.lastName}
+                                        onChange={(e) => handleUserInputChange(e, "lastName")}
+                                        maxLength={charLimits.lastName}
+                                        pattern="[A-Za-z]*"
+                                        onInput={(e) => {
+                                            // Capitalize first letter, rest lowercase
+                                            const value = e.target.value;
+                                            const formattedValue =
+                                                value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+                                            e.target.value = formattedValue;
+                                        }}
+                                    />
+                                    <p className="character-counter">{editedUser.lastName.length}/{charLimits.lastName}</p>
+                                </div>
                             </div>
                         </div>
                         <div className="settings-input">
                             <label>Email:</label>
+                            <div className="poll-input-container">
                             <input
                                 type="email"
                                 value={editedUser.email}
                                 onChange={(e) => handleUserInputChange(e, "email")}
+                                maxLength={charLimits.email}
                             />
+                              <p className="character-counter">{editedUser.email.length}/{charLimits.email}</p>
+                            </div>
                         </div>
                         <div className="settings-profile-input">
                             <label>Profile Picture:</label>
@@ -451,20 +459,28 @@ const Settings = () => {
                         {/* Title */}
                         <div className="settings-input">
                             <label>Title:</label>{" "}
-                            <input
-                                type="text"
-                                value={editedEvent.title}
-                                onChange={(e) => handleInputChange(e, "title")}
-                            />
+                            <div className="poll-input-container">
+                                <input
+                                    type="text"
+                                    value={editedEvent.title}
+                                    onChange={(e) => handleInputChange(e, "title")}
+                                    maxLength={charLimits.title}
+                                />
+                                <p className="character-counter">{editedEvent.title.length}/{charLimits.title}</p>
+                            </div>
                         </div>
 
                         {/* Description */}
                         <div className="settings-input">
                             <label>Description:</label>{" "}
+                            <div className="poll-input-container">
                             <textarea
                                 value={editedEvent.description}
                                 onChange={(e) => handleInputChange(e, "description")}
+                                maxLength={charLimits.description}
                             />
+                            <p className="character-counter-bottom">{editedEvent.description.length}/{charLimits.description}</p>
+                            </div>
                         </div>
 
                         {/* Dates */}

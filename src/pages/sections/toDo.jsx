@@ -21,6 +21,7 @@ const ToDo = () => {
     const [updatedToDoData, setUpdatedToDoData] = useState({ to_do: [], done: [] });
     const [secondaryloading, setSecondaryLoading] = useState(true);
     // Fetch user profiles and update tasks with username and profile_pic
+    const maxTodoLength = 40;
     
     useEffect(() => {
         const fetchProfile = async (userId) => {
@@ -185,6 +186,12 @@ const ToDo = () => {
         }
     };
 
+    const handleTaskChange = (e) => {
+        if (e.target.value.length <= maxTodoLength) {
+            setNewTask(e.target.value);
+        }
+    };
+
     if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"To Do"} />;
 
     if (loading || secondaryloading) return <div className="loader"><p>Fetching To Dos</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
@@ -202,12 +209,15 @@ const ToDo = () => {
 
             {/* New Task Input */}
             <div className="add-task">
-                <input
-                    type="text"
-                    placeholder="Enter a new task..."
-                    value={newTask}
-                    onChange={(e) => setNewTask(e.target.value)}
-                />
+                <div className="to-do-input-container">
+                    <input
+                        type="text"
+                        placeholder="Enter a new task..."
+                        value={newTask}
+                        onChange={handleTaskChange}
+                    />
+                    <p className="task-length">{newTask.length} / {maxTodoLength}</p>
+                </div>
                 <button className="small-button" onClick={handleAddTask}>Add Task</button>
             </div>
 
@@ -226,11 +236,11 @@ const ToDo = () => {
 
                                 return (
                                     <li key={task.task_id}>
-                                        <span className="to-do-profile">
+                                        <span className="profile">
                                             <img className="profile-pic" src={profile.path} alt={task.username} />
                                             <p className={`${task.creator_id === user_id ? "you underline" : ""} to-do-creator`}>{task.username}</p>
-                                            <p>{task.task}</p>
                                         </span>
+                                        <p className="task">{task.task}</p>
                                         <div className="button-container">
                                             {(role !== "attendee" || task.creator_id === user_id) && 
                                                 <button className="small-button" onClick={() => handleDeleteTask(task.task_id)}>🗑</button>}
@@ -250,11 +260,11 @@ const ToDo = () => {
                                 const profile = Profiles.find((profile) => profile.id === Number(task.profile_pic));
                                 return (
                                     <li key={task.task_id}>
-                                        <span className="to-do-profile">
+                                        <span className="profile">
                                             <img className="profile-pic" src={profile.path} alt={task.username} />
                                             <p className={`${task.creator_id === user_id ? "you underline" : ""} to-do-creator`}>{task.username}</p>
-                                            <p>{task.task}</p>
                                         </span>
+                                        <p className="task">{task.task}</p>
                                         <div className="button-container">
                                             {(role !== "attendee" || task.creator_id === user_id) && 
                                                 <button className="small-button" onClick={() => handleDeleteTask(task.task_id)}>🗑</button>}

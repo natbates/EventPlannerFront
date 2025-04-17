@@ -136,7 +136,7 @@ export const AuthProvider = ({ children }) => {
           role: isOrganiser ? "organiser" : "attendee",
           event_id: event_id || null,
           profileNum: profileNum || 0,
-        }),
+        })
       });
 
       if (!response.ok) {

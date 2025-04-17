@@ -11,6 +11,10 @@ import PageError from "../../components/PageError";
 import { useTheme } from "../../contexts/theme";
 import { useNavigate } from "react-router-dom";
 
+const MAX_TITLE_LENGTH = 30;
+const MAX_DESCRIPTION_LENGTH = 100;
+const MAX_OPTION_LENGTH = 30;
+
 const Polls = () =>
 {
     const { data: pollsData, error, loading, event_id, refetch, goEventPage } = useFetchEventData("polls/fetch-polls");
@@ -266,115 +270,136 @@ const Polls = () =>
 
         <div className="poll-container">
           {pollsData != null && pollsData.polls ? (
-            // Sort polls by priority (level-3 > level-2 > level-1)
-            Object.keys(pollsData.polls)
-              .sort((a, b) => {
-                const priorityOrder = {
-                  "level-3": 1,
-                  "level-2": 2,
-                  "level-1": 3,
-                };
+            (() => {
+              const sortedFilteredPollIds = Object.keys(pollsData.polls)
+                .sort((a, b) => {
+                  const priorityOrder = {
+                    "level-3": 1,
+                    "level-2": 2,
+                    "level-1": 3,
+                  };
 
-                const priorityA = pollsData.polls[a].priority;
-                const priorityB = pollsData.polls[b].priority;
+                  const priorityA = pollsData.polls[a].priority;
+                  const priorityB = pollsData.polls[b].priority;
 
-                return priorityOrder[priorityA] - priorityOrder[priorityB];
-              }).filter((pollId) => {
-                // Check if showUnansweredPolls is true
-                if (showUnansweredPolls) {
-                  const poll = pollsData.polls[pollId];
-                  // Check if any option in the poll has the user's ID, meaning the user has answered
-                  const userHasVoted = Object.values(poll.options).some(optionVotes => optionVotes.includes(user_id));
-                  
-                  // Only include polls that have NOT been answered (if selected, filter out answered polls)
-                  return !userHasVoted;
-                }
-                // If showUnansweredPolls is false, include all polls
-                return true;
-              })
-              .slice(0, visiblePollsCount)
-              .map((pollId) => {
-                // Define allOptions outside of the JSX
-                const allOptions = Object.keys(pollsData.polls[pollId].options).map((option) => ({
+                  return priorityOrder[priorityA] - priorityOrder[priorityB];
+                })
+                .filter((pollId) => {
+                  if (showUnansweredPolls) {
+                    const poll = pollsData.polls[pollId];
+                    const userHasVoted = Object.values(poll.options).some(optionVotes =>
+                      optionVotes.includes(user_id)
+                    );
+                    return !userHasVoted;
+                  }
+                  return true;
+                })
+                .slice(0, visiblePollsCount);
+
+              if (sortedFilteredPollIds.length === 0) {
+                return <h3>No Polls</h3>;
+              }
+
+              return sortedFilteredPollIds.map((pollId) => {
+                const poll = pollsData.polls[pollId];
+
+                const allOptions = Object.keys(poll.options).map((option) => ({
                   option,
-                  votedUserIds: pollsData.polls[pollId].options[option],
+                  votedUserIds: poll.options[option],
                 }));
 
-                const allVotedUserIds = Object.keys(pollsData.polls[pollId].options).flatMap(option => (
-                  pollsData.polls[pollId].options[option]  // Flattening the list of user IDs
-                ));
+                const allVotedUserIds = Object.values(poll.options).flat();
 
-                const creatorId = pollsData.polls[pollId].created_by;
+                const creatorId = poll.created_by;
                 const creatorDetails = userDetailsMap[creatorId] || {};
                 const profile = Profiles.find(
                   (profile) => profile.id === Number(creatorDetails.profile_pic)
                 );
 
-                const hasVoted = allVotedUserIds?.includes(user_id);
+                const hasVoted = allVotedUserIds.includes(user_id);
                 const selectedOption = getSelectedOption(pollId, user_id);
 
                 return (
                   <div key={pollId} className="poll section">
-                    <span className="creator-info">
+                    <span className="profile">
                       <img
                         src={profile ? profile.path : ""}
                         alt="Creator"
                         className="profile-pic"
                       />
-                      <p className={`${pollsData.polls[pollId].created_by === user_id ? "you underline" : ""}`}>
-                          {userDetailsMap[pollsData.polls[pollId].created_by]?.name || "Unknown"}
+                      <p className={`${poll.created_by === user_id ? "you underline" : ""}`}>
+                        {creatorDetails.name || "Unknown"}
                       </p>
                       <p>
-                      {new Date(pollsData.polls[pollId].created_at).toDateString() === new Date().toDateString()
-                      ? `at ${new Date(pollsData.polls[pollId].created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                      : `on ${new Date(pollsData.polls[pollId].created_at).toLocaleDateString()}`}
+                        {new Date(poll.created_at).toDateString() === new Date().toDateString()
+                          ? `at ${new Date(poll.created_at).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}`
+                          : `on ${new Date(poll.created_at).toLocaleDateString()}`}
                       </p>
                     </span>
 
-                    <h2>{pollsData.polls[pollId].title}</h2>
-                    <h3>{pollsData.polls[pollId].description}</h3>
-                    {pollsData.polls[pollId].priority != "level-1" && 
-                    <div className="priority-level">
-                    {pollsData.polls[pollId].priority === "level-2" ? (
-                      <span className="level-1"><img src = "/svgs/priority.svg" /></span>    
-                      ) : pollsData.polls[pollId].priority === "level-3" ? (  
-                        <span className="level-2"><img src = "/svgs/priority.svg" /></span>    
-                       ) : null}                     
-                    </div>
-                    }
+                    <h2>{poll.title}</h2>
+                    <h3>{poll.description}</h3>
+
+                    {poll.priority !== "level-1" && (
+                      <div className="priority-level">
+                        {poll.priority === "level-2" ? (
+                          <span className="level-1">
+                            <img src="/svgs/priority.svg" />
+                          </span>
+                        ) : poll.priority === "level-3" ? (
+                          <span className="level-2">
+                            <img src="/svgs/priority.svg" />
+                          </span>
+                        ) : null}
+                      </div>
+                    )}
 
                     <div className="poll-options">
-                      {Object.keys(pollsData.polls[pollId].options).map((option) => {
-                        // Find the option data in allOptions
+                      {Object.keys(poll.options).map((option) => {
                         const optionData = allOptions.find((o) => o.option === option);
-                        const userVotedForOption = pollsData.polls[pollId].options[option]?.includes(user_id);
+                        const userVotedForOption = poll.options[option]?.includes(user_id);
 
                         return (
-                          <div className="poll-option" key={option} style={{ backgroundColor: pendingVotes[pollId] === option ? "rgb(100, 100, 100, 0.3)" : "transparent" }}>
-                              <button
-                                disabled={hasVoted && userVotedForOption} // Disable button if user has already voted and didn't vote for this option
-                                onClick={() =>
-                                  setPendingVotes((prev) => ({
-                                    ...prev,
-                                    [pollId]: prev[pollId] === option ? null : option, // If the same option is clicked, deselect it
-                                  }))
-                                  
-                                }>   
-                                {pendingVotes[pollId] != option && (
+                          <div
+                            className="poll-option"
+                            key={option}
+                            style={{
+                              backgroundColor:
+                                pendingVotes[pollId] === option ? "rgb(100, 100, 100, 0.3)" : "transparent",
+                            }}
+                          >
+                            <button
+                              disabled={hasVoted && userVotedForOption}
+                              onClick={() =>
+                                setPendingVotes((prev) => ({
+                                  ...prev,
+                                  [pollId]: prev[pollId] === option ? null : option,
+                                }))
+                              }
+                            >
+                              {pendingVotes[pollId] !== option && (
                                 <div
-                                className={`button-filler ${hasVoted ? "voted" : ""}`}  
-                                style={{
-                                  width: hasVoted ?`${(optionData.votedUserIds.length / allVotedUserIds.length) * 100}%` : "0%",
-                                  opacity: pollsData.polls[pollId].options[option].includes(user_id) ? 0.8 : 0.3,
-                                }}
-                                ></div>)}
+                                  className={`button-filler ${hasVoted ? "voted" : ""}`}
+                                  style={{
+                                    width: hasVoted
+                                      ? `${(optionData.votedUserIds.length / allVotedUserIds.length) * 100}%`
+                                      : "0%",
+                                    opacity: poll.options[option].includes(user_id) ? 0.8 : 0.3,
+                                  }}
+                                ></div>
+                              )}
                               <p>{option}</p>
                             </button>
-                            {pendingVotes[pollId] === option && <p className = "pending-poll-chosen" src = "/svgs/tick.svg">✔</p>}
-                            {hasVoted && pendingVotes[pollId] != option && (
-                              <span
-                                className={`vote-count`}
-                              >
+
+                            {pendingVotes[pollId] === option && (
+                              <p className="pending-poll-chosen" src="/svgs/tick.svg">✔</p>
+                            )}
+
+                            {hasVoted && pendingVotes[pollId] !== option && (
+                              <span className="vote-count">
                                 {optionData.votedUserIds.length} votes
                               </span>
                             )}
@@ -382,27 +407,31 @@ const Polls = () =>
                         );
                       })}
                     </div>
+
                     <div className="button-container">
-                      {(pollsData.polls[pollId].created_by === user_id || role === "organiser") && (
-                        <button className="small-button" onClick={() => deletePoll(pollId)}>🗑</button>
+                      {(poll.created_by === user_id || role === "organiser") && (
+                        <button className="small-button" onClick={() => deletePoll(pollId)}>
+                          🗑
+                        </button>
                       )}
-                      <button 
-                        disabled={pendingVotes[pollId] != null || !hasVoted}  // Disable if no option is selected
+                      <button
+                        disabled={pendingVotes[pollId] != null || !hasVoted}
                         className="small-button"
                         onClick={async () => {
-                          // If a vote was cast, call the removeVote function
                           if (hasVoted) {
-                            await removeVote(pollId, selectedOption); // Remove vote if any vote has been cast
+                            await removeVote(pollId, selectedOption);
                             setPendingVotes((prev) => {
                               const updated = { ...prev };
-                              delete updated[pollId]; // Remove pending vote
+                              delete updated[pollId];
                               return updated;
                             });
                           }
                         }}
-                      >↩</button>
+                      >
+                        ↩
+                      </button>
                       <button
-                        disabled={pendingVotes[pollId] == null } // Disable if no option is selected
+                        disabled={pendingVotes[pollId] == null}
                         className="small-button"
                         onClick={async () => {
                           if (pendingVotes[pollId]) {
@@ -417,21 +446,31 @@ const Polls = () =>
                       >
                         Submit
                       </button>
-
                     </div>
                   </div>
                 );
-              })
+              });
+            })()
           ) : (
-            <p>No Polls</p>
+            <h3>No Polls</h3>
           )}
         </div>
 
-        {Object.keys(pollsData.polls).length > 3 && (
+
+        {Object.keys(pollsData.polls)
+          .filter((pollId) => {
+            if (showUnansweredPolls) {
+              const poll = pollsData.polls[pollId];
+              const userHasVoted = Object.values(poll.options).some(optionVotes =>
+                optionVotes.includes(user_id));
+              return !userHasVoted;
+            }
+            return true;
+          }).length > 3 && (
           <div className="show-more-less-buttons">
             {visiblePollsCount < Object.keys(pollsData.polls).length && (
               <button
-                className="small-button"
+                className="small-button show-more-polls"
                 onClick={() => setVisiblePollsCount((prev) => prev + 3)}
               >
                 Show More
@@ -454,34 +493,46 @@ const Polls = () =>
           <form className="create-poll">
             <div>
               <label>Poll Title:</label>
-              <input 
-                type="text" 
-                value={title} 
-                onChange={(e) => setTitle(e.target.value)} 
-                placeholder="Enter poll title" 
-              />
+                <div className="poll-input-container">
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter poll title"
+                  maxLength={MAX_TITLE_LENGTH}
+                />
+                <p className="character-counter">{title.length} / {MAX_TITLE_LENGTH}</p>
+              </div>
             </div>
 
             <div>
               <label>Poll Description:</label>
-              <textarea 
-                value={description} 
-                onChange={(e) => setDescription(e.target.value)} 
+              <div className="poll-input-container">
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe the poll"
+                maxLength={MAX_DESCRIPTION_LENGTH}
               />
+              <p className="character-counter-bottom">{description.length} / {MAX_DESCRIPTION_LENGTH}</p>
+              </div>
             </div>
 
             <label>Options:</label>
             {options.map((option, index) => (
               <div key={index} className="option-field">
-                <input 
-                  type="text" 
-                  value={option} 
-                  onChange={(e) => updateOption(index, e.target.value)} 
-                  placeholder={`Option ${index + 1}`}
-                />
+                <div className="poll-input-container">
+                  <input
+                    type="text"
+                    value={option}
+                    onChange={(e) => updateOption(index, e.target.value)}
+                    placeholder={`Option ${index + 1}`}
+                    maxLength={MAX_OPTION_LENGTH}
+                  />
+                  <p className="character-counter">{option.length} / {MAX_OPTION_LENGTH}</p>
+                </div>
                 {options.length > 2 && (
-                  <button className = "small-button" onClick={() => removeOption(index)}>🗑</button>
+                  <button className="small-button" onClick={() => removeOption(index)}>🗑</button>
                 )}
               </div>
             ))}

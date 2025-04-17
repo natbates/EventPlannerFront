@@ -75,6 +75,7 @@ const NavBar = () => {
         const loginPagePath = event_id ? `/event/${event_id}/login` : null;
         setIsOnLoginPage(location.pathname === loginPagePath);
     }, [event_id, location.pathname]);
+    
 
     const handleNavigation = (path) => {
         if (event_id === null || event_id === undefined) {

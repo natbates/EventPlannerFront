@@ -135,6 +135,13 @@ button
     color: var(--background-colour);
 }
 
+.profile p
+{
+    max-width: 150px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 button:disabled
 {
     opacity: 0.66;

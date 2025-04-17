@@ -26,11 +26,72 @@
 
 .priority-and-buttons button
 {
-    font-size: 0.8rem;
+    font-size: 1rem;
     margin-top: auto;
     height: 50px;
     padding-top: 8px;
     padding-bottom: 8px;
+}
+
+.poll-input-container
+{
+    position: relative;
+    width: 100%;
+}
+
+.poll-input-container input
+{
+    padding-right: 80px;
+    width: 100%;
+}
+
+.poll-input-container textarea
+{
+    width: 100%;
+}
+
+.show-more-polls
+{
+    margin-top: 20px;
+}
+
+.poll-input-container textarea
+{
+    padding-bottom: 70px;
+    overflow: hidden;
+}
+
+@media (max-width: 400px) {
+    .poll-input-container textarea
+    {
+        padding-bottom: 80px;
+    }
+}
+
+.poll-option button p
+{
+    max-width: 85%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.character-counter
+{
+    position: absolute;
+    right: 10px;
+    margin: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.character-counter-bottom
+{
+    position: absolute;
+    right: 10px;
+    margin: 0;
+    bottom: 10px;
+
 }
 
 .poll-form
@@ -46,6 +107,19 @@
 .poll.section h2
 {
     margin: 0;
+    text-wrap: break-word;
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+}
+
+.poll.section h3
+{
+    text-wrap: break-word;
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+    opacity: 0.8;
 }
 
 .poll-container
@@ -124,7 +198,7 @@
     display: flex;
     position: relative;
     overflow: hidden;
-    border: 3px solid black;
+    border: 3px solid var(--primary-colour)
 }
 
 .vote-count

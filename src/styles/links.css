@@ -7,17 +7,17 @@
     width: 100%;
 }
 
-.add-link-form .add-link
-{
+.add-link-form .add-link {
     display: flex;
+    align-items: stretch; /* Align input and button */
     gap: 10px;
     margin-bottom: 20px;
     width: 100%;
 }
 
-.add-link div
-{
+.add-link div {
     flex: 1;
+    min-width: 0; /* 👈 Prevent overflow by allowing shrinking */
 }
 
 .add-link button
@@ -68,23 +68,32 @@
     margin-top: 0;
 }
 
-.link-item
-{
+.link-item {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    gap: 10px;
 }
 
-.link-item div
-{
+.link-item div {
+    flex: 1;
+    min-width: 0; /* 🔑 Allows text to wrap or truncate instead of growing infinitely */
     display: flex;
-    gap: 10px;
     flex-direction: column;
+    gap: 5px;
 }
 
 .link-item div a
 {
     margin: 0;
     color: var(--accent-colour);
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+    text-wrap: break-word;
+    max-height: 40px;
+    text-overflow: ellipsis;
 }
 
 .link-list ul
@@ -109,3 +118,24 @@
     }
 }
 
+.link-list ul
+{
+    width: 100%;
+}
+
+.link-item{
+    width: 100%;
+    flex: 1;
+}
+
+.link-item div
+{
+    padding-right: 10px;
+    box-sizing: content-box;
+    width: 100%;
+}
+
+.add-link input
+{
+    padding-right: 90px !important;
+}

@@ -24,10 +24,20 @@
     font-weight: bold;
 }
 
-.add-task input
+.to-do-input-container input
 {
     flex: 1;
     display: block;
+    width: 100%;
+    padding-right: 70px;
+}
+
+.task
+{
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .add-task button
@@ -47,6 +57,7 @@
     justify-content: space-between;
     margin-bottom: 10px;
     align-items: center;
+    gap: 10px;
 }
 
 .dotted
@@ -72,4 +83,26 @@
     align-items: center;
     display: flex;
     gap: 10px;
+}
+
+.to-do-input-container
+{
+    position: relative;
+    width: 100%;
+}
+
+.task-length
+{
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+}
+
+@media (max-width: 650px) {
+    .task-section .profile
+    {
+        display: none;
+    }
 }

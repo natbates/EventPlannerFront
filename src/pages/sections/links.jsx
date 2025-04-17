@@ -144,18 +144,21 @@ const Links = () => {
 
             <form onSubmit={handleAddLink} className="add-link-form">
                 <div className="add-link">
-                    <div>
+                    <div className="to-do-input-container"> 
                         <input
                             type="url"
                             value={newLink.toLowerCase()}
                             onChange={(e) => setNewLink(e.target.value)}
                             placeholder="https://link.com"
                             required
+                            maxLength={150}
                         />
+                        <p className="character-counter">{newLink.length} / 150</p>
                     </div>
                     <button className="small-button" type="submit">Add Link</button>
                 </div>
             </form>
+
             
             {linksData != null && linksData.links.length > 0 && (
             <div className="link-list section">

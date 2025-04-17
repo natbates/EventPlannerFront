@@ -8,10 +8,20 @@ import ProfileSelector from "../components/ProfileSelector";
 import { Profiles } from "../components/ProfileSelector";
 import { getNames } from "country-list";
 
+export const charLimits = {
+  firstName: 20,
+  lastName: 20,
+  email: 70,
+  title: 40,
+  description: 100,
+  address: 100,
+  city: 50,
+  postcode: 15,
+};
+
 const CreateEvent = () => {
-  
-  const [formData, setFormData] = useState(
-    {firstName: "",
+  const [formData, setFormData] = useState({
+    firstName: "",
     lastName: "",
     email: "",
     title: "",
@@ -25,7 +35,7 @@ const CreateEvent = () => {
       postcode: "",
       country: "United Kingdom",
     },
-    organiser_id: ""
+    organiser_id: "",
   });
 
   const clearFormData = () => {
@@ -44,36 +54,30 @@ const CreateEvent = () => {
         postcode: "",
         country: "",
       },
-      organiser_id: ""
+      organiser_id: "",
     });
     setValidationErrors({});
   };
-  
+
   const [validationErrors, setValidationErrors] = useState({});
   const navigate = useNavigate();
   const { createUser } = useAuth();
-  const { notify, setNotifyLoad, showFavouritePopup} = useNotification();
+  const { notify, setNotifyLoad, showFavouritePopup } = useNotification();
   const [error, setError] = useState(null);
-  const [profileNum, setProfileNum] = useState(() => {
-    return Math.floor(Math.random() * Profiles.length);
-  });
-  
-  const countryOptions = getNames().map(country => {
-    if (country === "United Kingdom of Great Britain and Northern Ireland") {
-        return "United Kingdom";
-    }
-    if (country === "United States of America") {
-        return "United States";
-    }
-    // You can add more cases as needed
-    return country;
-  }).sort();
+  const [profileNum, setProfileNum] = useState(() => Math.floor(Math.random() * Profiles.length));
+
+  const countryOptions = getNames()
+    .map((country) => {
+      if (country === "United Kingdom of Great Britain and Northern Ireland") return "United Kingdom";
+      if (country === "United States of America") return "United States";
+      return country;
+    })
+    .sort();
 
   const validateForm = () => {
     const errors = {};
     const { firstName, lastName, email, title, description, earliest_date, latest_date, duration, location } = formData;
 
-    // Basic validations
     if (!firstName.trim()) errors.firstName = "First name is required.";
     if (!lastName.trim()) errors.lastName = "Last name is required.";
     if (!email.match(/^\S+@\S+\.\S+$/)) errors.email = "Invalid email format.";
@@ -83,40 +87,32 @@ const CreateEvent = () => {
     if (!latest_date) errors.latest_date = "Latest date is required.";
     if (!duration || Number(duration) < 1) errors.duration = "Duration must be at least 1 day.";
 
-    // Convert dates
     const earliestDate = new Date(earliest_date);
     const latestDate = new Date(latest_date);
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to midnight to ignore time part
+    today.setHours(0, 0, 0, 0);
 
-    // Check if earliestDate is before today's date
     if (earliestDate < today) {
-        errors.earliest_date = "Earliest date must be today or in the future.";
-        notify(errors.earliest_date);  
+      errors.earliest_date = "Earliest date must be today or in the future.";
+      notify(errors.earliest_date);
     }
 
-    // Check if earliestDate is before latestDate
     if (earliestDate >= latestDate) {
-        errors.dateRange = "Earliest date must be before the latest date.";
-        notify(errors.dateRange);  
+      errors.dateRange = "Earliest date must be before the latest date.";
+      notify(errors.dateRange);
     }
 
-    // Calculate the duration in days between earliest and latest date
-    const calculatedDuration = Math.floor((latestDate - earliestDate) / (1000 * 60 * 60 * 24)); // duration in days
-
-    // Check if the duration between the earliest and latest date is greater than or equal to the entered duration
+    const calculatedDuration = Math.floor((latestDate - earliestDate) / (1000 * 60 * 60 * 24));
     if (calculatedDuration < Number(duration)) {
-        errors.duration = `The duration between the earliest and latest date (${calculatedDuration} days) is shorter than the entered duration (${duration} days).`;
-        notify(errors.duration);  
+      errors.duration = `The duration between the earliest and latest date (${calculatedDuration} days) is shorter than the entered duration (${duration} days).`;
+      notify(errors.duration);
     }
 
-    // Location validations
     if (!location.address.trim()) errors.locationAddress = "Address is required.";
     if (!location.city.trim()) errors.locationCity = "City is required.";
     if (!location.postcode.trim()) errors.locationPostcode = "Postcode is required.";
     if (!location.country.trim()) errors.locationCountry = "Country is required.";
 
-    // Set validation errors and return true/false based on if there are errors
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -135,11 +131,8 @@ const CreateEvent = () => {
         notify("Maximum duration is 50 days.");
         numericValue = 50;
       }
-  
-      setFormData((prev) => ({
-        ...prev,
-        [name]: numericValue,
-      }));
+
+      setFormData((prev) => ({ ...prev, [name]: numericValue }));
       return;
     }
 
@@ -150,36 +143,31 @@ const CreateEvent = () => {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
-    localStorage.setItem('createEventData', JSON.stringify(formData));
+    localStorage.setItem("createEventData", JSON.stringify(formData));
   };
+
   useEffect(() => {
-    const savedData = localStorage.getItem('createEventData');
+    const savedData = localStorage.getItem("createEventData");
     if (savedData) {
       const parsedData = JSON.parse(savedData);
       const timeout = setTimeout(() => {
-        // Show confirmation prompt after the page is loaded
-        const userResponse = window.confirm('Do you want to load detected lost information?');
-        
+        const userResponse = window.confirm("Do you want to load detected lost information?");
         if (userResponse) {
-          // If the user presses "Yes", load the saved data
           setFormData(parsedData);
         } else {
-          // If the user presses "No", remove the data from localStorage
-          localStorage.removeItem('createEventData');
+          localStorage.removeItem("createEventData");
         }
-      }, 500); // Delay to ensure page is loaded
-      
-      return () => clearTimeout(timeout); // Cleanup the timeout on unmount
+      }, 500);
+      return () => clearTimeout(timeout);
     }
   }, []);
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()){
+    if (!validateForm()) {
       setError("Not all fields are filled in correctly.");
       return;
-    };
+    }
 
     setNotifyLoad(true);
 
@@ -197,23 +185,22 @@ const CreateEvent = () => {
         organiser_id,
         earliest_date: new Date(formData.earliest_date).toISOString().split("T")[0],
         latest_date: new Date(formData.latest_date).toISOString().split("T")[0],
-        location: JSON.stringify(formData.location)
+        location: JSON.stringify(formData.location),
       };
 
       const response = await fetch(`${API_BASE_URL}/events/create-event`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(eventPayload)
+        body: JSON.stringify(eventPayload),
       });
 
       if (!response.ok) throw new Error((await response.json()).message || "Failed to create event");
 
       const data = await response.json();
-      localStorage.removeItem('createEventData');
+      localStorage.removeItem("createEventData");
       navigate(`/event/${data.event_id}`);
       showFavouritePopup();
       notify("Event created successfully!");
-      localStorage.removeItem('createEventData');
     } catch (err) {
       setError("Error creating event: " + err.message);
       notify("Error: " + err.message);
@@ -228,32 +215,85 @@ const CreateEvent = () => {
       {validationErrors.dateRange && <div className="error-message">{validationErrors.dateRange}</div>}
 
       <form onSubmit={handleSubmit} className="section">
-
         <section className="create-section">
           <div className="one-line-input">
             <div>
               <label>First Name:</label>
-              <input required placeholder = "Your First Name..." type="text" name="firstName" value={formData.firstName} onChange={handleChange} />
+              <div className="create-input-container">
+                <input
+                  required
+                  placeholder="Your First Name..."
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  maxLength={charLimits.firstName}
+                />
+                <p className="character-counter">{formData.firstName.length} / {charLimits.firstName}</p>
+              </div>
             </div>
             <div>
               <label>Last Name:</label>
-              <input required placeholder = "Your Last Name..." type="text" name="lastName" value={formData.lastName} onChange={handleChange} />
+              <div className="create-input-container">
+                <input
+                  required
+                  placeholder="Your Last Name..."
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  maxLength={charLimits.lastName}
+                />
+                <p className="character-counter">{formData.lastName.length} / {charLimits.lastName}</p>
+              </div>
             </div>
           </div>
+
           <label>Email:</label>
-          <input required placeholder = "Your Email..." type="email" name="email" value={formData.email} onChange={handleChange} />
+          <div className="create-input-container">
+            <input
+              required
+              placeholder="Your Email..."
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              maxLength={charLimits.email}
+            />
+            <p className="character-counter">{formData.email.length} / {charLimits.email}</p>
+          </div>
 
           <label>Profile Picture:</label>
           <ProfileSelector index={profileNum} onSelect={(newIndex) => setProfileNum(newIndex)} />
-          </section>
+        </section>
 
         <section className="create-section">
-
           <label>Event Name:</label>
-          <input placeholder="Event Name..." required type="text" name="title" value={formData.title} onChange={handleChange} />
+          <div className="create-input-container">
+            <input
+              placeholder="Event Name..."
+              required
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              maxLength={charLimits.title}
+            />
+            <p className="character-counter">{formData.title.length} / {charLimits.title}</p>
+          </div>
 
           <label>Description:</label>
-          <textarea placeholder="Description Of Your Event..." required name="description" value={formData.description} onChange={handleChange} />
+          <div className="create-input-container">
+            <textarea
+              placeholder="Description Of Your Event..."
+              required
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              maxLength={charLimits.description}
+            />
+            <p className="character-counter-bottom">{formData.description.length} / {charLimits.description}</p>
+          </div>
 
           <div className="one-line-input swap">
             <div>
@@ -268,49 +308,90 @@ const CreateEvent = () => {
         </section>
 
         <section className="create-section">
-
           <div className="one-line-input">
             <div>
               <label>Event Address:</label>
-              <input placeholder="Event Address..." required type="text" name="location.address" value={formData.location.address} onChange={handleChange} />
+              <div className="create-input-container">
+                <input
+                  placeholder="Event Address..."
+                  required
+                  type="text"
+                  name="location.address"
+                  value={formData.location.address}
+                  onChange={handleChange}
+                  maxLength={charLimits.address}
+                />
+                <p className="character-counter">{formData.location.address.length} / {charLimits.address}</p>
+              </div>
             </div>
             <div className="duration">
               <label>Duration (Days):</label>
-              <input placeholder="Days.." required type="number" name="duration" value={formData.duration} onChange={handleChange} min="1" />
+              <input
+                placeholder="Days.."
+                required
+                type="number"
+                name="duration"
+                value={formData.duration}
+                onChange={handleChange}
+                min="1"
+              />
             </div>
           </div>
+
           <div className="one-line-input">
             <div>
               <label>Event City:</label>
-              <input placeholder="Event City..." required type="text" name="location.city" value={formData.location.city} onChange={handleChange} />
+              <div className="create-input-container">
+                <input
+                  placeholder="Event City..."
+                  required
+                  type="text"
+                  name="location.city"
+                  value={formData.location.city}
+                  onChange={handleChange}
+                  maxLength={charLimits.city}
+                />
+                <p className="character-counter">{formData.location.city.length} / {charLimits.city}</p>
+              </div>
             </div>
-
             <div>
               <label>Event Postcode:</label>
-              <input placeholder="Event Post Code..."required type="text" name="location.postcode" value={formData.location.postcode} onChange={handleChange} />
+              <div className="create-input-container">
+                <input
+                  placeholder="Event Post Code..."
+                  required
+                  type="text"
+                  name="location.postcode"
+                  value={formData.location.postcode}
+                  onChange={handleChange}
+                  maxLength={charLimits.postcode}
+                />
+                <p className="character-counter">{formData.location.postcode.length} / {charLimits.postcode}</p>
+              </div>
             </div>
           </div>
+
           <div className="one-line-bottom">
             <div style={{ flex: 1 }}>
-            <label>Event Country:</label>
-            <select
-              name="location.country"
-              value={formData.location.country}
-              onChange={handleChange}
-              style={{ width: "100%", marginTop: "10px" }}
-              required
-            >
-              <option value="">Select Country</option>
-              {countryOptions.map((country) => (
-                <option key={country} value={country}>
-                  {country}
-                </option>
-              ))}
-            </select>
+              <label>Event Country:</label>
+              <select
+                name="location.country"
+                value={formData.location.country}
+                onChange={handleChange}
+                style={{ width: "100%", marginTop: "10px" }}
+                required
+              >
+                <option value="">Select Country</option>
+                {countryOptions.map((country) => (
+                  <option key={country} value={country}>
+                    {country}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="create-buttons">
-              <button className = "small-button" type="button" onClick={clearFormData}>Clear</button>
-              <button className = "small-button" type="submit">Create Event</button>
+              <button className="small-button" type="button" onClick={clearFormData}>Clear</button>
+              <button className="small-button" type="submit">Create Event</button>
             </div>
           </div>
         </section>

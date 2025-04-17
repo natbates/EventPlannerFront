@@ -19,7 +19,7 @@ const EventPage = () => {
   const event_id = useParams().event_id;
   const [event, setEvent] = useState(null);
   const {theme} = useTheme();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastOpened, setLastOpened] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -27,7 +27,7 @@ const EventPage = () => {
 
   const navigate = useNavigate();
   const { notify, setNotifyLoad } = useNotification();
-  const { signOut, role, authed, user_id, profile_pic} = useAuth();
+  const { LogIn, signOut, role, authed, user_id, profile_pic} = useAuth();
   const {fetchLastOpened, fetchLastUpdated, fetchEventStatus} = useHistory();
 
   const routes = [
@@ -267,16 +267,43 @@ const EventPage = () => {
 
   useEffect(() => {
     
-    fetchEventData();
-    fetchUserAvailability();
+    if (authed && user_id)
+    {
+      setLoading(true);
+      fetchEventData();
+      fetchUserAvailability();
+    } else {
+      console.log("User not authenticated or user_id is missing. Skipping fetchEventData.");
+    }
     
   }, [authed, user_id]);
 
-  useEffect(() => {
-    if (!authed && error === null && !loading) {
+  const LogInFromEvent = async () => {
+
+    setNotifyLoad(true);
+
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser && event_id) {
+      console.log("Trying local session auto sign in ", storedUser.email);
+      await LogIn(storedUser.email, event_id); // ⬅️ optionally await if you want to wait before redirect
+    }
+
+    setNotifyLoad(false);
+
+    if (!authed && error === null) {
       console.log("Redirecting as event exists and not logged in FROM EVENT");
       navigate(`/event/${event_id}/login`);
+    } else
+    {
+      console.log("Logged in from event!");
     }
+
+  }
+
+  useEffect(() => {
+
+    LogInFromEvent();
+
   }, [authed, error, loading, event_id, navigate]);
   
 

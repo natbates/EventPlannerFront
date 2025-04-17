@@ -23,6 +23,7 @@ const Comments = () =>
     const {notify, setNotifyLoad, notifyLoad} = useNotification();
     const {theme} = useTheme();
     const [visibleTopLevelCount, setVisibleTopLevelCount] = useState(6);
+    const maxAmountOfChars = 128;
 
     const handleDeleteComment = async (comment_id) => {
         setNotifyLoad(true);
@@ -69,6 +70,12 @@ const Comments = () =>
       handleAddComment(e, true);
 
     }
+
+    const handleReplyChange = (e) => {
+      if (e.target.value.length <= maxAmountOfChars) {
+          setReplyText(e.target.value);
+      }
+    };
   
     const handleAddComment = async (e, posting = false) => {
       
@@ -83,9 +90,16 @@ const Comments = () =>
               return;
           }
           } else {
-          if (!posting && replyText.trim() === '') {
-              alert('Reply cannot be empty');
-              return;
+
+            if (!posting) {
+              if (replyText.trim() === '') {
+                  alert('Reply cannot be empty');
+                  return;
+              }
+              if (replyText.length > maxAmountOfChars) {
+                  alert(`Reply cannot exceed ${maxAmountOfChars} characters`);
+                  return;
+              }
           }
         }
     
@@ -207,8 +221,9 @@ const Comments = () =>
       
       
         return (
-          <div key={comment.uuid} className="comment" style={{ marginLeft: `${level * 20}px` }}>
+          <div key={comment.uuid} className="comment" style={{ marginLeft: `${level >= 4 ? 0 : level * 20}px` }}>
             <div className="comment-header">
+              {level > 0 && <div className="reply-line" alt="Reply Line" />}
               <div className="comment-info-delete">
                 <span>
                   <img className="profile-pic" src={profile ? profile.path : ""} />
@@ -223,14 +238,18 @@ const Comments = () =>
               {/* Reply button */}
               {replyTo?.uuid === comment.uuid ? (
                 <form onSubmit={(e) => {handleAddComment(e, false)}} className="reply-form">
-                  <input
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder={
-                      replyTo?.user_id === user_id
-                        ? "Write a reply to yourself..."
-                        : `Write a reply to ${replyTo?.username}...`
-                    }                  />
+                  <div className="poll-input-container">
+                    <input
+                      value={replyText}
+                      onChange={handleReplyChange}
+                      placeholder={
+                        replyTo?.user_id === user_id
+                          ? "Write a reply to yourself..."
+                          : `Write a reply to ${replyTo?.username}...`
+                      }                  
+                    />
+                    <p className="character-counter">{replyText.length} / {maxAmountOfChars}</p>
+                  </div>
                   <div className="button-container">
                     <button className = "small-button" type = "button" onClick={() => {setReplyTo(null)}}>Cancel</button>
                     <button className = "small-button" type="submit">Send Reply</button>
@@ -260,8 +279,7 @@ const Comments = () =>
     };
     
     const handleCommentChange = (e) => {
-      // Ensure that the comment does not exceed 100 characters
-      if (e.target.value.length <= 10) {
+      if (e.target.value.length <= maxAmountOfChars) {
           setNewComment(e.target.value);
       }
   };
@@ -283,12 +301,14 @@ const Comments = () =>
 
         {/* Input form for adding a new comment */}
         <div className="comment-form">
-          <textarea
-            value={newComment}
-            onChange={handleCommentChange}
-            placeholder="Add your comment here"
-            rows="4"
-          />
+          <div className="input-count-container">
+            <textarea
+              value={newComment}
+              onChange={handleCommentChange}
+              placeholder="Add your comment here"
+            />
+            <div className="comment-char-count">{newComment.length} / {maxAmountOfChars}</div>
+          </div>
           <div className="button-container">
             <button className = "small-button" onClick={() => {setNewComment("")}}>Clear Text</button>
             <button className = "small-button" onClick={handlePostComment}>Post Comment</button>

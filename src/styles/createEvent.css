@@ -69,9 +69,25 @@
 
 .create-event-container textarea {
     resize: vertical;
-    height: 100px;
+    height: 120px;
 }
 
+.create-input-container .character-counter
+{
+    transform: none;
+    top: 26px;
+}
+
+.create-input-container .character-counter-bottom
+{
+    transform: none;
+    top: -20px;
+}
+
+.create-input-container input
+{
+    padding-right: 75px;
+}
 
 .create-event-container button:disabled
 {
@@ -214,4 +230,10 @@
         margin-top: 20px;
         gap: 20px;
     }
+}
+
+
+.create-input-container
+{
+    position: relative;
 }

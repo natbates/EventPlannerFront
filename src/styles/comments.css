@@ -26,11 +26,84 @@
     object-fit: contain;
 }
 
+.input-count-container
+{
+    position: relative;
+}
+
+.comment-char-count
+{
+    position: absolute;
+    right: 10;
+    bottom: 10;
+}
 
 .comment-form textarea
 {
     width: 100%;
     margin-bottom: 0;
+    height: 10px;    
+    overflow: hidden;      
+    padding-bottom: 80px;
+}
+
+
+@media (max-width: 520px)
+{
+    .comment-form textarea
+    {
+        padding-bottom: 100px;
+
+    }
+    
+}
+
+@media (max-width: 460px)
+{
+    .comment-form textarea
+    {
+        padding-bottom: 130px;
+
+    }
+    
+}
+
+@media (max-width: 340px)
+{
+    .comment-form textarea
+    {
+        padding-bottom: 160px;
+
+    }
+    
+}
+
+.comment-header
+{
+    position: relative;
+}
+
+.reply-line
+{
+    position: absolute;
+    width: 3px;
+    height: 100%;
+    background-color: var(--primary-colour);
+    left: -20px;
+    top: 0.5px;
+    opacity: 0.2;
+}
+
+.comment-header p
+{
+    text-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+.reply-form input
+{
+    padding-right: 90px !important;
 }
 
 .comment-form .button-container

@@ -9,6 +9,7 @@ import MapComponent from "../../components/Map";
 import { useNotification } from "../../contexts/notification";
 import { useTheme } from "../../contexts/theme";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../components/App";
 
 const Location = () => {
     const { data: locationData, error, loading, event_id, refetch, goEventPage, setError, setLoading} = useFetchEventData("location/fetch-location");
@@ -156,10 +157,11 @@ const Location = () => {
         setNotifyLoad(true);
     
         try {
-            const res = await fetch("http://localhost:5000/api/location/update-location", {
+            const res = await fetch(`${API_BASE_URL}/location/update-location`, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
+                 "Authorization": `Bearer ${sessionStorage.getItem("token")}`
               },
               body: JSON.stringify({
                 event_id,

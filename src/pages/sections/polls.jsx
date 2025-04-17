@@ -38,7 +38,11 @@ const Polls = () =>
 
     const fetchUserDetails = async (userId) => {
       try {
-        const res = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${userId}`);
+        const res = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${userId}`, {
+          headers: {
+            "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+          }
+        });  
         if (!res.ok) throw new Error("Failed to fetch user");
         return await res.json(); // { name, profile_pic }
       } catch (error) {
@@ -122,7 +126,7 @@ const Polls = () =>
         try {
           const response = await fetch(`${API_BASE_URL}/polls/create-poll`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${sessionStorage.getItem("token")}` },
             body: JSON.stringify({
               event_id: event_id,
               poll_id: pollId,
@@ -158,7 +162,7 @@ const Polls = () =>
       try {
         const response = await fetch(`${API_BASE_URL}/polls/remove-vote`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${sessionStorage.getItem("token")}`},
           body: JSON.stringify({
             event_id: event_id,
             poll_id: pollId,
@@ -185,7 +189,7 @@ const Polls = () =>
           try {
             const response = await fetch(`${API_BASE_URL}/polls/delete-poll`, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json", "Authorization": `Bearer ${sessionStorage.getItem("token")}`},
               body: JSON.stringify({
                 event_id,
                 poll_id: pollId,
@@ -212,7 +216,10 @@ const Polls = () =>
         setNotifyLoad(true);
           const response = await fetch(`${API_BASE_URL}/polls/cast-vote`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+            },
             body: JSON.stringify({ event_id: event_id, poll_id: poll_id, user_id: user_id, selected_option: option }),
           });
       
@@ -409,7 +416,7 @@ const Polls = () =>
                     </div>
 
                     <div className="button-container">
-                      {(poll.created_by === user_id || role === "organiser") && (
+                      {(poll.created_by === user_id || role != "attendee") && (
                         <button className="small-button" onClick={() => deletePoll(pollId)}>
                           🗑
                         </button>

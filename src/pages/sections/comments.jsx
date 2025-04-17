@@ -42,7 +42,10 @@ const Comments = () =>
         try {
             const response = await fetch(`${API_BASE_URL}/comments/delete-comment`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+               "Content-Type": "application/json",
+               "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+            },
             body: JSON.stringify({ event_id: event_id, commentIds: commentsToDelete }),
             });
         
@@ -78,20 +81,16 @@ const Comments = () =>
     };
   
     const handleAddComment = async (e, posting = false) => {
-      
-        e.preventDefault();
-
-        setNotifyLoad(true);
-
-        // Validate if the comment is not empty
-        if (replyTo === null )  {
+      e.preventDefault();
+      setNotifyLoad(true);
+  
+      if (replyTo === null) {
           if (newComment.trim() === '') {
               alert('Comment cannot be empty');
               return;
           }
-          } else {
-
-            if (!posting) {
+      } else {
+          if (!posting) {
               if (replyText.trim() === '') {
                   alert('Reply cannot be empty');
                   return;
@@ -101,68 +100,80 @@ const Comments = () =>
                   return;
               }
           }
-        }
-    
-        // Prepare the comment object to send
-        const commentData = {
-          event_id: event_id,
-          user_id: user_id,
+      }
+  
+      const commentPayload = {
+          event_id,
+          user_id,
           message: replyTo !== null && !posting ? replyText : newComment,
-          reply_to: !posting ? (replyTo?.uuid || null) : null, // Null if no reply
-        };
-    
-        try {
-        const response = await fetch(`${API_BASE_URL}/comments/add-comment`, {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(commentData),
-        });
-    
-        if (!response.ok) {
-            throw new Error('Failed to add comment');
-        }
-    
-        const result = await response.json();
-        console.log('Comment added successfully:', result);
-    
-        // Clear the comment inputs
-        setNewComment('');
-        setReplyText('');
-        await refetch(); // Refresh event data
-        updateEventPage(event_id, "comments")
-        updateLastOpened("comments");
-        notify("Comment Posted!")
-
-        if (!replyTo) {
-          console.log("Expanding visibility for top-level comment");
-          console.log("Result comment ID", result.comment.comment_id);
-          setReplyVisibility((prev) => ({
-              ...prev,
-              [result.comment.comment_id]: true,
-          }));
+          reply_to: !posting ? (replyTo?.uuid || null) : null,
+      };
+  
+      try {
+          const response = await fetch(`${API_BASE_URL}/comments/add-comment`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+              },
+              body: JSON.stringify(commentPayload),
+          });
+  
+          if (!response.ok) throw new Error('Failed to add comment');
+  
+          const result = await response.json();
+          const newCommentObj = result.comment;
+  
+          // Fetch user data for the new comment
+          const userDetails = await getUserNameAndProfilePic(user_id);
+          if (userDetails) {
+              newCommentObj.username = userDetails.name;
+              newCommentObj.profile_pic = userDetails.profile_pic;
+          }
+  
+          // Update local state instead of refetching
+          setCommentsWithUserDetails((prev) => [newCommentObj, ...prev]);
+  
+          // Reset inputs
+          setNewComment('');
+          setReplyText('');
+          updateEventPage(event_id, "comments");
+          updateLastOpened("comments");
+          notify("Comment Posted!");
+  
+          // Expand visibility
+          if (!replyTo) {
+              setReplyVisibility((prev) => ({
+                  ...prev,
+                  [newCommentObj.comment_id]: true,
+              }));
           } else {
-              console.log("Expanding visibility for reply", replyTo);
               setReplyVisibility((prev) => ({
                   ...prev,
                   [replyTo.uuid]: true,
               }));
           }
-
+  
           setReplyTo(null);
-
-        } catch (error) {
+      } catch (error) {
           console.error('Error adding comment:', error);
           notify('Error adding comment: ' + error.message);
           setNotifyLoad(false);
-        }
+      } finally
+      {
+        setNotifyLoad(false);
+      }
     };
+  
 
     const getUserNameAndProfilePic = async (user_id) => {
       try {
-          const res = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${user_id}`);
-  
+        const res = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${user_id}`, {
+            headers: {
+              "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+            }
+          });  
+
           if (!res.ok) {
               const errorData = await res.json();
               throw new Error(errorData.message || "Error fetching username and profile pic.");
@@ -213,26 +224,26 @@ const Comments = () =>
         const replies = commentData.comments && commentData.comments
           .filter((c) => c.reply_to === comment.uuid)
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
       
         // Find the original comment being replied to
-        const parentComment = commentData.comments.find((c) => c.uuid === comment.reply_to);
-        const replyingToUsername = parentComment ? `@${parentComment.username} ` : "";
+        const parentComment = commentsWithUserDetails.find((c) => c.uuid === comment.reply_to);
+        const replyingToUsername = parentComment ? `@${parentComment.username?.split(" ")[0]} ` : "";
         const profile = Profiles.find((profile) => profile.id === Number(comment.profile_pic));
-      
-      
+
         return (
           <div key={comment.uuid} className="comment" style={{ marginLeft: `${level >= 4 ? 0 : level * 20}px` }}>
             <div className="comment-header">
               {level > 0 && <div className="reply-line" alt="Reply Line" />}
               <div className="comment-info-delete">
-                <span>
+                <span className="profile">
                   <img className="profile-pic" src={profile ? profile.path : ""} />
                   <p className={`${comment.user_id === user_id ? "you underline" : ""}`}>{comment.username}{" "}</p>
                   {new Date(comment.created_at).toDateString() === new Date().toDateString()
                     ? `at ${new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
                     : `on ${new Date(comment.created_at).toLocaleDateString()}`}
                 </span>
-                { (comment.user_id === user_id || role === "organiser") && <button className="small-button" onClick={() => {handleDeleteComment(comment.uuid)}}>🗑</button>}
+                { (comment.user_id === user_id || role != "attendee") && <button className="small-button" onClick={() => {handleDeleteComment(comment.uuid)}}>🗑</button>}
              </div>
               <p>{replyingToUsername}{comment.message}</p>
               {/* Reply button */}
@@ -320,12 +331,16 @@ const Comments = () =>
          {!loading && commentsWithUserDetails && commentsWithUserDetails.length > 0 && (
           <div className="section">
             {commentsWithUserDetails
-              .filter((comment) => comment.reply_to === null)
+              .filter((comment) =>
+                comment.reply_to === null &&
+                comment.username && comment.profile_pic
+              )
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
               .slice(0, visibleTopLevelCount)
               .map((comment) => renderComment(comment))}
           </div>
         )}
+
         {commentsWithUserDetails.filter(c => c.reply_to === null).length > visibleTopLevelCount && (
           <div className="show-more-container">
             <button className="small-button" onClick={() => setVisibleTopLevelCount(prev => prev + 6)}>

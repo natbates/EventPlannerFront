@@ -34,6 +34,7 @@ const YourCalendar = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${sessionStorage.getItem("token")}`
           },
           body: JSON.stringify({
             user_id: user_id,
@@ -98,11 +99,17 @@ const YourCalendar = () => {
 
         try {
           setSecondaryLoading(true);
-            const response = await fetch(`${API_BASE_URL}/calendar/fetch-user-availability/${user_id}`);
+          const response = await fetch(`${API_BASE_URL}/calendar/fetch-user-availability/${user_id}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${sessionStorage.getItem("token")}`,
+              'Content-Type': 'application/json',
+              },
+            });
+
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} ${response.statusText}`);
             }
-
             const data = await response.json();
             setUserAvailability(data);
             setPendingAvailability(data);
@@ -128,6 +135,7 @@ const YourCalendar = () => {
               method: "POST",
               headers: {
                   "Content-Type": "application/json",
+                  "Authorization": `Bearer ${sessionStorage.getItem("token")}`
               },
               body: JSON.stringify({
                   user_id: user_id,

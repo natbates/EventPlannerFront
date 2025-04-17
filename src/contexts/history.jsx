@@ -19,7 +19,13 @@ export const HistoryProvider = ({ children }) => {
     if (!event_id) return;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/events/fetch-event-status?event_id=${event_id}`);
+      const res = await fetch(`${API_BASE_URL}/events/fetch-event-status?event_id=${event_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${sessionStorage.getItem("token")}` // ⬅️ set Authorization header
+        }
+      });
       const data = await res.json();
       console.log("Event status data:", data.status);
       setEventStatus(data.status); // e.g., "active", "confirmed", "cancelled"
@@ -31,13 +37,14 @@ export const HistoryProvider = ({ children }) => {
 
   const fetchLastOpened = async (user_id) => {
 
-    if (!user_id) {return;}
+    if (!user_id || user_id===undefined || user_id==="undefined") {return;}
 
     try {
       const response = await fetch(`${API_BASE_URL}/users/fetch-last-opened`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${sessionStorage.getItem("token")}`
         },
         body: JSON.stringify({ user_id })
       });
@@ -58,6 +65,7 @@ export const HistoryProvider = ({ children }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${sessionStorage.getItem("token")}`
         },
         body: JSON.stringify({ event_id }),
       });
@@ -77,7 +85,7 @@ export const HistoryProvider = ({ children }) => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/update-last-opened`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",  "Authorization": `Bearer ${sessionStorage.getItem("token")}`},
         body: JSON.stringify({
           user_id,
           path,
@@ -105,7 +113,7 @@ export const HistoryProvider = ({ children }) => {
   
       const response = await fetch(`${API_BASE_URL}/events/update-last-update`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${sessionStorage.getItem("token")}` },
         body: JSON.stringify({
           event_id,
           path: pathname,

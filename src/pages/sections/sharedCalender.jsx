@@ -35,9 +35,14 @@ const AttendeeCalendar = () => {
         setDataLoad(true);
     
         try {
-            const response = await fetch(`${API_BASE_URL}/calendar/fetch-availability/${event_id}`);
+            const response = await fetch(`${API_BASE_URL}/calendar/fetch-availability/${event_id}`, {
+                method: 'GET',
+                headers: {
+                  'Authorization': `Bearer ${sessionStorage.getItem("token")}`,
+                  'Content-Type': 'application/json', // optional if you expect JSON data
+                },
+              });
             if (!response.ok) throw new Error(`Error: ${response.status} ${response.statusText}`);
-    
             const data = await response.json();
             setAttendeeAvailability(data);
         } catch (error) {
@@ -145,6 +150,7 @@ const AttendeeCalendar = () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
                 },
                 body: JSON.stringify({ 
                     event_id, 
@@ -190,6 +196,7 @@ const AttendeeCalendar = () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
                 },
                 body: JSON.stringify({ event_id, cancellation_reason: cancelReason }),
             });

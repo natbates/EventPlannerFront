@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getFingerprint } from "../services/getUserCode";
 import { API_BASE_URL } from "../components/App";
@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const {notify} = useNotification();
+  const intervalRef = useRef(null);
 
   const ReLogIn = async (eventId) => {
     console.log("Reloogging in")
@@ -34,6 +35,63 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const startTokenExpiryInterval = () => {
+    const token = sessionStorage.getItem("token");
+  
+    if (!token) {
+      console.log("No token found. Skipping interval setup.");
+      return;
+    }
+  
+    if (intervalRef.current) {
+      console.log("Interval already running, not setting another.");
+      return;
+    }
+  
+    const checkTokenExpiry = () => {
+      const token = sessionStorage.getItem("token");
+      const expiresAt = sessionStorage.getItem("expires_at");
+  
+      if (token && expiresAt) {
+        const now = Date.now();
+        if (now >= Number(expiresAt)) {
+          console.log("🔒 Token expired. Signing out...");
+          stopTokenExpiryInterval(); // stop FIRST
+          notify("Session expired. Please log in again.", 5000);
+          signOut(event_id);
+        }
+      }
+    };
+  
+    console.log("✅ Starting token expiry interval...");
+    checkTokenExpiry();
+  
+    intervalRef.current = setInterval(() => {
+      console.log("⏱️ Checking token expiry...");
+      checkTokenExpiry();
+    }, 60 * 1000); 
+  };
+  
+
+  useEffect(() => {
+    return () => {
+      console.log("💥 Unmounting or event_id changed. Cleaning up interval...");
+      stopTokenExpiryInterval();
+    };
+  }, [event_id]);
+  
+
+  const stopTokenExpiryInterval = () => {
+    if (intervalRef.current) {
+      console.log("🛑 Clearing token expiry interval...");
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    } else {
+      console.log("No interval running to stop.");
+    }
+  };
+  
+  
   // 🔹 Load user data from local storage
   useEffect(() => {    
 
@@ -54,6 +112,11 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 Log in method
   const LogIn = async (userEmail, eventId) => {
+
+    if (authed) { 
+      console.log("Already authenticated, skipping login.");
+      return;
+    }
 
     console.log("Logging in with email: ", userEmail);
     console.log("Event ID: ", eventId);
@@ -86,6 +149,9 @@ export const AuthProvider = ({ children }) => {
           profile_pic: data.user_details.profile_pic,
         };
 
+        sessionStorage.setItem("token", data.token);
+        sessionStorage.setItem("expires_at", Date.now() + 60 * 60 * 1000);
+
         setUser_id(userDetails.user_id);
         setEmail(userDetails.email);
         setName(userDetails.name);
@@ -93,9 +159,8 @@ export const AuthProvider = ({ children }) => {
         setProfile_pic(userDetails.profile_pic);
         setAuthed(true);
 
-        console.log("is AUTHED?: ", authed);
-
         saveUserToStorage(userDetails); // 🔥 Save to local storage
+        startTokenExpiryInterval();
         return true;
       } else if (data.status === "pending" || data.status === "rejected") {
         return {
@@ -114,6 +179,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       setError(error.message);
+      console.error("Login error:", error);
       notify("Failed to log in. Please try again.", 5000); // Show notification on error
     } finally {
       setLoading(false);
@@ -179,6 +245,8 @@ export const AuthProvider = ({ children }) => {
     setAuthed(false);
     setProfile_pic(null);
     localStorage.removeItem("user"); // 🔥 Clear local storage
+    localStorage.removeItem("token"); // 🔥 Clear local storage
+    stopTokenExpiryInterval();
     navigate(`/event/${event_id}/login`);
   };
 

@@ -117,7 +117,7 @@ const Settings = () => {
             setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/users/update-user`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${sessionStorage.getItem("token")}`},
                 body: JSON.stringify({
                     user_id,
                     name: `${editedUser.firstName} ${editedUser.lastName}`,
@@ -176,7 +176,7 @@ const Settings = () => {
             setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/events/delete-event`, {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${sessionStorage.getItem("token")}`},
                 body: JSON.stringify({ event_id }),
             });
     
@@ -208,7 +208,7 @@ const Settings = () => {
             setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/events/migrate-event`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${sessionStorage.getItem("token")}` },
                 body: JSON.stringify({ event_id }),
             });
     
@@ -254,7 +254,7 @@ const Settings = () => {
             setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/users/leave-event`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${sessionStorage.getItem("token")}`},
                 body: JSON.stringify({ event_id, user_id }),
             });
     
@@ -315,7 +315,7 @@ const Settings = () => {
             setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/events/update-event`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${sessionStorage.getItem("token")}`},
                 body: JSON.stringify({
                     event_id,
                     ...formattedEvent,

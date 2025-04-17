@@ -41,9 +41,6 @@
     transform: scale(1.05);
 }
 
-.nav-item.active:hover{
-    cursor:not-allowed;
-}
 
 .light-up
 {

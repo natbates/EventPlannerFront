@@ -16,6 +16,7 @@ import Countdown from 'react-countdown';
 
 
 const EventPage = () => {
+
   const event_id = useParams().event_id;
   const [event, setEvent] = useState(null);
   const {theme} = useTheme();
@@ -120,25 +121,42 @@ const EventPage = () => {
     
     setError(null);
     setLoading(true);
-    fetchEventStatus(event_id);
     try {
-      const response = await fetch(`${API_BASE_URL}/events/fetch-event/${event_id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        setError("Event doesn't exist");
-        throw new Error("Event doesn't exist");
+      if (authed)
+      { 
+      fetchEventStatus(event_id);
+        const response = await fetch(`${API_BASE_URL}/events/fetch-event/${event_id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${sessionStorage.getItem("token")}`,
+          },
+        });
+        if (!response.ok) {
+          setError("Event doesn't exist");
+          throw new Error("Event doesn't exist");
+        }
+        const eventData = await response.json();
+        setEvent(eventData);
+        const last_updated = await fetchLastUpdated(event_id);
+        setLastUpdated(last_updated);
+        const last_opened = await fetchLastOpened(user_id);
+        setLastOpened(last_opened);
+      } else
+      {
+        const response = await fetch(`${API_BASE_URL}/events/fetch-event-title/${event_id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          },
+        });
+        if (!response.ok) {
+          setError("Event doesn't exist");
+          throw new Error("Event doesn't exist");
+        } else {
+          LogInFromEvent();
+        }
       }
-      const eventData = await response.json();
-      setEvent(eventData);
-      const last_updated = await fetchLastUpdated(event_id);
-      setLastUpdated(last_updated);
-      const last_opened = await fetchLastOpened(user_id);
-      setLastOpened(last_opened);
-
     } catch (err) {
       setError(err.message);
       notify(err.message);
@@ -266,11 +284,12 @@ const EventPage = () => {
   };
 
   useEffect(() => {
+
+    fetchEventData();
     
     if (authed && user_id)
     {
       setLoading(true);
-      fetchEventData();
       fetchUserAvailability();
     } else {
       console.log("User not authenticated or user_id is missing. Skipping fetchEventData.");
@@ -298,12 +317,12 @@ const EventPage = () => {
 
   useEffect(() => {
 
-    if (!authed && event_id){
+    if (!authed && event_id && event){
       console.log("User not authenticated. Attempting to log in from event page.");
       LogInFromEvent();
     }
 
-  }, [authed, event_id]);
+  }, [authed, event_id, event]);
   
 
   if (error) {

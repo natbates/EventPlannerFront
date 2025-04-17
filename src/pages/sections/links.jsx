@@ -11,21 +11,32 @@ import { useTheme } from "../../contexts/theme";
 import { useNavigate } from "react-router-dom";
 
 const Links = () => {
-    const { data: linksData, error, loading, event_id, refetch, goEventPage} = useFetchEventData("links/fetch-links");
-    const { user_id, name, role } = useAuth();
+    const { data: linksDataFromAPI, error, loading, event_id, goEventPage} = useFetchEventData("links/fetch-links");
+    const { user_id, role, name} = useAuth();
     const [newLink, setNewLink] = useState(""); 
+    const [linksData, setLinksData] = useState([]); // Local state for links data
     const { updateEventPage, updateLastOpened } = useHistory();
-    const { notify, setNotifyLoad} = useNotification();
-    const {theme} = useTheme();
-    // State to store the added_by_name for each link
+    const { notify, setNotifyLoad } = useNotification();
+    const { theme } = useTheme();
     const [linkUsernames, setLinkUsernames] = useState({});
     const [secondaryloading, setSecondaryLoading] = useState(true);
     const navigate = useNavigate();
 
+    // Update the linksData state when linksDataFromAPI changes
+    useEffect(() => {
+        if (linksDataFromAPI) {
+            setLinksData(linksDataFromAPI.links); // Transfer data to local state
+        }
+    }, [linksDataFromAPI]);
+
     // Fetch the user's name based on their user_id
     const fetchUsername = async (userId) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${userId}`);
+            const response = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${userId}`, {
+                headers: {
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+                }
+            });
             if (response.ok) {
                 const { name } = await response.json();
                 return name;
@@ -42,11 +53,11 @@ const Links = () => {
     // Update the link's added_by_name when linksData changes
     useEffect(() => {
         const fetchNamesForLinks = async () => {
-            setSecondaryLoading(true); 
-            if (linksData && linksData.links.length > 0) {
+            setSecondaryLoading(true);
+            if (linksData && linksData.length > 0) {
                 const updatedUsernames = {};
 
-                for (const link of linksData.links) {
+                for (const link of linksData) {
                     const username = await fetchUsername(link.added_by);
                     updatedUsernames[link.link] = username; // Store the username with the link
                 }
@@ -66,85 +77,119 @@ const Links = () => {
 
     const handleAddLink = async (e) => {
         e.preventDefault();
-      
+
         if (!newLink) {
-          notify("Link required.");
-          return;
+            notify("Link required.");
+            return;
         }
 
         setNotifyLoad(true);
-      
+
         const newLinkObject = {
-          link: newLink,
-          added_by: user_id, 
-          created_at: new Date().toISOString(), 
-          event_id: event_id, 
+            link: newLink,
+            added_by: user_id,
+            created_at: new Date().toISOString(),
+            event_id: event_id,
         };
-      
+
         try {
-          // Make the API request to add the new link
-          const response = await fetch(`${API_BASE_URL}/links/add-link`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newLinkObject),
-          });
-      
-          if (response.ok) {
-            setNewLink("");  
-            updateEventPage(event_id, "links");
-            updateLastOpened("links");
-            refetch();
-          } else {
-            notify("Failed to add the link.");
-          }
+            // Make the API request to add the new link
+            const response = await fetch(`${API_BASE_URL}/links/add-link`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`,
+                },
+                body: JSON.stringify(newLinkObject),
+            });
+
+            if (response.ok) {
+                // Clear input field
+                setNewLink("");
+
+                // Directly update linksData in local state (without refetch)
+                setLinksData((prevLinks) => [...prevLinks, newLinkObject]);
+
+                // Optionally, update linkUsernames (if required)
+                setLinkUsernames((prevUsernames) => ({
+                    ...prevUsernames,
+                    [newLink]:  name
+                }));
+
+                updateEventPage(event_id, "links");
+                updateLastOpened("links");
+                setNotifyLoad(false); // Hide loading indicator
+            } else {
+                notify("Failed to add the link.");
+                setNotifyLoad(false);
+            }
         } catch (error) {
-          console.error("Error adding link:", error);
-          notify("An error occurred while adding the link.");
-        } 
+            console.error("Error adding link:", error);
+            notify("An error occurred while adding the link.");
+            setNotifyLoad(false);
+        }
     };
 
     const handleDeleteLink = async (link) => {
-        // Assuming you have a delete link function
         try {
             setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/links/delete-link`, {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`,
+                },
                 body: JSON.stringify({ event_id, link }),
             });
 
             if (response.ok) {
-                refetch(); // Re-fetch links after deletion
+                // Directly update linksData by removing the deleted link from local state
+                setLinksData((prevLinks) => prevLinks.filter((existingLink) => existingLink.link !== link));
+
                 notify("Link deleted!");
             } else {
                 notify("Failed to delete link");
             }
+            setNotifyLoad(false);
         } catch (error) {
             console.error("Error deleting link:", error);
             notify("An error occurred while deleting the link");
-        } 
+            setNotifyLoad(false);
+        }
     };
 
-    if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Links"} />;
-
-    console.log("Loadig Links", loading, secondaryloading, linksData);
-
-    if (loading || secondaryloading) return <div className="loader"><p>Fetching Links</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
+    if (loading || secondaryloading) {
+        return (
+            <div className="loader">
+                <p>Fetching Links</p>
+                <button
+                    onClick={() => {
+                        navigate(`/event/${event_id}`);
+                    }}
+                    className="small-button"
+                >
+                    Cancel
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="links">
             <div className="top-line">
                 <button className="back-button" onClick={() => { goEventPage(); }}>
-                  {theme === "dark" ? 
-                    <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
-                  <img src="/svgs/back-arrow.svg" alt="Back" />}
+                    {theme === "dark" ? (
+                        <img src="/svgs/back-arrow-white.svg" alt="Back" />
+                    ) : (
+                        <img src="/svgs/back-arrow.svg" alt="Back" />
+                    )}
                 </button>
                 <h2>Links</h2>
             </div>
 
             <form onSubmit={handleAddLink} className="add-link-form">
                 <div className="add-link">
-                    <div className="to-do-input-container"> 
+                    <div className="to-do-input-container">
                         <input
                             type="url"
                             value={newLink.toLowerCase()}
@@ -159,30 +204,39 @@ const Links = () => {
                 </div>
             </form>
 
-            
-            {linksData != null && linksData.links.length > 0 && (
-            <div className="link-list section">
-                <h3>Link List</h3>
-                <ul>
-                    {linksData.links.map((linkItem, index) => (
-                        <li key={index} className="link-item">
-                            <div>
-                                <a href={linkItem.link} target="_blank" rel="noopener noreferrer">
-                                    {linkItem.link}
-                                </a>
-                                <small>
-                                    Added by {linkUsernames[linkItem.link] || "Loading..."} {new Date(linkItem.created_at).toDateString() === new Date().toDateString()
-                                  ? `at ${new Date(linkItem.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                                  : `on ${new Date(linkItem.created_at).toLocaleDateString()}`}
-                                </small>
-                            </div>
-                            {(linkItem.added_by === user_id || role === "organiser") && (
-                                <button className="small-button" onClick={() => handleDeleteLink(linkItem.link)}>🗑</button>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-              </div>
+            {linksData.length > 0 && (
+                <div className="link-list section">
+                    <h3>Link List</h3>
+                    <ul>
+                        {linksData.map((linkItem, index) => (
+                            <li key={index} className="link-item">
+                                <div>
+                                    <a href={linkItem.link} target="_blank" rel="noopener noreferrer">
+                                        {linkItem.link}
+                                    </a>
+                                    <small>
+                                        Added by {linkUsernames[linkItem.link] || "Loading..."}{" "}
+                                        {new Date(linkItem.created_at).toDateString() ===
+                                        new Date().toDateString()
+                                            ? `at ${new Date(linkItem.created_at).toLocaleTimeString([], {
+                                                  hour: "2-digit",
+                                                  minute: "2-digit",
+                                              })}`
+                                            : `on ${new Date(linkItem.created_at).toLocaleDateString()}`}
+                                    </small>
+                                </div>
+                                {(linkItem.added_by === user_id || role !== "attendee") && (
+                                    <button
+                                        className="small-button"
+                                        onClick={() => handleDeleteLink(linkItem.link)}
+                                    >
+                                        🗑
+                                    </button>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             )}
 
             <div className="section">
@@ -190,23 +244,27 @@ const Links = () => {
                 <div className="invite-link-qr-code">
                     <div>
                         <a href={`${location.host}/event/${event_id}`} target="_blank" rel="noopener noreferrer">
-                            {`${location.host}/event/${event_id}`}
+                            {`https://${location.host}/event/${event_id}`}
                         </a>
-                        <button className="small-button" onClick={() => {
-                            navigator.clipboard.writeText(`${location.host}/event/${event_id}`);
-                            notify("Link copied to clipboard!");
-                        }}>Copy Link</button>
+                        <button
+                            className="small-button"
+                            onClick={() => {
+                                navigator.clipboard.writeText(`https://${location.host}/event/${event_id}`);
+                                notify("Link copied to clipboard!");
+                            }}
+                        >
+                            Copy Link
+                        </button>
                     </div>
-                    <QRCodeCanvas 
-                        value={`${location.host}/event/${event_id}`} 
-                        size={128}   
+                    <QRCodeCanvas
+                        value={`https://${location.host}/event/${event_id}`}
+                        size={128}
                         bgColor="white"
-                        fgColor="black" 
+                        fgColor="black"
                         className="qr"
                     />
                 </div>
             </div>
-
         </div>
     );
 };

@@ -12,6 +12,9 @@ import { useTheme } from "../contexts/theme";
 import { useNotification } from "../contexts/notification";
 import { useRef } from "react";
 
+const MAX_WAIT_TIME = 1000; // Maximum wait time in milliseconds (e.g., 5000 ms = 5 seconds)
+const POLL_INTERVAL = 100;  // Time interval to check (e.g., 100 ms)
+
 const Login = () => {
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -29,12 +32,15 @@ const Login = () => {
     const { fingerprint: userFingerprint, LogIn, authed } = useAuth();
     const navigate = useNavigate();
 
+
     const fingerprintRef = useRef(userFingerprint);
+    
     useEffect(() => {
         fingerprintRef.current = userFingerprint;
       }, [userFingerprint]);
 
       useEffect(() => {
+        
         const handleAuthInit = async () => {
             
           const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -56,10 +62,18 @@ const Login = () => {
             console.log("GOING TO HOME PAGE FROM LOGIN");
             navigate(`/event/${event_id}`);
           }
-
-          while (!fingerprintRef.current) {
+          const startTime = Date.now();
+          while (!fingerprintRef.current && !authed) {
             console.log("Waiting for fingerprint...");
-            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Wait for the poll interval before checking again
+            await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+          
+            // Check if the maximum wait time has been exceeded
+            if (Date.now() - startTime > MAX_WAIT_TIME) {
+              console.log("Max wait time reached. Exiting fingerprint wait.");
+              break; // Exit the loop after the max wait time
+            }
           }
       
           fetchEventData();
@@ -110,7 +124,7 @@ const Login = () => {
         setLoginError(null);
         setLoading(true);
         try {
-          const response = await fetch(`${API_BASE_URL}/events/fetch-event/${event_id}`, {
+          const response = await fetch(`${API_BASE_URL}/events/fetch-event-title/${event_id}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",

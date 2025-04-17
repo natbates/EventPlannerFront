@@ -26,8 +26,12 @@ const ToDo = () => {
     useEffect(() => {
         const fetchProfile = async (userId) => {
             try {
-                const response = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${userId}`);
-                if (response.ok) {
+                const response = await fetch(`${API_BASE_URL}/users/fetch-username?user_id=${userId}`, {
+                    headers: {
+                      "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+                    }
+                  });                
+                  if (response.ok) {
                     const { name, profile_pic } = await response.json();
                     return { username: name, profile_pic };
                 } else {
@@ -95,7 +99,7 @@ const ToDo = () => {
             setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/to-do/add-to-do`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${sessionStorage.getItem("token")}`},
                 body: JSON.stringify({ event_id, creator_id: user_id, task: newTask}),
             });
         
@@ -121,7 +125,7 @@ const ToDo = () => {
             setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/to-do/move-to-done`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${sessionStorage.getItem("token")}`,},
                 body: JSON.stringify({ event_id, task_id }),
             });
 
@@ -146,7 +150,7 @@ const ToDo = () => {
             setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/to-do/move-to-do`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${sessionStorage.getItem("token")}`, },
                 body: JSON.stringify({ event_id, task_id }),
             });
 
@@ -169,7 +173,7 @@ const ToDo = () => {
             setNotifyLoad(true);
             const response = await fetch(`${API_BASE_URL}/to-do/delete-to-do`, {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${sessionStorage.getItem("token")}`,},
                 body: JSON.stringify({ event_id, task_id }),
             });
 

@@ -72,10 +72,7 @@ const Attendees = () => {
     const { user_id, name, role, createUser, authed, email: userEmail, fingerprint: userFingerprint, LogIn, LogOut} = useAuth();
     const navigate = useNavigate();
     const {theme} = useTheme();
-    
     const {notify, setNotifyLoad} = useNotification();
-
-    console.log("on attendees page")
 
     const AcceptRequest = async (request) => {
         setNotifyLoad(true);
@@ -117,6 +114,7 @@ const Attendees = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
                 },
                 body: JSON.stringify({
                     event_id,
@@ -154,6 +152,7 @@ const Attendees = () => {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
+                "Authorization": `Bearer ${sessionStorage.getItem("token")}`
               },
               body: JSON.stringify({
                 event_id: event_id, // assuming event_id is available in the scope
@@ -191,6 +190,7 @@ const Attendees = () => {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                "Authorization": `Bearer ${sessionStorage.getItem("token")}`
               },
               body: JSON.stringify({
                 event_id,
@@ -221,6 +221,7 @@ const Attendees = () => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${sessionStorage.getItem("token")}`
             },
             body: JSON.stringify({
               event_id,
@@ -249,6 +250,7 @@ const Attendees = () => {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                "Authorization": `Bearer ${sessionStorage.getItem("token")}`
               },
               body: JSON.stringify({
                 event_id,

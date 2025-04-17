@@ -52,11 +52,24 @@
     margin: 0;
 }
 
+.leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar
+{
+    border: none !important;
+
+    flex-direction: column;
+    display: flex;
+    gap: 5px;
+}
+
 .leaflet-bar a
 {
     background-color: var(--primary-colour) !important;
     border-top-left-radius: 0px !important;
     border-top-right-radius: 0px !important;
+    border: none !important;
+    border-radius: 0px !important;
+    border: 3px solid black !important;
+    outline: none !important;
 }
 
 .leaflet-bar a span

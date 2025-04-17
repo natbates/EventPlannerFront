@@ -4,7 +4,6 @@ import { useAuth } from "../contexts/auth";
 import { useEffect, useState } from "react";
 import { useHistory } from "../contexts/history";
 import { useTheme } from "../contexts/theme";
-import { API_BASE_URL } from "./App";
 
 const NavBar = () => {
     const { signOut, user_id, authed} = useAuth();
@@ -114,6 +113,7 @@ const NavBar = () => {
         filteredLastUpdated.length > 0 &&
         new Date(filteredLastOpened[0].timestamp) < new Date(filteredLastUpdated[0].timestamp);
 
+
     return (
         <nav className="nav-bar">
             <Link to="/">
@@ -154,7 +154,7 @@ const NavBar = () => {
             )}
 
 
-            {isOnEventHomePage && authed && eventStatus !== "confirmed" && eventStatus !== "canceled" && (
+            {isOnEventHomePage && authed && eventStatus && eventStatus !== "confirmed" && eventStatus !== "canceled" && (
                 <div className="nav-links">
                     <div className="tooltip-wrapper">
                         <button

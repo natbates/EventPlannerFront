@@ -86,6 +86,7 @@ const MapComponent = ({ location, setLocation}) => {
         className="small-button"
         style={{
           position: "absolute",
+          border: "3px solid black",
           bottom: "10px",
           left: "10px",
           zIndex: 50,

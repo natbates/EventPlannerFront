@@ -148,7 +148,7 @@ const Login = () => {
         }
 
         const username = `${firstName} ${lastName}`; // Combine first and last name to form username
-
+        setNotifyLoad(true);
         try {
             // Prepare request data
             const requestData = {
@@ -191,6 +191,9 @@ const Login = () => {
             }
         } catch (err) {
             setLoginError(err.message);
+        } finally
+        {
+            setNotifyLoad(false);
         }
     };
 

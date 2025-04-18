@@ -269,7 +269,21 @@ const Polls = () =>
           onClick={toggleUnansweredPolls}
           className={`small-button toggle-unanswered-polls ${showUnansweredPolls ? 'active' : ''}`}
         >
-          {showUnansweredPolls ? '✓' : '✖'}
+          {showUnansweredPolls ? (
+            theme === "light" ? (
+              <img className="tick" src="/svgs/tick-white.svg" alt="Accept" />
+            ) : (
+              <img className="tick" src="/svgs/tick.svg" alt="Accept" />
+            )
+          ) : (
+            theme === "light" ? (
+              <img className="cross" src="/svgs/cross-white.svg" alt="Reject" />
+            ) : (
+              <img className="cross" src="/svgs/cross.svg" alt="Reject" />
+            )
+          )}
+
+
         </button>
         </span>
         </div>
@@ -401,7 +415,10 @@ const Polls = () =>
                             </button>
 
                             {pendingVotes[pollId] === option && (
-                              <p className="pending-poll-chosen" src="/svgs/tick.svg">✔</p>
+                              <p className="pending-poll-chosen" src="/svgs/tick.svg">                              
+                              {theme === "light" ? 
+                                <img className="tick" src="/svgs/tick-white.svg" alt="Accept" /> :
+                                <img className = "tick" src="/svgs/tick.svg" alt="Accept" />}</p>
                             )}
 
                             {hasVoted && pendingVotes[pollId] !== option && (

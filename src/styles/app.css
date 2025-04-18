@@ -231,6 +231,20 @@ button:disabled
     height: 100%;
 }
 
+.tick, .cross, .question
+{
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.tick, .question
+{
+    padding: 2px;
+}
+
 .delete
 {
     padding: 3px;

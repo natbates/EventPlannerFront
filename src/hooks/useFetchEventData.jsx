@@ -86,7 +86,12 @@ const useFetchEventData = (endpoint) => {
     // 🔹 Fetch endpoint data only if event is valid
     const fetchData = async (refetch = false) => {
     
-        const timeoutDuration = 5000;
+        const timeoutDuration = 30000;
+
+        if (!authed)
+        {
+            return navigate(`/event/${event_id}/login`);
+        }
     
         try {
             if (!logginRef.current && authedRef.current) {

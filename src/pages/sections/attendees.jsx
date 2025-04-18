@@ -396,8 +396,18 @@ const Attendees = () => {
                         <div className="profile-container request" key={index}>
                           <Profile name={`${request.username}`}  profileNum={request.profile_pic}/>
                           <div className="button-container">
-                            <button className="request-button" onClick={() => RejectRequest(request)}>✖</button>
-                            <button className="request-button" onClick={() => AcceptRequest(request)}>✔</button>
+
+                            <button className="request-button" onClick={() => RejectRequest(request)}>
+                              {theme === "light" ? 
+                              <img className="cross" src="/svgs/cross-white.svg" alt="Reject" /> :
+                              <img className = "cross" src="/svgs/cross.svg" alt="Reject" />}
+                            </button>
+
+                            <button className="request-button" onClick={() => AcceptRequest(request)}>                         
+                              {theme === "light" ? 
+                              <img className="tick" src="/svgs/tick-white.svg" alt="Accept" /> :
+                              <img className = "tick" src="/svgs/tick.svg" alt="Accept" />}
+                            </button>
                           </div>
                         </div>
                       ))}

@@ -138,6 +138,23 @@ const CreateEvent = () => {
       return;
     }
 
+    if (name === "earliest_date") {
+      setFormData((prev) => {
+        const updated = { ...prev, earliest_date: value };
+  
+        // Auto-set latest_date if not set
+        if (!prev.latest_date && prev.duration) {
+          const newLatest = new Date(value);
+          newLatest.setDate(newLatest.getDate() + Number(prev.duration) - 1);
+          updated.latest_date = newLatest.toISOString().split("T")[0];
+        }
+  
+        return updated;
+      });
+      return;
+    }
+
+
     if (name.startsWith("location.")) {
       const field = name.split(".")[1];
       setFormData((prev) => ({ ...prev, location: { ...prev.location, [field]: value } }));

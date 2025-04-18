@@ -297,6 +297,9 @@ const EventPage = () => {
   }, [authed, user_id]);
 
   const LogInFromEvent = async () => {
+
+    console.log("Logging in from event page..."); // Debugging line
+
     setNotifyLoad(true);
   
     const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -305,6 +308,8 @@ const EventPage = () => {
     if (storedUser && event_id) {
       data = await LogIn(storedUser.email, event_id); // Await login result
     }
+
+    console.log("Login data:", data); // Debugging line
   
     if (data === true) {
       setNotifyLoad(false);
@@ -314,6 +319,9 @@ const EventPage = () => {
   }
 
   useEffect(() => {
+
+    console.log("Authed:", authed); // Debugging line
+    console.log("Event ID:", event_id); // Debugging line
 
     if (!authed && event_id && event){
       LogInFromEvent();
@@ -378,10 +386,27 @@ const EventPage = () => {
                   <img src={profile?.path} alt={profile?.name || "Unknown"} className="profile-pic" />
                   <p className={`${attendee.user_id === user_id ? "you underline" : ""}`}>{attendee?.name || "Unknown"}</p>
                   <strong className="is_coming">
-                      {attendee.is_coming === 1 && "✔"}
-                      {attendee.is_coming === 0 && "✖"}
-                      {attendee.is_coming === null && "?"}
-                    </strong>
+                    {attendee.is_coming === 1 ? (
+                      theme === "dark" ? (
+                        <img className="tick" src="/svgs/tick-white.svg" alt="Can Come" />
+                      ) : (
+                        <img className="tick" src="/svgs/tick.svg" alt="Can Come" />
+                      )
+                    ) : attendee.is_coming === 0 ? (
+                      theme === "dark" ? (
+                        <img className="cross" src="/svgs/cross-white.svg" alt="Cant Come" />
+                      ) : (
+                        <img className="cross" src="/svgs/cross.svg" alt="Cant Come" />
+                      )
+                    ) : (
+                      theme === "dark" ? (
+                        <img className="question" src="/svgs/question-mark-white.svg" alt="Undecided" />
+                      ) : (
+                        <img className="question" src="/svgs/question-mark.svg" alt="Undecided" />
+                      )
+                    )}
+                  </strong>
+
                 </div>
               );
             })

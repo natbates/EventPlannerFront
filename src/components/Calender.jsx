@@ -6,6 +6,7 @@ import "../styles/calendar.css";
 import { Profiles } from "./ProfileSelector";
 import { useAuth } from "../contexts/auth";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../contexts/theme";
 
 const localizer = momentLocalizer(moment);
 
@@ -169,6 +170,7 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
 
   const {user_id} = useAuth();
   const navigate = useNavigate();
+  const {theme} = useTheme();
 
   const earliestDate = new Date(data.earliest_date || "2024-01-01");
   const latestDate = new Date(data.latest_date || "2024-12-31");
@@ -401,7 +403,13 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
 
       {!isSelectingDates && selectedDate && 
         <div className="section selected-dates">
-          <span className="selected-date-top-header"><h3 style={{margin: 0}}>Selected: {selectedDate ? formatDate(selectedDate) : "None"}</h3><button className="small-button" onClick={(e) => {setSelectedDate(null)}}>X</button></span>
+          <span className="selected-date-top-header"><h3 style={{margin: 0}}>Selected: {selectedDate ? formatDate(selectedDate) : "None"}</h3><button className="small-button" onClick={(e) => {setSelectedDate(null)}}>
+          {theme === "light" ? (
+              <img className="cross" src="/svgs/cross-white.svg" alt="Reject" />
+            ) : (
+              <img className="cross" src="/svgs/cross.svg" alt="Reject" />
+            )
+          }</button></span>
           <div className= "availability-group-container">
             {selectedDate && (
               <>

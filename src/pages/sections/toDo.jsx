@@ -246,8 +246,13 @@ const ToDo = () => {
                                         <p className="task">{task.task}</p>
                                         <div className="button-container">
                                             {(role !== "attendee" || task.creator_id === user_id) && 
-                                                <button className="small-button" onClick={() => handleDeleteTask(task.task_id)}>🗑</button>}
-                                            <button className="small-button" onClick={() => handleMoveToDone(task.task_id)}>✔</button>
+                                                <button className="small-button" onClick={() => handleDeleteTask(task.task_id)}>                                    {theme === "light" ? 
+                                                    <img className="delete" src="/svgs/trash-white.svg" alt="Delete" /> :
+                                                    <img className = "delete" src="/svgs/trash.svg" alt="Delete" />}</button>
+                                                }
+                                            <button className="small-button" onClick={() => handleMoveToDone(task.task_id)}>                              {theme === "light" ? 
+                                                <img className="tick" src="/svgs/tick-white.svg" alt="Accept" /> :
+                                                <img className = "tick" src="/svgs/tick.svg" alt="Accept" />}</button>
                                         </div>
                                     </li>
                                 );
@@ -270,7 +275,10 @@ const ToDo = () => {
                                         <p className="task">{task.task}</p>
                                         <div className="button-container">
                                             {(role !== "attendee" || task.creator_id === user_id) && 
-                                                <button className="small-button" onClick={() => handleDeleteTask(task.task_id)}>🗑</button>}
+                                                <button className="small-button" onClick={() => handleDeleteTask(task.task_id)}>                                    
+                                                {theme === "light" ? 
+                                                    <img className="delete" src="/svgs/trash-white.svg" alt="Delete" /> :
+                                                    <img className = "delete" src="/svgs/trash.svg" alt="Delete" />}</button>}
                                             <button className="small-button" onClick={() => handleMoveToDo(task.task_id)}>
                                             {theme === "light" ? 
                                                 <img className="undo" src="/svgs/undo-white.svg" alt="Undo" /> :

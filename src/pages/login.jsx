@@ -174,14 +174,15 @@ const Login = () => {
 
             const result = await response.json();
             if (result.success) {
-                setRequestData({
-                    status: "pending",
+                const userData = {
                     email: loginEmail,
                     username: username,
                     event_id: event_id,
                     time_requested: new Date().toISOString(),
                     profile_pic: profileNum
-                })
+                };
+                setRequestData(userData);
+                localStorage.setItem("user", JSON.stringify(userData));
                 setLoginStep("pending"); // Go back to login step
                 setAutoLogInEmail();
                 updateEventPage(event_id, "attendees");
@@ -307,7 +308,7 @@ const Login = () => {
                 {requestData.status === "rejected" ? 
                 <h3>Your request has been cancelled</h3> :
                 <h3>Your request to join {event.title} is pending</h3>}
-                <button className = "small-button" onClick={() => { setLoginStep("login")}}>Back</button>
+                <button className = "small-button" onClick={() => { localStorage.removeItem("user"); setLoginStep("login")}}>Back</button>
             </div>
         );
     }
@@ -327,7 +328,6 @@ const Login = () => {
                     <button type="submit">GO</button>
                 </span>
             </form>
-            {loginError && <p style={{ color: "red" }}>{loginError}</p>}
         </div>
     );
 }

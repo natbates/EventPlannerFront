@@ -271,7 +271,11 @@ const ToDo = () => {
                                         <div className="button-container">
                                             {(role !== "attendee" || task.creator_id === user_id) && 
                                                 <button className="small-button" onClick={() => handleDeleteTask(task.task_id)}>🗑</button>}
-                                            <button className="small-button" onClick={() => handleMoveToDo(task.task_id)}>↩</button>
+                                            <button className="small-button" onClick={() => handleMoveToDo(task.task_id)}>
+                                            {theme === "light" ? 
+                                                <img className="undo" src="/svgs/undo-white.svg" alt="Undo" /> :
+                                                <img className = "undo" src="/svgs/undo.svg" alt="Undo" />}
+                                            </button>
                                         </div>
                                     </li>
                                 );

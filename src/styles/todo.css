@@ -106,4 +106,10 @@
     {
         display: none;
     }
+
+    .add-task, .add-link
+    {
+        flex-direction: column;
+    }
+
 }

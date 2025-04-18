@@ -401,7 +401,7 @@ export const SharedCalendar = ({ data, selectChosenDays, attendeeData, isSelecti
 
       {!isSelectingDates && selectedDate && 
         <div className="section selected-dates">
-          <h3>Selected Date: {selectedDate ? formatDate(selectedDate) : "None"}</h3>
+          <span className="selected-date-top-header"><h3 style={{margin: 0}}>Selected: {selectedDate ? formatDate(selectedDate) : "None"}</h3><button className="small-button" onClick={(e) => {setSelectedDate(null)}}>X</button></span>
           <div className= "availability-group-container">
             {selectedDate && (
               <>

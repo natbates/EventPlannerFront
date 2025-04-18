@@ -223,6 +223,7 @@ const Polls = () =>
       
           if (response.ok) {
             setSelectedOption(prev => (prev === option ? "" : option)); // Toggle vote
+            notify("Vote cast successfully!");
             refetch();
           } else{
             throw new Error("Failed to cast vote");
@@ -416,7 +417,9 @@ const Polls = () =>
                     <div className="button-container">
                       {(poll.created_by === user_id || role != "attendee") && (
                         <button className="small-button" onClick={() => deletePoll(pollId)}>
-                          🗑
+                          {theme === "light" ? 
+                            <img className="delete" src="/svgs/trash-white.svg" alt="Delete" /> :
+                            <img className = "delete" src="/svgs/trash.svg" alt="Delete" />}
                         </button>
                       )}
                       <button
@@ -433,7 +436,9 @@ const Polls = () =>
                           }
                         }}
                       >
-                        ↩
+                        {theme === "light" ? 
+                          <img className="undo" src="/svgs/undo-white.svg" alt="Undo" /> :
+                        <img className = "undo" src="/svgs/undo.svg" alt="Undo" />}
                       </button>
                       <button
                         disabled={pendingVotes[pollId] == null}
@@ -537,7 +542,10 @@ const Polls = () =>
                   <p className="character-counter">{option.length} / {MAX_OPTION_LENGTH}</p>
                 </div>
                 {options.length > 2 && (
-                  <button className="small-button" onClick={() => removeOption(index)}>🗑</button>
+                  <button className="small-button" onClick={() => removeOption(index)}>
+                    {theme === "light" ? 
+                    <img className="delete" src="/svgs/trash-white.svg" alt="Delete" /> :
+                  <img className = "delete" src="/svgs/trash.svg" alt="Delete" />}</button>
                 )}
               </div>
             ))}

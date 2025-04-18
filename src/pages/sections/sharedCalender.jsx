@@ -272,7 +272,7 @@ const AttendeeCalendar = () => {
     
     if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Shared Calender"} />;
 
-    if (loading || dataLoad) return <div className="loader"><p>Fetching Calender Data</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
+    if (loading || dataLoad) return <div className="loader"><p>Fetching Calender</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     return (
         <div className="shared-calender">

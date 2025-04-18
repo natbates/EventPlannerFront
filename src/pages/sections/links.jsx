@@ -215,7 +215,7 @@ const Links = () => {
                                         {linkItem.link}
                                     </a>
                                     <small>
-                                        Added by {linkUsernames[linkItem.link] || "Loading..."}{" "}
+                                        Added by <strong className="name">{linkUsernames[linkItem.link]?.split(" ")[0] || "Loading..."}{" "}</strong>
                                         {new Date(linkItem.created_at).toDateString() ===
                                         new Date().toDateString()
                                             ? `at ${new Date(linkItem.created_at).toLocaleTimeString([], {
@@ -230,7 +230,9 @@ const Links = () => {
                                         className="small-button"
                                         onClick={() => handleDeleteLink(linkItem.link)}
                                     >
-                                        🗑
+                                    {theme === "light" ? 
+                                        <img className="delete" src="/svgs/trash-white.svg" alt="Delete" /> :
+                                        <img className = "delete" src="/svgs/trash.svg" alt="Delete" />}
                                     </button>
                                 )}
                             </li>

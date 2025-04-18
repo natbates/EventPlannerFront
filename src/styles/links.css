@@ -112,9 +112,18 @@
 
 @media (max-width: 500px) {
 
+    .invite-link-qr-code
+    {
+        flex-direction: column;
+        gap: 20px;
+    }
     .qr
     {
-        display: none;
+        width: 100% !important;
+        height: 100% !important;
+        padding: 50px;
+        box-sizing: border-box;
+        outline-offset: -40px !important;
     }
 }
 
@@ -123,9 +132,31 @@
     width: 100%;
 }
 
+.link-item button img
+{
+    height: 100%;
+}
+
+.link-item small
+{
+    display: flex;
+    text-wrap: nowrap;
+    gap: 5px;
+}
+
+.link-item .name
+{
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 30px;
+}
+
 .link-item{
     width: 100%;
     flex: 1;
+    align-items: flex-end;
 }
 
 .link-item div

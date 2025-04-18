@@ -4,6 +4,7 @@
     --background-colour: #f5f1eb;
     --background-colour-low-opacity: #f5f1eb8d;
     --primary-colour: #000000;
+    --primary-colour-lower-opacity: #0000006c;
     --accent-colour: #e27171;
 
 }
@@ -11,6 +12,7 @@
 [data-theme="dark"] {
     --background-colour: #14161a;
     --primary-colour: #f1f1f1;
+    --primary-colour-lower-opacity: #f1f1f19b;
 }
 
 /* * {
@@ -221,6 +223,18 @@ button:disabled
 .warning p
 {
     margin: 0;
+}
+
+.undo, .delete
+{
+    width: auto;
+    height: 100%;
+}
+
+.delete
+{
+    padding: 3px;
+    box-sizing: border-box;
 }
 
 .underline

@@ -415,11 +415,10 @@ const Polls = () =>
                             </button>
 
                             {pendingVotes[pollId] === option && (
-                              <p className="pending-poll-chosen" src="/svgs/tick.svg">                              
-                              {theme === "light" ? 
-                                <img className="tick" src="/svgs/tick-white.svg" alt="Accept" /> :
-                                <img className = "tick" src="/svgs/tick.svg" alt="Accept" />}</p>
-                            )}
+                              <div className="pending-poll-chosen" src="/svgs/tick.svg">                              
+                                <img className="tick" src="/svgs/tick-white.svg" alt="Accept" /> 
+                              </div>)}
+                            
 
                             {hasVoted && pendingVotes[pollId] !== option && (
                               <span className="vote-count">

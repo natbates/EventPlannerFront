@@ -165,11 +165,9 @@ const EventPage = () => {
       if (authed && user_id)
       {
           fetchUserAvailability();
-      } else 
-      {
-        setLoading(false);
       }
       setNotifyLoad(false);
+      setLoading(false);
     }
     
   };
@@ -216,7 +214,10 @@ const EventPage = () => {
   };
   
   const fetchUserAvailability = async () => {
-    if (user_id || !authed) return; 
+    if (user_id || !authed) {
+      setLoading(false);
+      return;
+    } 
     {
       try {
         const response = await fetch(`${API_BASE_URL}/calendar/fetch-user-availability/${user_id}`, {
@@ -227,6 +228,7 @@ const EventPage = () => {
         });
     
         if (!response.ok) {
+          setLoading(false);
           throw new Error("Failed to fetch availability");
         }
     

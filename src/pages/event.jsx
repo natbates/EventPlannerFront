@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/auth";
 import MyCalendar, { SharedCalendar } from "../components/Calender";
@@ -21,6 +21,7 @@ const EventPage = () => {
   const [event, setEvent] = useState(null);
   const {theme} = useTheme();
   const [loading, setLoading] = useState(true);
+  const [loggingIn, setLoggingIn] = useState(false);
   const [error, setError] = useState(null);
   const [lastOpened, setLastOpened] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -91,6 +92,11 @@ const EventPage = () => {
   useEffect(() => {
     fetchAttendees();
   }, [event]);
+
+  useEffect(() => {
+    console.log("Loading:", loading); // Debugging line
+  }, [loading]);
+
   
 
   const reopenEvent = async () => {
@@ -215,7 +221,6 @@ const EventPage = () => {
   
   const fetchUserAvailability = async () => {
     if (user_id || !authed) {
-      setLoading(false);
       return;
     } 
     {
@@ -309,6 +314,7 @@ const EventPage = () => {
     let data = null;
   
     if (storedUser && event_id) {
+      setLoggingIn(true);
       data = await LogIn(storedUser.email, event_id); // Await login result
     }
 
@@ -319,6 +325,7 @@ const EventPage = () => {
     } else {
       navigate(`/event/${event_id}/login`);
     }
+    setLoggingIn(false);
   }
 
   useEffect(() => {
@@ -345,7 +352,8 @@ const EventPage = () => {
       </div>
     );
   }
-  
+
+  if (loggingIn) return <div className="loader"><p>Logging You In</p></div>;
 
   if (loading || notifyLoad) return <div className="loader"><p>Fetching Event</p></div>;
 
@@ -360,7 +368,6 @@ const EventPage = () => {
       </div>
     );
   }
-
 
   if (authed && event && event.status === "confirmed") {
     

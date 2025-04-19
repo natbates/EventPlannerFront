@@ -202,7 +202,7 @@
 .your-calender-bottom
 {
     display: flex;
-    margin-top: 20px;
+    margin-top: 30px;
     justify-content: space-between;
     align-items: center;
 }
@@ -663,4 +663,18 @@
         text-overflow: ellipsis;
         overflow: hidden;
     }
+
+    .date-range
+    {
+        font-size: 0.8rem !important;
+        margin-bottom: 20px !important;
+    }
+}
+
+.date-range
+{
+    margin-bottom: 40px;
+    margin-top: 0;
+    font-weight: lighter;
+    font-size: 1.2rem;
 }

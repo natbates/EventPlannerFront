@@ -166,6 +166,32 @@ const YourCalendar = () => {
                 </button>
               <h2>Your Calendar</h2>
             </div>
+
+            {calenderData.earliest_date !== calenderData.latest_date && (() => {
+              const start = new Date(calenderData.earliest_date);
+              const end = new Date(calenderData.latest_date);
+
+              const sameYear = start.getFullYear() === end.getFullYear();
+
+              const getOrdinal = (n) => {
+                const s = ["th", "st", "nd", "rd"];
+                const v = n % 100;
+                return n + (s[(v - 20) % 10] || s[v] || s[0]);
+              };
+
+              const formatDate = (date, includeYear) => {
+                const day = getOrdinal(date.getDate());
+                const month = date.toLocaleString(undefined, { month: "long" });
+                const year = date.getFullYear();
+                return `${day} of ${month}${includeYear ? ` ${year}` : ''}`;
+              };
+
+              const startFormatted = formatDate(start, !sameYear);
+              const endFormatted = formatDate(end, true);
+
+              return <h3 className="date-range">Availability Range: {startFormatted} to {endFormatted}</h3>;
+            })()}
+
             <MyCalendar data={calenderData} processDate={processDate} userAvailability={pendingAvailability} />  
 
             {/* Clear Availability Button */}

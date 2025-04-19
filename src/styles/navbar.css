@@ -208,7 +208,7 @@
     padding: 4px 8px;
     font-size: 12px;
     white-space: nowrap;
-    color: var(--primary-colour);
+    color: white;
     position: absolute;
     bottom: -30px;
     left: 50%;

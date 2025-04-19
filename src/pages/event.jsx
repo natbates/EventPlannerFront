@@ -21,7 +21,7 @@ const EventPage = () => {
   const [event, setEvent] = useState(null);
   const {theme} = useTheme();
   const [loading, setLoading] = useState(true);
-  const [loggingIn, setLoggingIn] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(true);
   const [error, setError] = useState(null);
   const [lastOpened, setLastOpened] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);

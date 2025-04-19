@@ -32,7 +32,15 @@
 
 .attendees-section .profile
 {
-  width: 205px;
+  width: 225px;
+}
+
+
+@media (max-width: 906px) {
+  .profile-group {
+    justify-content: flex-start !important;
+  }
+
 }
 
 .attendees-section .profile p
@@ -98,8 +106,8 @@ p.you
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: flex-start;
-  }
+    justify-content: space-between;
+}
 
 .request-button
 {

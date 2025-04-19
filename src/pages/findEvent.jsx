@@ -2,12 +2,33 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../contexts/notification";
 import "../styles/findEvent.css";
+import { Profiles } from "../components/ProfileSelector";
+
+const RecentEvent = ({ event_id, title, profile_pic, description, last_logged_in }) => {
+  const navigate = useNavigate();
+  const profile = Profiles.find((profile) => profile.id === Number(profile_pic));
+
+  // Load recent events from localStorage
+
+  return (
+    <div className="recent-event" onClick={() => navigate(`/event/${event_id}`)}>
+      <div className="title-profile-container">
+        <div>
+          <img src={profile?.path} alt="Profile" className="profile-pic" />
+          <h2>{title}</h2>
+        </div>
+        <p>Last logged in: {last_logged_in}</p>
+      </div>
+    </div>
+  );
+};
 
 const FindEvent = () => {
   const [eventId, setEventId] = useState("");
   const [autoAdded, setAutoAdded] = useState(false);
   const navigate = useNavigate();
   const notify = useNotification();
+  const [recentEvents, setRecentEvents] = useState([]);
 
   // Load stored event ID when component mounts
   useEffect(() => {
@@ -15,6 +36,20 @@ const FindEvent = () => {
     if (storedEventId) {
       setEventId(storedEventId);
       setAutoAdded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const storedEvents = localStorage.getItem("viewedEvents");
+    if (storedEvents) {
+      try {
+        const parsed = JSON.parse(storedEvents);
+        if (Array.isArray(parsed)) {
+          setRecentEvents(parsed);
+        }
+      } catch (e) {
+        console.error("Failed to parse stored events", e);
+      }
     }
   }, []);
 
@@ -56,6 +91,14 @@ const FindEvent = () => {
         </div>
         <button onClick={handleFindEvent}>Find Event</button>
       </span>
+
+      <div className="recent-event-container">
+        {recentEvents.length > 0 && (
+          recentEvents.map((event, index) => (
+            <RecentEvent key={index} {...event} />
+          )
+        ))}
+      </div>
 
       <div className="section whats-new">
       <h2>Coming Soon</h2>

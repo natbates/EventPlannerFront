@@ -11,6 +11,13 @@
     text-align: start;
 }
 
+.event-top-line div
+{
+    width: 100%;
+    word-break: break-word;
+    text-wrap: break-word;
+}
+
 .top-line
 {
     display: flex;

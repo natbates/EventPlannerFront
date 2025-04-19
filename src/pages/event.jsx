@@ -149,6 +149,48 @@ const EventPage = () => {
         setLastUpdated(last_updated);
         const last_opened = await fetchLastOpened(user_id);
         setLastOpened(last_opened);
+
+        try {
+          const viewedEventsKey = "viewedEvents";
+          const stored = localStorage.getItem(viewedEventsKey);
+          let viewedEvents = stored ? JSON.parse(stored) : [];
+          
+          // Check if the event already exists by ID
+          const alreadyViewed = viewedEvents.some(event => event.event_id === event_id);
+
+          function formatFancyDate(date) {
+            const day = date.getDate();
+            const daySuffix = (d) => {
+              if (d > 3 && d < 21) return "th";
+              switch (d % 10) {
+                case 1: return "st";
+                case 2: return "nd";
+                case 3: return "rd";
+                default: return "th";
+              }
+            };
+            const month = date.toLocaleString("default", { month: "long" });
+            const year = date.getFullYear();
+          
+            return `${day}${daySuffix(day)} ${month} ${year}`;
+          }
+          
+          if (!alreadyViewed && eventData) {
+            viewedEvents.push({
+              event_id: event_id,
+              title: eventData.title,
+              description: eventData.description,
+              profile_pic: profile_pic,
+              last_logged_in: formatFancyDate(new Date())
+            });
+          
+            localStorage.setItem(viewedEventsKey, JSON.stringify(viewedEvents));
+          }          
+        } catch (storageError) {
+          console.error("Failed to update viewed events in session storage:", storageError);
+        }
+
+
       } else
       {
         const response = await fetch(`${API_BASE_URL}/events/fetch-event-title/${event_id}`, {

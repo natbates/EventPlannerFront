@@ -18,6 +18,7 @@
     width: 100%;
     box-sizing: border-box;
     margin-top: 30px;
+    margin-bottom: 0;
 }
 
 .whats-new h2
@@ -72,6 +73,84 @@
     align-items: flex-start;
 }
 
+.title-profile-container p
+{
+    text-wrap: nowrap;
+
+}
+
+.title-profile-container div
+{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    word-break: break-word;
+    text-wrap: break-word;
+}
+
+.recent-event-info
+{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.recent-event-info p
+{
+    margin: 0;
+    padding: 0;
+}
+
+
+.title-profile-container h2
+{
+    font-size: 1.5rem;
+    margin: 0;
+    padding: 0;
+}
+
+.recent-event img
+{
+    width: auto;
+}
+
+.recent-event:hover
+{
+    opacity: 1;
+    transition: 0.2s ease-in-out;
+}
+
+.recent-event-container
+{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 30px;
+    gap: 20px;
+}
+
+.recent-event
+{
+    display: flex;
+    flex-direction: column;
+    border: 3px solid var(--primary-colour);
+    width: 100%;
+    opacity: 0.7;
+    gap: 10px;
+    padding: 15px 15px;
+    align-items: flex-start;
+    box-sizing: border-box;
+}
+
+.title-profile-container
+{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
 @media (max-width: 714px) {
     .find-event-input
     {
@@ -81,5 +160,20 @@
     .find-event h1
     {
         font-size: 3rem;
+    }
+    .title-profile-container
+    {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .recent-event
+    {
+        gap: 0;
+        opacity: 1;
+    }
+    
+    .title-profile-container h2
+    {
+        font-size: 1.2rem;
     }
 }

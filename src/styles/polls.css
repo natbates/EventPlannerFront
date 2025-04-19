@@ -209,6 +209,11 @@
     box-sizing: border-box;
 }
 
+.poll-input-container textarea
+{
+    margin-top: 0;
+}
+
 .vote-count
 {
     position: absolute;

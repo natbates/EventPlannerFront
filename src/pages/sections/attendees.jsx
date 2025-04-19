@@ -124,6 +124,20 @@ const Attendees = () => {
             }
     
             const data = await response.json();
+
+            await fetch(`${API_BASE_URL}/notifications/send-request-accepted-email`, {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${sessionStorage.getItem("token")}`,
+              },
+              body: JSON.stringify({
+                  email,
+                  username,
+                  event_id,
+              }),
+            });
+          
             await refetch();
             notify("Request accepted and user added to the event.");
     

@@ -162,7 +162,10 @@ const EventPage = () => {
       setError(err.message);
       notify(err.message);
     } finally {
-      if (!authed || !user_id)
+      if (authed && user_id)
+      {
+          fetchUserAvailability();
+      } else 
       {
         setLoading(false);
       }
@@ -291,11 +294,6 @@ const EventPage = () => {
 
     fetchEventData();
     
-    if (authed && user_id)
-    {
-      setLoading(true);
-      fetchUserAvailability();
-    } 
     
   }, [authed, user_id]);
 

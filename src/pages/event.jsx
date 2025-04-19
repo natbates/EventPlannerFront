@@ -169,11 +169,12 @@ const EventPage = () => {
           const viewedEventsKey = "viewedEvents";
           const stored = localStorage.getItem(viewedEventsKey);
           let viewedEvents = stored ? JSON.parse(stored) : [];
-          
-          // Check if the event already exists by ID
-          const alreadyViewed = viewedEvents.some(event => event.event_id === event_id);
-
-          if (!alreadyViewed && eventData) {
+        
+          // Find index of the event if it already exists
+          const index = viewedEvents.findIndex(event => event.event_id === event_id);
+        
+          if (index === -1 && eventData) {
+            // Not viewed yet – add it
             viewedEvents.push({
               event_id: event_id,
               title: eventData.title,
@@ -181,13 +182,15 @@ const EventPage = () => {
               profile_pic: profile_pic,
               last_logged_in: formatFancyDate(new Date())
             });
-          
-            localStorage.setItem(viewedEventsKey, JSON.stringify(viewedEvents));
-          }          
+          } else if (index !== -1) {
+            // Already exists – update just the last_logged_in
+            viewedEvents[index].last_logged_in = formatFancyDate(new Date());
+          }
+        
+          localStorage.setItem(viewedEventsKey, JSON.stringify(viewedEvents));
         } catch (storageError) {
-          console.error("Failed to update viewed events in session storage:", storageError);
-        }
-
+          console.error("Failed to update viewed events in local storage:", storageError);
+      }
 
       } else
       {

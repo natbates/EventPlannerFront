@@ -4,11 +4,9 @@ import { useNotification } from "../contexts/notification";
 import "../styles/findEvent.css";
 import { Profiles } from "../components/ProfileSelector";
 
-const RecentEvent = ({ event_id, title, profile_pic, description, last_logged_in }) => {
+const RecentEvent = ({ event_id, title, profile_pic, description, last_logged_in, isRequest }) => {
   const navigate = useNavigate();
   const profile = Profiles.find((profile) => profile.id === Number(profile_pic));
-
-  // Load recent events from localStorage
 
   return (
     <div className="recent-event" onClick={() => navigate(`/event/${event_id}`)}>
@@ -17,11 +15,12 @@ const RecentEvent = ({ event_id, title, profile_pic, description, last_logged_in
           <img src={profile?.path} alt="Profile" className="profile-pic" />
           <h2>{title}</h2>
         </div>
-        <p>Last logged in: {last_logged_in}</p>
+        <p>{isRequest ? "Request made" : `Last logged in: ${last_logged_in}`}</p>
       </div>
     </div>
   );
 };
+
 
 const FindEvent = () => {
   const [eventId, setEventId] = useState("");
@@ -110,18 +109,18 @@ const FindEvent = () => {
         {recentEvents.length > 0 && <h3>Joined Events</h3>}
         {recentEvents.length > 0 && (
           recentEvents.map((event, index) => (
-            <RecentEvent key={index} {...event} />
-          )
-        ))}
+            <RecentEvent key={index} {...event} isRequest={false} />
+          ))
+        )}
       </div>
 
       <div className="recent-event-container">
         {recentRequests.length > 0 && <h3>Requested Events</h3>}
         {recentRequests.length > 0 && (
           recentRequests.map((event, index) => (
-            <RecentEvent key={index} {...event} />
-          )
-        ))}
+            <RecentEvent key={index} {...event} isRequest={true} />
+          ))
+        )}
       </div>
 
       <div className="section whats-new">

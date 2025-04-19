@@ -21,7 +21,6 @@ const EventPage = () => {
   const [event, setEvent] = useState(null);
   const {theme} = useTheme();
   const [loading, setLoading] = useState(true);
-  const [loggingIn, setLoggingIn] = useState(true);
   const [error, setError] = useState(null);
   const [lastOpened, setLastOpened] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -31,6 +30,7 @@ const EventPage = () => {
   const { notify, setNotifyLoad, notifyLoad} = useNotification();
   const { LogIn, signOut, role, authed, user_id, profile_pic} = useAuth();
   const {fetchLastOpened, fetchLastUpdated, fetchEventStatus} = useHistory();
+  const [loggingIn, setLoggingIn] = useState(!authed);
 
   const routes = [
     { path: "/attendees", label: "Attendees", img: "/svgs/attendees.svg"},

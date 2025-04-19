@@ -6,6 +6,8 @@
     justify-content: center;
     align-items: flex-start;
     width: 100%;
+    word-break: break-word;
+    text-wrap: break-word;
 }
 
 .login-form h1

@@ -126,7 +126,6 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    margin-top: 30px;
     gap: 20px;
 }
 
@@ -176,4 +175,10 @@
     {
         font-size: 1.2rem;
     }
+}
+
+.recent-event-container h3
+{
+    margin: 0;
+    margin-top: 30px;
 }

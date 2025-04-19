@@ -29,6 +29,7 @@ const FindEvent = () => {
   const navigate = useNavigate();
   const notify = useNotification();
   const [recentEvents, setRecentEvents] = useState([]);
+  const [recentRequests, setRecentRequests] = useState([]);
 
   // Load stored event ID when component mounts
   useEffect(() => {
@@ -51,6 +52,19 @@ const FindEvent = () => {
         console.error("Failed to parse stored events", e);
       }
     }
+
+    const storedRequests = localStorage.getItem("requestedEvents");
+    if (storedEvents) {
+      try {
+        const parsed = JSON.parse(storedRequests);
+        if (Array.isArray(parsed)) {
+          setRecentRequests(parsed);
+        }
+      } catch (e) {
+        console.error("Failed to parse stored events", e);
+      }
+    }
+
   }, []);
 
   const handleFindEvent = () => {
@@ -93,8 +107,18 @@ const FindEvent = () => {
       </span>
 
       <div className="recent-event-container">
+        {recentEvents.length > 0 && <h3>Joined Events</h3>}
         {recentEvents.length > 0 && (
           recentEvents.map((event, index) => (
+            <RecentEvent key={index} {...event} />
+          )
+        ))}
+      </div>
+
+      <div className="recent-event-container">
+        {recentRequests.length > 0 && <h3>Requested Events</h3>}
+        {recentRequests.length > 0 && (
+          recentRequests.map((event, index) => (
             <RecentEvent key={index} {...event} />
           )
         ))}

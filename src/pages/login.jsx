@@ -11,6 +11,7 @@ import { Profiles } from "../components/ProfileSelector";
 import { useTheme } from "../contexts/theme";
 import { useNotification } from "../contexts/notification";
 import { useRef } from "react";
+import { formatFancyDate } from "./event";
 
 const MAX_WAIT_TIME = 1000; // Maximum wait time in milliseconds (e.g., 5000 ms = 5 seconds)
 const POLL_INTERVAL = 100;  // Time interval to check (e.g., 100 ms)
@@ -45,8 +46,15 @@ const Login = () => {
             
           const storedUser = JSON.parse(localStorage.getItem("user"));
           if (storedUser && event_id) {
-            await LogIn(storedUser.email, event_id); // ⬅️ optionally await if you want to wait before redirect
-          }
+            console.log("Stored user found loggin in", storedUser);
+            const data = await LogIn(storedUser.email, event_id); // ⬅️ optionally await if you want to wait before redirect
+            if (data.status === "pending") {
+              setLoginStep("pending");
+              setRequestData(data);
+            } else {
+              console.log("No stored user found, redirecting to login page.");
+            }
+         }
       
           if (!event_id || event_id === "undefined") {
             navigate(`/`);
@@ -185,6 +193,29 @@ const Login = () => {
                 setLoginStep("pending"); // Go back to login step
                 setAutoLogInEmail();
                 updateEventPage(event_id, "attendees");
+
+                try {
+                    const requestedEventsKey = "requestedEvents";
+                    const stored = localStorage.getItem(requestedEventsKey);
+                    let requestedEvents = stored ? JSON.parse(stored) : [];
+                    
+                    // Check if the event already exists by ID
+                    const alreadyRequested = requestedEvents.some(event => event.event_id === event_id);
+          
+                    if (!alreadyRequested && event_id) {
+                        requestedEvents.push({
+                        event_id: event_id,
+                        title: event.title,
+                        profile_pic: profileNum,
+                        last_logged_in: formatFancyDate(new Date())
+                      });
+                    
+                      localStorage.setItem(requestedEventsKey, JSON.stringify(requestedEvents));
+                    }          
+                  } catch (storageError) {
+                    console.error("Failed to update requested events in session storage:", storageError);
+                  }
+
             } else {
                 setLoginError("Request failed.");
             }

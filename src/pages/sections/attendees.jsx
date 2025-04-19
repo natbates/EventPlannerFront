@@ -377,6 +377,7 @@ const Attendees = () => {
                                                   />
                                                   <div className="dropdown">
                                                       <div className="dropdown-content">
+                                                          <strong>{attendee.username}</strong>
                                                           <button onClick={() => seeAvailability(attendee.user_id)}>
                                                               See Availability
                                                           </button>

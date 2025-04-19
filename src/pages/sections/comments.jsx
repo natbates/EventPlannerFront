@@ -241,7 +241,9 @@ const Comments = () =>
                     ? `at ${new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
                     : `on ${new Date(comment.created_at).toLocaleDateString()}`}
                 </span>
-                { (comment.user_id === user_id || role != "attendee") && <button className="small-button" onClick={() => {handleDeleteComment(comment.uuid)}}>🗑</button>}
+                { (comment.user_id === user_id || role != "attendee") && <button className="small-button" onClick={() => {handleDeleteComment(comment.uuid)}}>                                    {theme === "light" ? 
+                  <img className="delete" src="/svgs/trash-white.svg" alt="Delete" /> :
+                  <img className = "delete" src="/svgs/trash.svg" alt="Delete" />}</button>}
              </div>
               <p>{replyingToUsername}{comment.message}</p>
               {/* Reply button */}

@@ -17,27 +17,6 @@ const useFetchEventData = (endpoint) => {
     const navigate = useNavigate();
     const { notify } = useNotification();
 
-    useEffect(() => {
-        const checkAuth = async () => {
-            setLoggingIn(true);
-            if (authLoading) return; // Wait until auth check is done
-    
-            if (!authed) {
-                const result = await ReLogIn(event_id);
-                
-                setLoggingIn(false);
-                // If user is now authed after ReLogIn, skip redirect
-                if (!result && !authed) {
-                    navigate(`/event/${event_id}/login`);
-                }
-            } else
-            {
-                setLoggingIn(false);
-            }
-        };
-    
-        checkAuth();
-    }, [authed, authLoading, event_id, navigate]);
     
 
     // 🔹 Fetch event status before fetching other data
@@ -90,7 +69,19 @@ const useFetchEventData = (endpoint) => {
 
         if (!authed)
         {
-            return navigate(`/event/${event_id}/login`);
+            let data = null;
+          
+            if (event_id) {
+              data = await ReLogIn(event_id); // Await login result
+            }
+        
+            console.log("Login data:", data); // Debugging line
+          
+            if (data === true) {
+            //   setNotifyLoad(false);
+            } else {
+              navigate(`/event/${event_id}/login`);
+            }
         }
     
         try {

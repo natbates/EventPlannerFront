@@ -80,7 +80,7 @@ const Login = () => {
 
         if (userFingerprint && event_id) {
             // Make API call to auto-sign-in endpoint using fetch
-            setNotifyLoad(true);
+            console.log("userFingerprint", userFingerprint);
             fetch(`${API_BASE_URL}/users/auto-sign-in`, {
                 method: 'POST', // Using POST method for sending data
                 headers: {
@@ -96,9 +96,8 @@ const Login = () => {
                     if (data.success) {
                         // Handle the successful sign-in (e.g., redirect, set logged-in state)
                         setLoginEmail(data.email);
-                        setNotifyLoad(false);
-                    } else {
-                        setNotifyLoad(false);
+                    }  else {
+                        console.log('Auto sign-in failed');
                     }
                 })
                 .catch((error) => {
@@ -228,7 +227,7 @@ const Login = () => {
 
     if (loginError) return <PageError error={"Something Went Wrong"} page={"Log In"} />;
 
-    if (loading) return <div className="loader"><p>Logging In</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
+    if (loading) return <div className="loader"><p>Loading...</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     if (loginStep === "enter-username") {
         return (

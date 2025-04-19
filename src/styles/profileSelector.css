@@ -22,7 +22,7 @@
 
 .profile-option
 {
-    opacity: 0.5;
+    opacity: 0.9;
     display: flex;
     justify-content: center;
     min-width: 59px;
@@ -32,6 +32,7 @@
 .profile-option.selected
 {
     opacity: 1;
+    background-color: var(--accent-colour);
 }
 
 .profile-selector {

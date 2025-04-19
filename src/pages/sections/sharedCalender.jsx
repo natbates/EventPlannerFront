@@ -270,9 +270,9 @@ const AttendeeCalendar = () => {
         }
     };
     
-    if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Shared Calender"} />;
+    if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Shared Calendar"} />;
 
-    if (loading || dataLoad) return <div className="loader"><p>Fetching Calender</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
+    if (loading || dataLoad) return <div className="loader"><p>Fetching Calendar</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
     return (
         <div className="shared-calender">
@@ -282,7 +282,7 @@ const AttendeeCalendar = () => {
                         <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
                     <img src="/svgs/back-arrow.svg" alt="Back" />}
                 </button>
-                <h2>Shared Calender</h2>
+                <h2>Shared Calendar</h2>
             </div>
 
             <div className="shame-list section">

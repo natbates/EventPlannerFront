@@ -71,8 +71,26 @@
     min-width: 59px !important;
 }
 
-@media (max-width: 714px) {
+@media (max-width: 500px) {
+    .settings-buttons-user
+    {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 20px;
+    }   
 
+    .settings-buttons-user .button-container
+    {
+        width: 100%;
+    }
+
+    .settings-buttons-user button
+    {
+        width: 100%;
+    }
+}
+
+@media (max-width: 714px) {
 
     .settings .one-line-input
     {

@@ -151,9 +151,9 @@ const YourCalendar = () => {
 
     useEffect(() => {if (!error){fetchUserAvailability();} }, [user_id]);
 
-    if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Your Calender"} />;
+    if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Your Calendar"} />;
 
-    if (loading || secondaryloading) return <div className="loader"><p>Fetching Your Calender</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
+    if (loading || secondaryloading) return <div className="loader"><p>Fetching Calendar</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
 
     return (
@@ -164,7 +164,7 @@ const YourCalendar = () => {
                       <img src="/svgs/back-arrow-white.svg" alt="Back" /> :
                     <img src="/svgs/back-arrow.svg" alt="Back" />}
                 </button>
-              <h2>Your Calender</h2>
+              <h2>Your Calendar</h2>
             </div>
             <MyCalendar data={calenderData} processDate={processDate} userAvailability={pendingAvailability} />  
 

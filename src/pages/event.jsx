@@ -300,7 +300,7 @@ const EventPage = () => {
 
     console.log("Logging in from event page..."); // Debugging line
 
-    setNotifyLoad(true);
+    //setNotifyLoad(true);
   
     const storedUser = JSON.parse(localStorage.getItem("user"));
     let data = null;
@@ -312,7 +312,7 @@ const EventPage = () => {
     console.log("Login data:", data); // Debugging line
   
     if (data === true) {
-      setNotifyLoad(false);
+      //setNotifyLoad(false);
     } else {
       navigate(`/event/${event_id}/login`);
     }

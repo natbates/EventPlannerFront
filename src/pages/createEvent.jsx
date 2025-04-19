@@ -82,7 +82,6 @@ const CreateEvent = () => {
     if (!lastName.trim()) errors.lastName = "Last name is required.";
     if (!email.match(/^\S+@\S+\.\S+$/)) errors.email = "Invalid email format.";
     if (!title.trim()) errors.title = "Event title is required.";
-    if (!description.trim()) errors.description = "Description is required.";
     if (!earliest_date) errors.earliest_date = "Earliest date is required.";
     if (!latest_date) errors.latest_date = "Latest date is required.";
     if (!duration || Number(duration) < 1) errors.duration = "Duration must be at least 1 day.";
@@ -110,9 +109,6 @@ const CreateEvent = () => {
       notify(errors.duration);
     }
 
-    if (!location.address.trim()) errors.locationAddress = "Address is required.";
-    if (!location.city.trim()) errors.locationCity = "City is required.";
-    if (!location.postcode.trim()) errors.locationPostcode = "Postcode is required.";
     if (!location.country.trim()) errors.locationCountry = "Country is required.";
 
     setValidationErrors(errors);
@@ -139,22 +135,10 @@ const CreateEvent = () => {
     }
 
     if (name === "earliest_date") {
-      setFormData((prev) => {
-        const updated = { ...prev, earliest_date: value };
-  
-        // Auto-set latest_date if not set
-        if (!prev.latest_date && prev.duration) {
-          const newLatest = new Date(value);
-          newLatest.setDate(newLatest.getDate() + Number(prev.duration) - 1);
-          updated.latest_date = newLatest.toISOString().split("T")[0];
-        }
-  
-        return updated;
-      });
+      setFormData((prev) => ({ ...prev, earliest_date: value }));
       return;
     }
-
-
+    
     if (name.startsWith("location.")) {
       const field = name.split(".")[1];
       setFormData((prev) => ({ ...prev, location: { ...prev.location, [field]: value } }));
@@ -187,9 +171,9 @@ const CreateEvent = () => {
       setError("Not all fields are filled in correctly.");
       return;
     }
-
+  
     setNotifyLoad(true);
-
+  
     try {
       const organiser_id = await createUser(
         formData.email,
@@ -198,10 +182,9 @@ const CreateEvent = () => {
         null,
         profileNum
       );
-
+  
       if (!organiser_id) throw new Error("Failed to create user.");
-
-
+  
       const eventPayload = {
         ...formData,
         organiser_id,
@@ -209,20 +192,52 @@ const CreateEvent = () => {
         latest_date: new Date(formData.latest_date).toISOString().split("T")[0],
         location: JSON.stringify(formData.location),
       };
-
+  
       const response = await fetch(`${API_BASE_URL}/events/create-event`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(eventPayload),
       });
-
+  
       if (!response.ok) throw new Error((await response.json()).message || "Failed to create event");
-      
+  
       const data = await response.json();
+      const eventId = data.event_id;
       localStorage.removeItem("createEventData");
-      navigate(`/event/${data.event_id}`);
-      showFavouritePopup();
-      notify("Event created successfully!");
+  
+      // ⏳ Polling until the event is available via public endpoint
+      const maxAttempts = 10;
+      let attempts = 0;
+  
+      const pollEvent = setInterval(async () => {
+        try {
+          const checkRes = await fetch(`${API_BASE_URL}/events/fetch-event-title/${eventId}`);
+          if (checkRes.ok) {
+            const eventData = await checkRes.json();
+            console.log("Event available:", eventData.title);
+            clearInterval(pollEvent);
+            navigate(`/event/${eventId}`);
+            showFavouritePopup();
+            notify("Event created successfully!");
+          } else {
+            attempts++;
+            if (attempts >= maxAttempts) {
+              clearInterval(pollEvent);
+              setError("Event not found after creation. Try refreshing manually.");
+              notify("Event might take a bit longer to appear. Please refresh.");
+            }
+          }
+        } catch (err) {
+          console.error("Polling error:", err);
+          attempts++;
+          if (attempts >= maxAttempts) {
+            clearInterval(pollEvent);
+            setError("Error confirming event creation.");
+            notify("Issue confirming event. Please try again.");
+          }
+        }
+      }, 1000); // poll every second
+  
     } catch (err) {
       setError("Error creating event: " + err.message);
       notify("Error: " + err.message);
@@ -230,6 +245,7 @@ const CreateEvent = () => {
       setNotifyLoad(false);
     }
   };
+  
 
   return (
     <div className="create-event-container">
@@ -240,7 +256,7 @@ const CreateEvent = () => {
         <section className="create-section">
           <div className="one-line-input">
             <div>
-              <label>First Name:</label>
+              <label>First Name: *</label>
               <div className="create-input-container">
                 <input
                   required
@@ -255,7 +271,7 @@ const CreateEvent = () => {
               </div>
             </div>
             <div>
-              <label>Last Name:</label>
+              <label>Last Name: *</label>
               <div className="create-input-container">
                 <input
                   required
@@ -271,7 +287,7 @@ const CreateEvent = () => {
             </div>
           </div>
 
-          <label>Email:</label>
+          <label>Email: *</label>
           <div className="create-input-container">
             <input
               required
@@ -285,12 +301,12 @@ const CreateEvent = () => {
             <p className="character-counter">{formData.email.length} / {charLimits.email}</p>
           </div>
 
-          <label>Profile Picture:</label>
+          <label>Profile Picture: *</label>
           <ProfileSelector index={profileNum} onSelect={(newIndex) => setProfileNum(newIndex)} />
         </section>
 
         <section className="create-section">
-          <label>Event Name:</label>
+          <label>Event Name: *</label>
           <div className="create-input-container">
             <input
               placeholder="Event Name..."
@@ -308,7 +324,6 @@ const CreateEvent = () => {
           <div className="create-input-container">
             <textarea
               placeholder="Description Of Your Event..."
-              required
               name="description"
               value={formData.description}
               onChange={handleChange}
@@ -319,11 +334,22 @@ const CreateEvent = () => {
 
           <div className="one-line-input swap">
             <div>
-              <label>Earliest Date:</label>
-              <input required type="date" name="earliest_date" value={formData.earliest_date} onChange={handleChange} />
+              <label>Earliest Potential Date: *</label>
+              <input required type="date" name="earliest_date" value={formData.earliest_date} onChange={handleChange}
+              onBlur={() => {
+                setFormData((prev) => {
+                  const latestDate = new Date(prev.latest_date);
+                  const newEarliest = new Date(prev.earliest_date);
+            
+                  if (!prev.latest_date || latestDate < newEarliest) {
+                    return { ...prev, latest_date: prev.earliest_date };
+                  }
+                  return prev;
+                });}}
+               />
             </div>
             <div>
-              <label>Latest Date:</label>
+              <label>Latest Potential Date: *</label>
               <input required type="date" name="latest_date" value={formData.latest_date} onChange={handleChange} />
             </div>
           </div>
@@ -336,7 +362,6 @@ const CreateEvent = () => {
               <div className="create-input-container">
                 <input
                   placeholder="Event Address..."
-                  required
                   type="text"
                   name="location.address"
                   value={formData.location.address}
@@ -347,7 +372,7 @@ const CreateEvent = () => {
               </div>
             </div>
             <div className="duration">
-              <label>Duration (Days):</label>
+              <label>Duration (Days): *</label>
               <input
                 placeholder="Days.."
                 required
@@ -366,7 +391,6 @@ const CreateEvent = () => {
               <div className="create-input-container">
                 <input
                   placeholder="Event City..."
-                  required
                   type="text"
                   name="location.city"
                   value={formData.location.city}
@@ -381,7 +405,6 @@ const CreateEvent = () => {
               <div className="create-input-container">
                 <input
                   placeholder="Event Post Code..."
-                  required
                   type="text"
                   name="location.postcode"
                   value={formData.location.postcode}
@@ -395,13 +418,12 @@ const CreateEvent = () => {
 
           <div className="one-line-bottom">
             <div style={{ flex: 1 }}>
-              <label>Event Country:</label>
+              <label>Event Country: *</label>
               <select
                 name="location.country"
                 value={formData.location.country}
                 onChange={handleChange}
                 style={{ width: "100%", marginTop: "10px" }}
-                required
               >
                 <option value="">Select Country</option>
                 {countryOptions.map((country) => (

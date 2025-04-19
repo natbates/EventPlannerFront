@@ -78,9 +78,9 @@ const UserCalender = () => {
   }, [user_id_param, user_id, event_id, navigate]);
   
 
-  if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Attendees Calender"} />;
+  if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Attendees Calendar"} />;
 
-  if (loading || secondLoading) return <div className="loader"><p>Fetching Attendees Calender</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
+  if (loading || secondLoading) return <div className="loader"><p>Fetching Attendees Calendar</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
 
   return (

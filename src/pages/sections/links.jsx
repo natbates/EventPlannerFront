@@ -55,25 +55,31 @@ const Links = () => {
         const fetchNamesForLinks = async () => {
             setSecondaryLoading(true);
             if (linksData && linksData.length > 0) {
+                const results = await Promise.all(
+                    linksData.map(async (link) => ({
+                        link: link.link,
+                        username: await fetchUsername(link.added_by),
+                    }))
+                );
+    
                 const updatedUsernames = {};
-
-                for (const link of linksData) {
-                    const username = await fetchUsername(link.added_by);
-                    updatedUsernames[link.link] = username; // Store the username with the link
-                }
-
-                setLinkUsernames(updatedUsernames); // Update state
+                results.forEach(({ link, username }) => {
+                    updatedUsernames[link] = username;
+                });
+    
+                setLinkUsernames(updatedUsernames);
                 setSecondaryLoading(false);
                 setNotifyLoad(false);
             } else {
-                setLinkUsernames({}); // Reset if no links
+                setLinkUsernames({});
                 setSecondaryLoading(false);
                 setNotifyLoad(false);
             }
         };
-
+    
         fetchNamesForLinks();
     }, [linksDataFromAPI]);
+    
 
     const handleAddLink = async (e) => {
         e.preventDefault();

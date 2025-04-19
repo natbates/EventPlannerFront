@@ -27,7 +27,7 @@ const EventPage = () => {
   const [availabilityEmpty, setAvailabilityEmpty] = useState(false);
 
   const navigate = useNavigate();
-  const { notify, setNotifyLoad } = useNotification();
+  const { notify, setNotifyLoad, notifyLoad} = useNotification();
   const { LogIn, signOut, role, authed, user_id, profile_pic} = useAuth();
   const {fetchLastOpened, fetchLastUpdated, fetchEventStatus} = useHistory();
 
@@ -347,7 +347,7 @@ const EventPage = () => {
   }
   
 
-  if (loading) return <div className="loader"><p>Fetching Event</p></div>;
+  if (loading || notifyLoad) return <div className="loader"><p>Fetching Event</p></div>;
 
   if (authed && event && event.status === "canceled") {
     const profile = Profiles.find((profile) => profile.id === Number(profile_pic));

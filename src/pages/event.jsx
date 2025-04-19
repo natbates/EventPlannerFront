@@ -162,7 +162,10 @@ const EventPage = () => {
       setError(err.message);
       notify(err.message);
     } finally {
-      setLoading(false);
+      if (!authed || !user_id)
+      {
+        setLoading(false);
+      }
       setNotifyLoad(false);
     }
     

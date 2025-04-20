@@ -45,7 +45,7 @@ const EventPage = () => {
   const { notify, setNotifyLoad, notifyLoad} = useNotification();
   const { LogIn, signOut, role, authed, user_id, profile_pic} = useAuth();
   const {fetchLastOpened, fetchLastUpdated, fetchEventStatus} = useHistory();
-  const [loggingIn, setLoggingIn] = useState(true);
+  const [loggingIn, setLoggingIn] = useState(JSON.parse(localStorage.getItem("user")) !== null);
 
   const routes = [
     { path: "/attendees", label: "Attendees", img: "/svgs/attendees.svg"},
@@ -357,7 +357,6 @@ const EventPage = () => {
     let data = null;
   
     if (storedUser && event_id) {
-      setLoggingIn(true);
       data = await LogIn(storedUser.email, event_id); // Await login result
     }
 
@@ -396,7 +395,7 @@ const EventPage = () => {
     );
   }
 
-  if (loggingIn) return <div className="loader"><p>Trying to Log You In</p></div>;
+  if (loggingIn && !loading) return <div className="loader"><p>Trying to Log You In</p></div>;
 
   if ((loading || notifyLoad) && !loggingIn) return <div className="loader"><p>Fetching Event</p></div>;
 

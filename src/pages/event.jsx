@@ -45,7 +45,7 @@ const EventPage = () => {
   const { notify, setNotifyLoad, notifyLoad} = useNotification();
   const { LogIn, signOut, role, authed, user_id, profile_pic} = useAuth();
   const {fetchLastOpened, fetchLastUpdated, fetchEventStatus} = useHistory();
-  const [loggingIn, setLoggingIn] = useState(!authed);
+  const [loggingIn, setLoggingIn] = useState(false);
 
   const routes = [
     { path: "/attendees", label: "Attendees", img: "/svgs/attendees.svg"},
@@ -396,7 +396,7 @@ const EventPage = () => {
     );
   }
 
-  if (loggingIn) return <div className="loader"><p>Logging You In</p></div>;
+  if (loggingIn) return <div className="loader"><p>Trying to Log You In</p></div>;
 
   if (loading || notifyLoad) return <div className="loader"><p>Fetching Event</p></div>;
 

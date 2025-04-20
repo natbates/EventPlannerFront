@@ -45,7 +45,7 @@ const EventPage = () => {
   const { notify, setNotifyLoad, notifyLoad} = useNotification();
   const { LogIn, signOut, role, authed, user_id, profile_pic} = useAuth();
   const {fetchLastOpened, fetchLastUpdated, fetchEventStatus} = useHistory();
-  const [loggingIn, setLoggingIn] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(true);
 
   const routes = [
     { path: "/attendees", label: "Attendees", img: "/svgs/attendees.svg"},

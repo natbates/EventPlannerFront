@@ -80,10 +80,11 @@ const CreateEvent = () => {
 
     if (!firstName.trim()) errors.firstName = "First name is required.";
     if (!lastName.trim()) errors.lastName = "Last name is required.";
-    if (!email.match(/^\S+@\S+\.\S+$/)) errors.email = "Invalid email format.";
-    if (!title.trim()) errors.title = "Event title is required.";
-    if (!earliest_date) errors.earliest_date = "Earliest date is required.";
-    if (!latest_date) errors.latest_date = "Latest date is required.";
+    if (!email.match(/^\S+@\S+\.\S+$/)) {
+      errors.email = "Email must include a domain (e.g., yourname@example.com).";
+      notify(errors.email);
+    }
+
     if (!duration || Number(duration) < 1) errors.duration = "Duration must be at least 1 day.";
 
     const earliestDate = new Date(earliest_date);

@@ -203,8 +203,6 @@ const EventPage = () => {
         if (!response.ok) {
           setError("Event doesn't exist");
           throw new Error("Event doesn't exist");
-        } else {
-          LogInFromEvent();
         }
       }
     } catch (err) {
@@ -343,7 +341,6 @@ const EventPage = () => {
   useEffect(() => {
 
     fetchEventData();
-    
     
   }, [authed, user_id]);
 

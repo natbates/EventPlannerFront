@@ -35,7 +35,7 @@ const EventPage = () => {
   const event_id = useParams().event_id;
   const [event, setEvent] = useState(null);
   const {theme} = useTheme();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastOpened, setLastOpened] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);

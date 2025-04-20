@@ -376,7 +376,7 @@ const EventPage = () => {
     console.log("Authed:", authed); // Debugging line
     console.log("Event ID:", event_id); // Debugging line
 
-    if (!authed && event_id && event){
+    if (event_id && event){
       LogInFromEvent();
     }
 

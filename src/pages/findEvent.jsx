@@ -89,6 +89,10 @@ const FindEvent = () => {
     setEventId(filteredValue);
   };
 
+  const filteredRequests = recentRequests.filter(
+    (request) => !recentEvents.some((event) => event.event_id === request.event_id)
+  );
+
   return (
     <div className="find-event">
       <h1>Find Event</h1>
@@ -114,14 +118,15 @@ const FindEvent = () => {
         )}
       </div>
 
-      <div className="recent-event-container">
-        {recentRequests.length > 0 && <h3>Requested Events</h3>}
-        {recentRequests.length > 0 && (
-          recentRequests.map((event, index) => (
+      {filteredRequests.length > 0 && (
+        <div className="recent-event-container">
+          <h3>Requested Events</h3>
+          {filteredRequests.map((event, index) => (
             <RecentEvent key={index} {...event} isRequest={true} />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
+
 
       <div className="section whats-new">
       <h2>Coming Soon</h2>

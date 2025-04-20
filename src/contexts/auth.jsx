@@ -100,10 +100,6 @@ export const AuthProvider = ({ children }) => {
   // 🔹 Log in method
   const LogIn = async (userEmail, eventId) => {
 
-    if (authed) { 
-      return;
-    }
-
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/users/login`, {

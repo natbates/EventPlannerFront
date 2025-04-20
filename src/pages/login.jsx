@@ -48,11 +48,16 @@ const Login = () => {
           if (storedUser && event_id) {
             console.log("Stored user found loggin in", storedUser);
             const data = await LogIn(storedUser.email, event_id); // ⬅️ optionally await if you want to wait before redirect
-            if (data.status === "pending") {
-              setLoginStep("pending");
-              setRequestData(data);
-            } else {
-              console.log("No stored user found, redirecting to login page.");
+            if (data == true && event_id) {
+                navigate(`/event/${event_id}`);
+              }
+            else {
+                if (data?.status === "pending") {
+                setLoginStep("pending");
+                setRequestData(data);
+                } else {
+                console.log("No stored user found, redirecting to login page.");
+                }
             }
          }
       
@@ -61,21 +66,8 @@ const Login = () => {
             return;
           } 
       
-          if (authed && event_id) {
-            navigate(`/event/${event_id}`);
-          }
-          const startTime = Date.now();
-          while (!fingerprintRef.current && !authed) {
-            
-            // Wait for the poll interval before checking again
-            await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
-          
-            // Check if the maximum wait time has been exceeded
-            if (Date.now() - startTime > MAX_WAIT_TIME) {
-              break; // Exit the loop after the max wait time
-            }
-          }
-      
+
+
           fetchEventData();
           setAutoLogInEmail();
         };
@@ -118,7 +110,6 @@ const Login = () => {
     const fetchEventData = async () => {
     
         setLoginError(null);
-        setLoading(true);
         try {
           const response = await fetch(`${API_BASE_URL}/events/fetch-event-title/${event_id}`, {
             method: "GET",

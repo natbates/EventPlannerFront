@@ -135,8 +135,7 @@ const EventPage = () => {
     setLoading(true);
     console.log("SETING LOADDIN TRUE FETCHING EVENT DATA")
     try {
-      if (authed)
-      { 
+
       fetchEventStatus(event_id);
         const response = await fetch(`${API_BASE_URL}/events/fetch-event/${event_id}`, {
           method: "GET",
@@ -181,21 +180,7 @@ const EventPage = () => {
           localStorage.setItem(viewedEventsKey, JSON.stringify(viewedEvents));
         } catch (storageError) {
           console.error("Failed to update viewed events in local storage:", storageError);
-      }
-
-      } else
-      {
-        const response = await fetch(`${API_BASE_URL}/events/fetch-event-title/${event_id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json"
-          },
-        });
-        if (!response.ok) {
-          setError("Event doesn't exist");
-          throw new Error("Event doesn't exist");
-        }
-      }
+      } 
     } catch (err) {
       setError(err.message);
       notify(err.message);
@@ -325,7 +310,7 @@ const EventPage = () => {
   useEffect(() => {
     const initialLoad = async () => {
       await LogInFromEvent();  // sets user_id
-      await fetchEventData();  // event fetched once
+      setLoading(false);
     };
   
     initialLoad();
@@ -348,8 +333,6 @@ const EventPage = () => {
   const LogInFromEvent = async () => {
 
     console.log("Logging in from event page..."); // Debugging line
-
-    //setNotifyLoad(true);
   
     const storedUser = JSON.parse(localStorage.getItem("user"));
     let data = null;
@@ -362,10 +345,14 @@ const EventPage = () => {
   
     if (data === true) {
       //setNotifyLoad(false);
+      setLoggingIn(false);
+      await fetchEventData(); // Fetch event data after login
+      return;
     } else {
+      setLoggingIn(false);
       navigate(`/event/${event_id}/login`);
+      return;
     }
-    setLoggingIn(false);
   }
 
   if (error) {

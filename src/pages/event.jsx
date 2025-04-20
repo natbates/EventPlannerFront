@@ -398,7 +398,7 @@ const EventPage = () => {
 
   if (loggingIn) return <div className="loader"><p>Trying to Log You In</p></div>;
 
-  if (loading || notifyLoad) return <div className="loader"><p>Fetching Event</p></div>;
+  if ((loading || notifyLoad) && !loggingIn) return <div className="loader"><p>Fetching Event</p></div>;
 
   if (authed && event && event.status === "canceled") {
     const profile = Profiles.find((profile) => profile.id === Number(profile_pic));

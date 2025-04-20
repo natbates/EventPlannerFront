@@ -61,28 +61,25 @@ const useFetchEventData = (endpoint) => {
     }, [loggin]);
       
 
-
     // 🔹 Fetch endpoint data only if event is valid
     const fetchData = async (refetch = false) => {
     
         const timeoutDuration = 30000;
-
-        if (!authed)
-        {
-            let data = null;
-          
-            if (event_id) {
-              data = await ReLogIn(event_id); // Await login result
-            }
         
-            console.log("Login data:", data); // Debugging line
-          
-            if (data === true) {
-            //   setNotifyLoad(false);
-            } else {
-              navigate(`/event/${event_id}/login`);
-            }
+        let data = null;
+        
+        if (event_id) {
+            data = await ReLogIn(event_id); // Await login result
         }
+    
+        console.log("Login data:", data); // Debugging line
+        
+        if (data === true) {
+        //   setNotifyLoad(false);
+        } else {
+            navigate(`/event/${event_id}/login`);
+        }
+        
     
         try {
             if (!logginRef.current && authedRef.current) {

@@ -322,21 +322,25 @@ const EventPage = () => {
   };
 
   useEffect(() => {
-
-    const Load = async () => {
-
-      await LogInFromEvent();
-
-      await fetchEventData();
-
-      await fetchAttendees();
-
-      await fetchUserAvailability();
-      
-    }
-
-    Load();
+    const initialLoad = async () => {
+      await LogInFromEvent();  // sets user_id
+      await fetchEventData();  // event fetched once
+    };
+  
+    initialLoad();
   }, []);
+  
+  // Watch for user_id becoming available
+  useEffect(() => {
+    const postLoginLoad = async () => {
+      if (user_id) {
+        await fetchUserAvailability();
+        await fetchAttendees();
+      }
+    };
+  
+    postLoginLoad();
+  }, [user_id]);
 
   const LogInFromEvent = async () => {
 

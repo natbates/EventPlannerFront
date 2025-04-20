@@ -10,7 +10,7 @@ const useFetchEventData = (endpoint) => {
     const [data, setData] = useState(null);
     const [event, setEvent] = useState(null);
     const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState("logging in");
     const [loggin, setLoggingIn] = useState(false);
 
     const { authed, loading: authLoading, ReLogIn} = useAuth(); // 👈 renamed loading to authLoading
@@ -75,7 +75,7 @@ const useFetchEventData = (endpoint) => {
         console.log("Login data:", data); // Debugging line
         
         if (data === true) {
-        //   setNotifyLoad(false);
+            setLoading(true);
         } else {
             navigate(`/event/${event_id}/login`);
         }

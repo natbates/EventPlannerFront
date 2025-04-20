@@ -24,6 +24,11 @@
     width: 100%;
 }
 
+.username-form .profile-selector
+{
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+}
+
 
 .username-form
 {

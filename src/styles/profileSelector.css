@@ -2,7 +2,7 @@
 .profile-selector {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
     gap: 15.5px;
     outline: 3px solid var(--primary-colour);
     margin-top: 10px;
@@ -11,6 +11,7 @@
     align-items: center;
     align-content: center;
     justify-content: center;
+    overflow: hidden;
 }
 
 .profile-selector-image

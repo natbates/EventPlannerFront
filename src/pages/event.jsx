@@ -35,7 +35,7 @@ const EventPage = () => {
   const event_id = useParams().event_id;
   const [event, setEvent] = useState(null);
   const {theme} = useTheme();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastOpened, setLastOpened] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -83,7 +83,7 @@ const EventPage = () => {
     if (user_id) fetchUserComingStatus();
   }, [user_id]);
 
-    const fetchAttendees = async () => {
+  const fetchAttendees = async () => {
       if (!event) return;
     
       let details = [];
@@ -101,19 +101,8 @@ const EventPage = () => {
       }
     
       setAttendeeDetails(details);
-    };
+  };
   
-
-  useEffect(() => {
-    fetchAttendees();
-  }, [event]);
-
-  useEffect(() => {
-    console.log("Loading:", loading); // Debugging line
-  }, [loading]);
-
-  
-
   const reopenEvent = async () => {
     try {
       setNotifyLoad(true);
@@ -143,6 +132,7 @@ const EventPage = () => {
     
     setError(null);
     setLoading(true);
+    console.log("SETING LOADDIN TRUE FETCHING EVENT DATA")
     try {
       if (authed)
       { 
@@ -203,22 +193,13 @@ const EventPage = () => {
         if (!response.ok) {
           setError("Event doesn't exist");
           throw new Error("Event doesn't exist");
-        } else {
-          LogInFromEvent();
         }
       }
     } catch (err) {
       setError(err.message);
       notify(err.message);
-    } finally {
-      if (authed && user_id)
-      {
-          fetchUserAvailability();
-      }
-      setNotifyLoad(false);
-      setLoading(false);
-    }
-    
+    } 
+
   };
 
   const renderer = ({ days, hours, minutes, seconds, completed }) => {
@@ -263,7 +244,7 @@ const EventPage = () => {
   };
   
   const fetchUserAvailability = async () => {
-    if (user_id || !authed) {
+    if (!user_id) {
       return;
     } 
     {
@@ -342,9 +323,20 @@ const EventPage = () => {
 
   useEffect(() => {
 
-    fetchEventData();
-    
-  }, [authed, user_id]);
+    const Load = async () => {
+
+      await LogInFromEvent();
+
+      await fetchEventData();
+
+      await fetchAttendees();
+
+      await fetchUserAvailability();
+      
+    }
+
+    Load();
+  }, []);
 
   const LogInFromEvent = async () => {
 
@@ -369,18 +361,6 @@ const EventPage = () => {
     setLoggingIn(false);
   }
 
-  useEffect(() => {
-
-    console.log("Authed:", authed); // Debugging line
-    console.log("Event ID:", event_id); // Debugging line
-
-    if (event_id && event){
-      LogInFromEvent();
-    }
-
-  }, [authed, event_id, event]);
-  
-
   if (error) {
     return (
       <div className="page-not-found page">
@@ -394,9 +374,11 @@ const EventPage = () => {
     );
   }
 
-  if (loggingIn && !loading) return <div className="loader"><p>Trying to Log You In</p></div>;
+  if (loggingIn) return <div className="loader"><p>Trying to Log You In</p></div>;
 
-  if ((loading || notifyLoad)) return <div className="loader"><p>Fetching Event</p></div>;
+  if (loading) return <div className="loader"><p>Fetching Event</p></div>;
+
+  if (!event) return null;
 
   if (authed && event && event.status === "canceled") {
     const profile = Profiles.find((profile) => profile.id === Number(profile_pic));

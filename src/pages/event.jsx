@@ -46,6 +46,7 @@ const EventPage = () => {
   const { LogIn, signOut, role, authed, user_id, profile_pic} = useAuth();
   const {fetchLastOpened, fetchLastUpdated, fetchEventStatus} = useHistory();
   const [loggingIn, setLoggingIn] = useState(JSON.parse(localStorage.getItem("user")) !== null);
+  const [fetchingAttendees, setFetchingAttendees] = useState(false);
 
   const routes = [
     { path: "/attendees", label: "Attendees", img: "/svgs/attendees.svg"},
@@ -198,7 +199,9 @@ const EventPage = () => {
     } catch (err) {
       setError(err.message);
       notify(err.message);
-    } 
+    } finally {
+      setLoading(false);
+    }
 
   };
 
@@ -285,8 +288,6 @@ const EventPage = () => {
     
       } catch (err) {
         console.error("Error fetching availability:", err);
-      } finally {
-        setLoading(false);
       }
     }
   };
@@ -334,8 +335,10 @@ const EventPage = () => {
   useEffect(() => {
     const postLoginLoad = async () => {
       if (user_id) {
+        setFetchingAttendees(true);
         await fetchUserAvailability();
         await fetchAttendees();
+        setFetchingAttendees(false);
       }
     };
   
@@ -398,6 +401,8 @@ const EventPage = () => {
 
   if (authed && event && event.status === "confirmed") {
     
+    if (fetchingAttendees) return <div className="loader"><p>Fetching Attendees</p></div>;
+
     const profile = Profiles.find((profile) => profile.id === Number(profile_pic));
 
     let formattedChosenDates;

@@ -397,7 +397,7 @@ const EventPage = () => {
 
   if (loggingIn && !loading) return <div className="loader"><p>Trying to Log You In</p></div>;
 
-  if ((loading || notifyLoad) && !loggingIn) return <div className="loader"><p>Fetching Event</p></div>;
+  if ((loading || notifyLoad)) return <div className="loader"><p>Fetching Event</p></div>;
 
   if (authed && event && event.status === "canceled") {
     const profile = Profiles.find((profile) => profile.id === Number(profile_pic));
@@ -517,35 +517,11 @@ const EventPage = () => {
 
                     {showNotification && <div className="notifcation-circle">!</div>}
                   </button>
-
-                  {/* {filteredLastOpened.length > 0 && (
-                    <p>
-                      Last opened:{" "}
-                      {new Date(filteredLastOpened[0].timestamp).toLocaleString()}
-                    </p>
-                  )}
-    
-                  {filteredLastUpdated.length > 0 && (
-                    <p>
-                      Last updated:{" "}
-                      {new Date(filteredLastUpdated[0].timestamp).toLocaleString()}
-                    </p>
-                  )} */}
-    
-                  {/* Show notification if last opened occurred before last updated */}
                 </div>
               );
             })}
           </div>
-         
-          {/* <div className="bottom-line">
-            {availabilityEmpty ? (
-              <div className="warning">
-                <img src = "/svgs/warning.svg"></img>
-                <p>You have not entered your calender availability.</p>
-              </div>
-              ) : <div></div>}
-          </div> */}
+    
           </div>
         </>
       )}

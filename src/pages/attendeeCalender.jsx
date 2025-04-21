@@ -80,7 +80,7 @@ const UserCalender = () => {
 
   if (error) return <PageError error={error?.message ? error?.message : "Something Went Wrong"} page={"Attendees Calendar"} />;
 
-  if (loading || secondLoading) return <div className="loader"><p>Fetching Attendees Calendar</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
+  if (loading || secondLoading) return <div className="loader"><p>Fetching Calendar</p><button onClick = {() => {navigate(`/event/${event_id}`)}} className="small-button">Cancel</button></div>;
 
 
   return (

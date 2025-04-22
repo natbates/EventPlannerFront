@@ -109,7 +109,6 @@ const Login = () => {
     const fetchEventData = async () => {
         if (!event_id || event_id === "undefined") {
             setLoginError("Invalid event ID.");
-            navigate("/"); // Redirect to the homepage or a fallback page
             return;
         }
     

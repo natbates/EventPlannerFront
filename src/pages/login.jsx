@@ -123,7 +123,6 @@ const Login = () => {
                 },
             });
             if (!response.ok) {
-                notify("Event doesn't exist");
                 setLoginError("Event doesn't exist");
                 navigate("/event/"+event_id);
                 throw new Error("Event doesn't exist");

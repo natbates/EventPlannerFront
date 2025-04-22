@@ -144,12 +144,12 @@ const EventPage = () => {
       }
   
       const data = await response.json();
-      return data; // or return true/false depending on your use case
+      return true; // or return true/false depending on your use case
     } catch (err) {
       console.error("Error checking event existence:", err);
       setError(err.message);
       setLoading(false);
-      return null; // or false
+      return false; // or false
     }
   };
 
@@ -332,8 +332,8 @@ const EventPage = () => {
 
   useEffect(() => {
     const initialLoad = async () => {
-      await isEventExisting();
-      if (error == null) {
+      let exists = await isEventExisting();
+      if (error == null && exists) {
         console.log("Fetching event data...");
         await LogInFromEvent();  // sets user_id
         await fetchEventData();
@@ -344,7 +344,7 @@ const EventPage = () => {
 
     initialLoad();
     
-  }, [event]);
+  }, [event_id]);
   
   // Watch for user_id becoming available
   useEffect(() => {
@@ -376,7 +376,6 @@ const EventPage = () => {
     if (data === true) {
       //setNotifyLoad(false);
       setLoggingIn(false);
-      await fetchEventData(); // Fetch event data after login
       return;
     } else {
       setLoggingIn(false);

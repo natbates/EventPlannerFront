@@ -40,7 +40,7 @@ const Login = () => {
         fingerprintRef.current = userFingerprint;
       }, [userFingerprint]);
 
-      useEffect(() => {
+    useEffect(() => {
         
         const handleAuthInit = async () => {
             
@@ -66,14 +66,12 @@ const Login = () => {
             return;
           } 
       
-
-
           fetchEventData();
           setAutoLogInEmail();
         };
       
         handleAuthInit();
-      }, [event_id, authed, navigate, userFingerprint]);
+      }, [event_id, authed]);
       
 
     const setAutoLogInEmail = () => {

@@ -45,9 +45,11 @@ const Login = () => {
             if (!event_id || event_id === "undefined") {
                 return;
             }
+
+            await fetchEventData();
     
             const storedUser = JSON.parse(localStorage.getItem("user"));
-            if (storedUser) {
+            if (storedUser && !loginError) {
                 try {
                     const data = await LogIn(storedUser.email, event_id);
                     if (data === true) {
@@ -63,8 +65,8 @@ const Login = () => {
                 }
             }
     
-            fetchEventData();
-            setAutoLogInEmail();
+            await setAutoLogInEmail();
+            setLoading(false);
         };
     
         handleAuthInit();
@@ -108,7 +110,6 @@ const Login = () => {
 
     const fetchEventData = async () => {
         if (!event_id || event_id === "undefined") {
-            setLoginError("Invalid event ID.");
             return;
         }
     
@@ -129,8 +130,6 @@ const Login = () => {
             setEvent(eventData);
         } catch (err) {
             setLoginError(err.message);
-        } finally {
-            setLoading(false);
         }
     };
 

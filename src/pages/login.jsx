@@ -43,7 +43,6 @@ const Login = () => {
     useEffect(() => {
         const handleAuthInit = async () => {
             if (!event_id || event_id === "undefined") {
-                navigate("/"); // Redirect to the homepage
                 return;
             }
     

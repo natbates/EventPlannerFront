@@ -129,10 +129,32 @@ const EventPage = () => {
     }
   };
 
+  const isEventExisting = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/events/fetch-event-title/${event_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error("Event not found");
+      }
+  
+      const data = await response.json();
+      return data; // or return true/false depending on your use case
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+      return null; // or false
+    }
+  };
+
   const fetchEventData = async () => {
     
     setError(null);
-    setLoading(true);
     console.log("SETING LOADDIN TRUE FETCHING EVENT DATA")
     try {
 
@@ -309,9 +331,10 @@ const EventPage = () => {
 
   useEffect(() => {
     const initialLoad = async () => {
-      await fetchEventData();
-      if (event != null && error == null) {
+      await isEventExisting();
+      if (error == null) {
         await LogInFromEvent();  // sets user_id
+        await fetchEventData();
       }
       setLoading(false);
     };

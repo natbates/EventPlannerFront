@@ -309,13 +309,16 @@ const EventPage = () => {
 
   useEffect(() => {
     const initialLoad = async () => {
-      await LogInFromEvent();  // sets user_id
+      await fetchEventData();
+      if (event != null && error == null) {
+        await LogInFromEvent();  // sets user_id
+      }
       setLoading(false);
     };
     
-    if (event != null && error == null) {
-      initialLoad();
-    }
+
+    initialLoad();
+    
   }, [event]);
   
   // Watch for user_id becoming available

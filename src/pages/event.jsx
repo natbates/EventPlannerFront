@@ -312,9 +312,11 @@ const EventPage = () => {
       await LogInFromEvent();  // sets user_id
       setLoading(false);
     };
-  
-    initialLoad();
-  }, []);
+    
+    if (event != null && error == null) {
+      initialLoad();
+    }
+  }, [event]);
   
   // Watch for user_id becoming available
   useEffect(() => {

@@ -41,94 +41,99 @@ const Login = () => {
       }, [userFingerprint]);
 
     useEffect(() => {
-        
         const handleAuthInit = async () => {
-            
-          const storedUser = JSON.parse(localStorage.getItem("user"));
-          if (storedUser && event_id) {
-            console.log("Stored user found loggin in", storedUser);
-            const data = await LogIn(storedUser.email, event_id); // ⬅️ optionally await if you want to wait before redirect
-            if (data == true && event_id) {
-                navigate(`/event/${event_id}`);
-              }
-            else {
-                if (data?.status === "pending") {
-                setLoginStep("pending");
-                setRequestData(data);
-                } else {
-                console.log("No stored user found, redirecting to login page.");
+            if (!event_id || event_id === "undefined") {
+                navigate("/"); // Redirect to the homepage
+                return;
+            }
+    
+            const storedUser = JSON.parse(localStorage.getItem("user"));
+            if (storedUser) {
+                try {
+                    const data = await LogIn(storedUser.email, event_id);
+                    if (data === true) {
+                        navigate(`/event/${event_id}`);
+                    } else if (data?.status === "pending") {
+                        setLoginStep("pending");
+                        setRequestData(data);
+                    } else {
+                        console.log("No stored user found, redirecting to login page.");
+                    }
+                } catch (err) {
+                    console.error("Error during login:", err);
                 }
             }
-         }
-      
-          if (!event_id || event_id === "undefined") {
-            navigate(`/`);
-            return;
-          } 
-      
-          fetchEventData();
-          setAutoLogInEmail();
+    
+            fetchEventData();
+            setAutoLogInEmail();
         };
-      
+    
         handleAuthInit();
-      }, [event_id, authed]);
+    }, [event_id, authed]);
       
 
     const setAutoLogInEmail = () => {
-
-        if (userFingerprint && event_id) {
-            // Make API call to auto-sign-in endpoint using fetch
-            console.log("userFingerprint", userFingerprint);
-            fetch(`${API_BASE_URL}/users/auto-sign-in`, {
-                method: 'POST', // Using POST method for sending data
-                headers: {
-                    'Content-Type': 'application/json', // Set content type to JSON
-                },
-                body: JSON.stringify({
-                    event_id, // Pass the event_id
-                    fingerprint: userFingerprint, // Pass the userFingerprint
-                }),
-            })
-                .then((response) => response.json()) // Parse the response as JSON
-                .then((data) => {
-                    if (data.success) {
-                        // Handle the successful sign-in (e.g., redirect, set logged-in state)
-                        setLoginEmail(data.email);
-                    }  else {
-                        console.log('Auto sign-in failed');
-                    }
-                })
-                .catch((error) => {
-                    setNotifyLoad(false);
-                    console.error('Error during auto sign-in:', error);
-            });
+        if (!userFingerprint || !event_id) {
+            console.log("Missing fingerprint or event ID.");
+            return;
         }
+    
+        fetch(`${API_BASE_URL}/users/auto-sign-in`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                event_id,
+                fingerprint: userFingerprint,
+            }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Auto sign-in failed");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (data.success) {
+                    setLoginEmail(data.email);
+                } else {
+                    console.log("Auto sign-in failed");
+                }
+            })
+            .catch((error) => {
+                console.error("Error during auto sign-in:", error);
+                setLoginError("Auto sign-in failed. Please log in manually.");
+            });
     };
 
     const fetchEventData = async () => {
+        if (!event_id || event_id === "undefined") {
+            setLoginError("Invalid event ID.");
+            navigate("/"); // Redirect to the homepage or a fallback page
+            return;
+        }
     
         setLoginError(null);
         try {
-          const response = await fetch(`${API_BASE_URL}/events/fetch-event-title/${event_id}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          if (!response.ok) {
-            setLoginError("Event doesn't exist");
-            navigate("/event/"+event_id)
-            throw new Error("Event doesn't exist");
-          }
-          const eventData = await response.json();
-          setEvent(eventData);
-    
+            const response = await fetch(`${API_BASE_URL}/events/fetch-event-title/${event_id}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            if (!response.ok) {
+                setLoginError("Event doesn't exist");
+                navigate("/"); // Redirect to the homepage or a fallback page
+                throw new Error("Event doesn't exist");
+            }
+            const eventData = await response.json();
+            setEvent(eventData);
         } catch (err) {
-          setLoginError(err.message);
+            setLoginError(err.message);
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
-        
     };
 
     const handleSetUsername = async (e) => {

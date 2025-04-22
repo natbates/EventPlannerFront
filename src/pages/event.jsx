@@ -146,6 +146,7 @@ const EventPage = () => {
       const data = await response.json();
       return data; // or return true/false depending on your use case
     } catch (err) {
+      console.error("Error checking event existence:", err);
       setError(err.message);
       setLoading(false);
       return null; // or false
@@ -333,6 +334,7 @@ const EventPage = () => {
     const initialLoad = async () => {
       await isEventExisting();
       if (error == null) {
+        console.log("Fetching event data...");
         await LogInFromEvent();  // sets user_id
         await fetchEventData();
       }

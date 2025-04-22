@@ -110,6 +110,7 @@ const Login = () => {
 
     const fetchEventData = async () => {
         if (!event_id || event_id === "undefined") {
+            console.log("Invalid event ID.");
             return;
         }
     
@@ -123,7 +124,6 @@ const Login = () => {
             });
             if (!response.ok) {
                 setLoginError("Event doesn't exist");
-                navigate("/"); // Redirect to the homepage or a fallback page
                 throw new Error("Event doesn't exist");
             }
             const eventData = await response.json();

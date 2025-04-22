@@ -156,7 +156,6 @@ const EventPage = () => {
   const fetchEventData = async () => {
     
     setError(null);
-    console.log("SETING LOADDIN TRUE FETCHING EVENT DATA")
     try {
 
       fetchEventStatus(event_id);
@@ -169,6 +168,7 @@ const EventPage = () => {
         });
         if (!response.ok) {
           setError("Event doesn't exist");
+          notify("Event doesn't exist");
           throw new Error("Event doesn't exist");
         }
         const eventData = await response.json();
@@ -206,7 +206,6 @@ const EventPage = () => {
       } 
     } catch (err) {
       setError(err.message);
-      notify(err.message);
     } finally {
       setLoading(false);
     }

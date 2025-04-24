@@ -155,7 +155,10 @@ const EventPage = () => {
 
   const fetchEventData = async () => {
 
-    if (!event_id) return;
+    if (!event_id || !authed){
+      setLoading(false);
+      return;
+    }
     
     setError(null);
     try {

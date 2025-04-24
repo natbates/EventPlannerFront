@@ -154,6 +154,8 @@ const EventPage = () => {
   };
 
   const fetchEventData = async () => {
+
+    if (!event_id) return;
     
     setError(null);
     try {

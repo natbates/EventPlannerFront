@@ -90,6 +90,8 @@ const MapComponent = ({ location, setLocation}) => {
           bottom: "10px",
           left: "10px",
           zIndex: 50,
+          paddingBottom: "3px",
+          paddingTop: "3px",
         }}
       >
         Reset View

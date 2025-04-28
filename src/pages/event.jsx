@@ -155,7 +155,7 @@ const EventPage = () => {
 
   const fetchEventData = async () => {
 
-    if (!event_id || !authed){
+    if (!event_id){
       setLoading(false);
       return;
     }
@@ -340,7 +340,6 @@ const EventPage = () => {
       if (error == null && exists) {
         console.log("Fetching event data...");
         await LogInFromEvent();  // sets user_id
-        await fetchEventData();
       }
       setLoading(false);
     };
@@ -380,6 +379,7 @@ const EventPage = () => {
     if (data === true) {
       //setNotifyLoad(false);
       setLoggingIn(false);
+      await fetchEventData();
       return;
     } else {
       setLoggingIn(false);
